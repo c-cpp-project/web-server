@@ -1,8 +1,8 @@
 #ifndef CONTROLLER_HPP
 # define CONTROLLER_HPP
 
-#include"../RequestHandler/HttpRequest.hpp"
-#include"../RequestHandler/HttpResponse.hpp"
+#include"../ResponseHandler/HttpRequest.hpp"
+#include"../ResponseHandler/HttpResponse.hpp"
 #include<string>
 
 class   HttpRequest;

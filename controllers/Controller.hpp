@@ -4,6 +4,9 @@
 #include"../ResponseHandler/HttpRequest.hpp"
 #include"../ResponseHandler/HttpResponse.hpp"
 #include<string>
+#include<unistd.h>
+#include <iostream>
+#include <cstdio>
 
 class   HttpRequest;
 class   HttpResponse;

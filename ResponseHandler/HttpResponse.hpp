@@ -36,6 +36,8 @@ public:
 	void	HttpResponseBody(std::string body);
 	std::string	readFile(int fd);
 
+	void	redirect(HttpRequest &Httprequest, HttpResponse &Httpresponse);
+
 	void    forward(HttpRequest &Httprequest, HttpResponse &Httpresponse);
 	void    sendBody(std::string body);
 	void    ResponseStatusLine();

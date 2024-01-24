@@ -8,16 +8,24 @@ void    FrontController::run()
 {
     HttpRequest     request;
     HttpResponse    response(this->socketfd);
-    std::string uri;
-    Controller *controller;
+    std::string     uri;
+    Controller      *controller;
+    const char* fileName = HttpConfig::pathResolver(uri).c_str();
 
     uri = request.getPath();
-    controller = ControllerMapping::getController(uri);
     try
     {
-        if (controller == 0) // view: get -> html 보기
-            response.forward(request, response);
-        else // api: delete, post (o), fail (o), file post, cgi
+        if (access(fileName, F_OK) == -1) // Not Found
+            throw ErrorResponse("404", HttpConfig::getHttpStatusMsg("404"));
+        controller = ControllerMapping::getController(uri);
+        if (controller == 0 || (request.getMethod() == "GET" && request.getQueryString() == ""))
+        {
+            if (HttpConfig::IsRedriectUri(uri) == true) // redirect
+                response.redirect(request, response);
+            else
+                response.forward(request, response); // get
+        }
+        else // cgi: GET && POST, FILE POST, DELETE
             controller->service(request, response);
     }
     catch(const std::exception& e)
@@ -25,8 +33,7 @@ void    FrontController::run()
         std::cerr << e.what() << '\n';
         response.setStatusCode(e.what());
         response.ResponseStatusLine();
-        controller = ControllerMapping::getController("/fail");
-        controller->service(request, response);
+        response.forward(request, response);
     }
     delete controller;
 }
@@ -41,12 +48,3 @@ FrontController::FrontController()
 
 FrontController::~FrontController()
 {}
-
-// int main(void)
-// {
-
-//     // ... kqueue와 설정 처리
-//     // event가 발생한 socket에 관하여 http 통신
-//     FrontController  FrontController(socketfd);
-//     FrontController.run(); // request와 response에 대한 처리 완료
-// }

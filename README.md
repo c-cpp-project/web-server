@@ -19,6 +19,9 @@ std::map<std::string, std::string> umap;
 umap.put("uri", "path") 
 
 # 문제 상황
-### 어떻게 CGI를 구현할 것인가?
+### 어떻게 CGI를 구현할 것인가? -> 해결
 
-### 어떻게 chunked request를 CGI에서 구현할 것인가?
+### 어떻게 chunked request를 CGI에서 구현할 것인가? transfer-encode:chunked -> 해결
+
+### pipe를 non_block으로 설정했을 때, 수행 결과를 어떻게 전달 받을 수 있는가? 
+아마도 kqueue를 써야할 것 같다.

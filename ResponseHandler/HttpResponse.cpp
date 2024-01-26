@@ -136,3 +136,13 @@ std::string	HttpResponse::getStatusCode()
 {
 	return (this->status_code);
 }
+
+long long	HttpResponse::getMaxBodySize()
+{
+	return (this->max_size);
+}
+
+int		HttpResponse::getSockfd()
+{
+	return (this->sockfd);
+}

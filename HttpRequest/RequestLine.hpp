@@ -12,6 +12,7 @@ class RequestLine
 
 		void parseMethod(std::string method_string);
 		void parseURI(std::string uri_string);
+		void parseProtocol(std::string protocol_string);
 
 	public:
 		RequestLine(const std::string& input);

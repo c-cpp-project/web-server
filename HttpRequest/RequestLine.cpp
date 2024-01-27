@@ -1,53 +1,76 @@
 #include "RequestLine.hpp"
+#include <cctype>
 
 RequestLine::RequestLine(const std::string& input)
 {
 	std::vector<std::string> tockens = HttpRequestUtility::splitString(input, ' ');
+	
+	// 요청 라인이 "[메서드] [경로] [프로토콜]" 형식이 아닌 경우 400 응답
 	if (tockens.size() != 3)
 	{
-		throw std::invalid_argument("Request Line's tocken count is invalid.");
+		throw std::invalid_argument("400 Bad Request");
 	}
 
 	parseMethod(tockens[0]);
 	parseURI(tockens[1]);
-	if (tockens[2] != "HTTP/1.1")
-	{
-		throw std::invalid_argument("Request Line's protocol version is invalid.");
-	}
+	parseProtocol(tockens[2]);
 }
 
 void RequestLine::parseMethod(std::string method_string)
 {
-	if (method_string == "GET" || method_string == "POST" || method_string == "DELETE")
+	// 영어 대문자 이외의 문자가 포함된 메서드인 경우 400 응답
+	for(size_t i = 0; i < method_string.size(); i++)
 	{
-		method = method_string;
+		if (!std::isupper(method_string[i]))
+		{
+			throw std::invalid_argument("400 Bad Request");
+		}
 	}
-	else
+
+	// 유효하지 않거나 지원하지 않은 메서드인 경우 400 응답
+	if (method_string != "GET" && method_string != "POST" && method_string != "DELETE")
 	{
-		throw std::invalid_argument("Request Line's method tocken is invalid.");
+		throw std::invalid_argument("400 Bad Request");
 	}
+
+	method = method_string;
 }
 
 void RequestLine::parseURI(std::string uri_string)
 {
 	std::vector<std::string> tockens = HttpRequestUtility::splitString(uri_string, '?');
-	if (tockens.size() == 1)
+	
+	if (tockens.size() < 1 || 2 < tockens.size())
 	{
-		path = tockens[0];
-		query_string = "";
-	}
-	else if (tockens.size() == 2)
-	{
-		path = tockens[0];
-		query_string = tockens[1];
-	}
-	else
-	{
-		throw std::invalid_argument("Request Line's uri is invalid.");
+		throw std::invalid_argument("400 Bad Request");
 	}
 
-	// path 유효성 검사
-	// query_string은 아마 RequestParams 쪽에서 유효성 검사할 듯
+	if (tockens[0][0] != '/')
+	{
+		throw std::invalid_argument("400 Bad Request");
+	}
+
+	path = tockens[0];
+	if (tockens.size() == 2)
+		query_string = tockens[1];
+}
+
+void RequestLine::parseProtocol(std::string protocol_string)
+{
+	if (protocol_string != "HTTP/1.1")
+	{
+		throw std::invalid_argument("400 Bad Request");
+	}
+// 추가적인 조건이 더 필요할 가능성 있음
+// 	std::vector<std::string> tockens = HttpRequestUtility::splitString(protocol_string, '/')
+// 	if (tockens.size() != 2)
+// 	{
+// 		throw std::invalid_argument("400 Bad Request");
+// 	}
+// 	if (tockens[0] != "HTTP")
+// 	{
+// 		throw std::invalid_argument("400 Bad Request");
+// 	}
 }
 
 std::string RequestLine::getMethod() const

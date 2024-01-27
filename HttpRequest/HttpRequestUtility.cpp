@@ -10,9 +10,23 @@ std::vector<std::string> HttpRequestUtility::splitString(const std::string& inpu
 
 	std::string buffer;
 	while (std::getline(iss, buffer, delimeter))
-		result.push_back(buffer);
+	{
+		if (buffer != "")
+			result.push_back(buffer);
+	}
 
 	return (result);
+}
+
+std::vector<std::string> HttpRequestUtility::splitStringOnce(const std::string& input, char delimeter)
+{
+	std::vector<std::string> result;
+	std::istringstream iss(input);
+
+	std::string buffer;
+	std::getline(iss, buffer, delimeter);
+	
+	result.push_back(buffer);
 }
 
 // query string을 map<string, string> 형태로 변환

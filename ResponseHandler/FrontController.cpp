@@ -10,12 +10,12 @@ void    FrontController::run()
     HttpResponse    response(this->socketfd);
     std::string     uri;
     Controller      *controller;
-    const char* fileName = HttpConfig::pathResolver(uri).c_str();
+    std::string     fileName = HttpConfig::pathResolver(uri);
 
     uri = request.getPath();
     try
     {
-        if (access(fileName, F_OK) == -1 && request.getMethod() != "POST") // Not Found
+        if (access(fileName.c_str(), F_OK) == -1 && request.getMethod() != "POST") // Not Found
             throw ErrorResponse("404", HttpConfig::getHttpStatusMsg("404"));
         controller = ControllerMapping::getController(uri);
         if (controller == 0 || (request.getMethod() == "GET" && request.getQueryString() == ""))
@@ -28,7 +28,7 @@ void    FrontController::run()
         else // cgi: GET && POST, FILE POST, DELETE
             controller->service(request, response);
     }
-    catch(const std::exception& e)
+    catch(const ErrorResponse& e)
     {
         std::cerr << e.what() << '\n';
         response.setStatusCode(e.what());

@@ -12,6 +12,24 @@ void    Controller::service(HttpRequest &request, HttpResponse &response)
         throw ErrorResponse("400", HttpConfig::getHttpStatusMsg("400"));
 }
 
+void    Controller::doGet(HttpRequest &request, HttpResponse &response)
+{
+    request.getMethod();
+    response.getMaxBodySize();
+}
+
+void	Controller::doPost(HttpRequest &request, HttpResponse &response)
+{
+    request.getMethod();
+    response.getMaxBodySize();
+}
+
+void	Controller::doDelete(HttpRequest &request, HttpResponse &response)
+{
+    request.getMethod();
+    response.getMaxBodySize();
+}
+
 Controller::Controller()
 {}
 

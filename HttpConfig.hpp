@@ -3,8 +3,8 @@
 
 #include<map>
 #include<string>
+#include<algorithm>
 
-static  std::string serverName = "WebServe";
 class HttpConfig
 {
 private:
@@ -24,4 +24,5 @@ public:
     static  std::string getServerName();
     static  std::string getCgiAddress(std::string cgiAddress);
 };
+
 #endif

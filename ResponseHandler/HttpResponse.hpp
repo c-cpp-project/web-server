@@ -1,5 +1,6 @@
 // 단순하게 바디 크기는 32K, WAS 대기 시간은 60s (cgi), keep-alive 75s -> Httprequest
 
+
 #ifndef HTTP_RESPONSE_HPP
 # define HTTP_RESPONSE_HPP
 
@@ -14,6 +15,7 @@
 #include <sstream>
 #include<vector>
 #include<string>
+
 #define K 1000
 
 class HttpConfig;

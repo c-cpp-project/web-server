@@ -1,9 +1,9 @@
 // 단순하게 바디 크기는 32K, WAS 대기 시간은 60s (cgi), keep-alive 75s -> Httprequest
 
-#ifndef HTTP_REQUESST_HPP
-# define HTTP_REQUESST_HPP
+#ifndef HTTP_RESPONSE_HPP
+# define HTTP_RESPONSE_HPP
 
-#include"HttpRequest.hpp"
+#include"../HttpRequest/HttpRequest.hpp"
 #include"../HttpConfig.hpp"
 #include"ErrorResponse.hpp"
 #include"sys/fcntl.h"
@@ -37,14 +37,16 @@ public:
 	std::string	readFile(int fd);
 
 	void	redirect(HttpRequest &Httprequest, HttpResponse &Httpresponse);
-
 	void    forward(HttpRequest &Httprequest, HttpResponse &Httpresponse);
 	void    sendBody(std::string body);
 	void    ResponseStatusLine();
 	void    processHeader();
+	
 	void    flush(); // 마지막에 호출
-
 	void	setStatusCode(std::string code);
 	std::string	getStatusCode();
+
+	long long	getMaxBodySize();
+	int		getSockfd();
 };
 #endif

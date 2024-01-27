@@ -19,6 +19,11 @@ std::map<std::string, std::string> umap;
 umap.put("uri", "path") 
 
 # 문제 상황
-### 어떻게 CGI를 구현할 것인가?
+### 어떻게 CGI를 구현할 것인가? -> 해결
 
-### 어떻게 chunked request를 CGI에서 구현할 것인가?
+### 어떻게 chunked request를 CGI에서 구현할 것인가? transfer-encode:chunked -> 해결
+
+### pipe를 non_block으로 설정했을 때, 수행 결과를 어떻게 전달 받을 수 있는가? 
+아마도 kqueue를 써야할 것 같다.
+1. kqueue에 파이프의 fd를 유동적으로 추가시킬 수 있는가?
+2. 만약 가능하다면, request와 response는 서로 독립적으로 작동해야 하지 않을까?

@@ -55,11 +55,11 @@ HttpConfig::HttpConfig()
 std::string HttpConfig::pathResolver(std::string uri)
 {
 	if (uri == "/")
-		uri = "index";
+		uri = "/index.html";
 	// std::string uri;
 	// path = pathRepo.get("uri")
 	// return (path);
-	return ("static/html" + uri + ".html");
+	return ("static/html" + uri);
 }
 
 bool    HttpConfig::IsRedriectUri(std::string srcUri)

@@ -42,7 +42,7 @@ void HttpRequest::parseRequestParams()
 	// 요청 헤더드가 GET, DELETE인 경우 본문이 있으면 안 됨
 
 	// 본문 형식이 query string 이라면
-	if (request_headers->getHeader("Content-Type") == "application/x-www-form-urlencoded")
+	if (request_headers->getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded")
 	{
 		request_params->addQuearyString(reader->getLine());
 	}

@@ -61,6 +61,5 @@ int main()
 
 	close(server_socket);
 	close(clientSocket);
-
 	return (0);
 }

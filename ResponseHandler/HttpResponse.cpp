@@ -20,8 +20,14 @@ HttpResponse::HttpResponse(int sockfd, std::string send_timeout)
 	this->send_timeout = send_timeout; // nginx send_timeout default
 }
 
+void    HttpResponse::putHeader(std::string key, std::string value)
+{
+	headers.insert(std::make_pair(key, value));
+}
+
 void	HttpResponse::redirect(HttpRequest &request, HttpResponse &response)
 {
+	response.getMaxBodySize();
 	setStatusCode("302");
 	ResponseStatusLine();
 	putHeader("Location", HttpConfig::getRedirectPath(request.getPath()));
@@ -104,9 +110,9 @@ void	HttpResponse::HttpResponseBody(std::string body)
 
 void	HttpResponse::flush() // 마지막에 호출
 {
-	int			i;
-	int			size;
-	std::string	httpMsg;
+	unsigned int	i;
+	int				size;
+	std::string		httpMsg;
 
 	i = 0;
 	size = 0;

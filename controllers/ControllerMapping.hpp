@@ -1,9 +1,10 @@
+#ifndef CONTROLLER_MAPPING_HPP
+# define CONTROLLER_MAPPING_HPP
+
 #include<map>
 #include"Controller.hpp"
 #include"MyController.hpp"
 
-#ifndef CONTROLLER_MAPPING_HPP
-# define CONTROLLER_MAPPING_HPP
 class Controller;
 class ControllerMapping
 {

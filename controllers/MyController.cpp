@@ -6,17 +6,17 @@ MyController::MyController() : Controller()
 MyController::~MyController()
 {}
 
-std::string	MyController::doExecute(HttpRequest &request, std::string data, char *cgi_python)
+std::string	MyController::doExecute(HttpRequest &request, std::string data, const char *cgi_python)
 {
 	if (data == "")
 		return ("");
 	if (request.getMethod() == "POST")
-		return (doExecuteLarge(request, data, cgi_python));
-	return (doExecuteSmall(request, data, cgi_python));
+		return (doExecuteLarge(data, cgi_python));
+	return (doExecuteSmall(data, cgi_python));
 }
 
 // post
-std::string    MyController::doExecuteLarge(HttpRequest &request, std::string &data, char *cgi_python)
+std::string    MyController::doExecuteLarge(std::string &data, const char *cgi_python)
 {
 	int		ret;
 	char	buffer[64 * K];
@@ -25,7 +25,7 @@ std::string    MyController::doExecuteLarge(HttpRequest &request, std::string &d
 	std::string	saved_dir;
 
 	// saved_dir : cgi_pthyon의 결과값을 저장하는 경로
-
+	
 	// write: 데이터를 갱신하자.
 
 	path[0] = "/usr/bin/python3";
@@ -59,7 +59,7 @@ std::string    MyController::doExecuteLarge(HttpRequest &request, std::string &d
 }
 
 // get, delete
-std::string    MyController::doExecuteSmall(HttpRequest &request, std::string &data, char *cgi_python)
+std::string    MyController::doExecuteSmall(std::string &data, const char *cgi_python)
 {
 	const char    *path[4];
 	char	buffer[64 * K];
@@ -96,12 +96,12 @@ void    MyController::doGet(HttpRequest &request, HttpResponse &response)
 {
 	std::string	body;
 	std::string	bodyLength;
-	char		*cgiFile;
+	std::string	cgiFile;
 	std::stringstream ss;
 
 	// cgiFile = HttpConfig::getCgiAddress(request.getMethod());
 	cgiFile = "../DoGet.py";
-	body = doExecute(request, request.getQueryString(), cgiFile);
+	body = doExecute(request, request.getQueryString(), cgiFile.c_str());
 	if (body == "500")
 		throw ErrorResponse("500", HttpConfig::getHttpStatusMsg("500"));
 	response.ResponseStatusLine();
@@ -116,7 +116,7 @@ void    MyController::doGet(HttpRequest &request, HttpResponse &response)
 void	MyController::doPost(HttpRequest &request, HttpResponse &response)
 {
 	std::string			data;
-	char				*cgiFile;
+	std::string			cgiFile;
 	HttpRequestReader	reader(response.getSockfd());
 	std::string			tmp;
 
@@ -126,14 +126,14 @@ void	MyController::doPost(HttpRequest &request, HttpResponse &response)
 	while (request.getHeader("Transfer-Encoding") == "chunked"  && tmp != "0")
 	{
 		tmp = reader.getLine(); // 임시 파일 생성
-		doExecute(request, tmp, cgiFile);
+		doExecute(request, tmp, cgiFile.c_str());
 		if (tmp == "0") // -> 임시 파일 모두 삭제 후 하나의 파일로 merged
 			reader.getLine(); // \r\n remove
 	}
 	if (request.getHeader("Transfer-Encoding") != "chunked")
 	{
-		doExecute(request, request.getQueryString(), cgiFile);
-		doExecute(request, "0", cgiFile);
+		doExecute(request, request.getQueryString(), cgiFile.c_str());
+		doExecute(request, "0", cgiFile.c_str());
 	}
 	response.ResponseStatusLine();
 	response.putHeader("Server", HttpConfig::getServerName());
@@ -146,16 +146,15 @@ void	MyController::doDelete(HttpRequest &request, HttpResponse &response)
 {
 	std::string currentDate = getCurrentDate();
 	std::string path;
-	int         fd;
-	const char* fileName = HttpConfig::pathResolver(request.getPath()).c_str();
-	char		*cgiFile;
+	std::string	fileName = HttpConfig::pathResolver(request.getPath());
+	std::string	cgiFile;
 	std::string	body;
 
-	if (access(fileName, W_OK) == -1) // Unauthorized -> Access 권한이 없다.
+	if (access(fileName.c_str(), W_OK) == -1) // Unauthorized -> Access 권한이 없다.
 		throw ErrorResponse("401", HttpConfig::getHttpStatusMsg("401"));
 	// cgiFile = HttpConfig::getCgiAddress(request.getMethod());
 	cgiFile = "../DoDelete.py";
-	body = doExecute(request, fileName, cgiFile);
+	body = doExecute(request, fileName, cgiFile.c_str());
 	if (body[0] == '5' || body[0] == '4')
 		throw ErrorResponse(body, HttpConfig::getHttpStatusMsg(body));
 	response.setStatusCode("204"); // if the action has been enacted and no further information is to be supplied.
@@ -167,11 +166,11 @@ void	MyController::doDelete(HttpRequest &request, HttpResponse &response)
 
 std::string MyController::getCurrentDate() {
 	// 현재 시각 얻기
-	auto currentTime = std::chrono::system_clock::now();
+	std::time_t currentTime_t;
+    std::time(&currentTime_t);
 
-	// 시각을 현지 시간대로 변환
-	std::time_t currentTime_t = std::chrono::system_clock::to_time_t(currentTime);
-	std::tm* localTime = std::localtime(&currentTime_t);
+    // 시각을 현지 시간대로 변환
+    std::tm* localTime = std::localtime(&currentTime_t);
 
 	// 현재 날짜 및 시간 문자열 생성
 	std::ostringstream oss;

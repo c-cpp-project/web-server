@@ -1,6 +1,13 @@
 #include"HttpConfig.hpp"
 #include"controllers/ControllerMapping.hpp"
 
+
+std::string HttpConfig::serverName = "WebServe";
+std::map<std::string, std::string>  HttpConfig::statusCodeRepo;
+std::map<std::string, std::string>  HttpConfig::pathRepo;
+std::map<std::string, std::string>  HttpConfig::redirectRepo;
+std::map<std::string, std::string>  HttpConfig::cgiAddressRepo;
+
 std::string HttpConfig::getHttpStatusMsg(std::string key)
 {
 	return (statusCodeRepo[key]);
@@ -32,13 +39,13 @@ HttpConfig::HttpConfig()
 	i = 0;
 	while (key[i].length() != 0)
 	{
-		statusCodeRepo.insert({key[i], value[i]});
+		statusCodeRepo.insert(std::make_pair(key[i], value[i]));
 		i++;
 	}
 	// pathRepo.put()
-	// redirectRepo.put("/src_redirect", "/dest_redirect");
-	// ControllerMapping.put("/hello", new Hello()); -> CGI에서 처리해야 할 요청을 모두 저장
-	// 예를 들어, ControllerMapping.put()"form 관련 요청 uri", new FromController());
+	redirectRepo.insert(std::make_pair("/src_redirect", "/dest_redirect"));
+	// ControllerMapping.insert("/hello", new Hello()); -> CGI에서 처리해야 할 요청을 모두 저장
+	// 예를 들어, ControllerMapping.insert()"form 관련 요청 uri", new FromController());
 	// 하지만 귀찮기 때문에 하나에 다 박자.
 	ControllerMapping::putController("/index", new MyController());
 }
@@ -57,7 +64,7 @@ std::string HttpConfig::pathResolver(std::string uri)
 
 bool    HttpConfig::IsRedriectUri(std::string srcUri)
 {
-	std::map<std::string, std::string>::iterator it = std::find(redirectRepo.begin(), redirectRepo.end(), srcUri);
+	std::map<std::string, std::string>::iterator it = redirectRepo.find(srcUri);
 
     if (it != redirectRepo.end())
         return (true);
@@ -70,6 +77,4 @@ std::string  HttpConfig::getServerName()
 }
 
 HttpConfig::~HttpConfig()
-{
-
-}
+{}

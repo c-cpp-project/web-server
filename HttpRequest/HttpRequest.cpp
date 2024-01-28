@@ -30,6 +30,9 @@ void HttpRequest::parseRequestHeaders()
 			break;
 		request_headers->addHeader(line);
 	}
+
+	if (request_headers->isExist("HOST") == false) // HOST 헤더는 필수
+		throw std::invalid_argument("400 Bad Request");
 }
 
 void HttpRequest::parseRequestParams()

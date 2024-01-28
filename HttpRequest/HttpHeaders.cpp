@@ -1,12 +1,5 @@
 #include "HttpHeaders.hpp"
 
-bool HttpHeaders::isExist(const std::string& field)
-{
-	if (headers.find(field) == headers.end())
-		return (false);
-	return (true);
-}
-
 void HttpHeaders::addHeader(const std::string& line)
 {
 	// 헤더 필드와 헤더 값을 적절히 분리
@@ -34,6 +27,13 @@ std::string HttpHeaders::getHeader(const std::string& field)
 	if (isExist(field))
 		return (headers[field]);
 	return ("");
+}
+
+bool HttpHeaders::isExist(const std::string& field)
+{
+	if (headers.find(field) == headers.end())
+		return (false);
+	return (true);
 }
 
 // 테스트용

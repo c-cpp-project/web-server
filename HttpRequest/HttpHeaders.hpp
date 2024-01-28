@@ -7,10 +7,11 @@ class HttpHeaders
 {
 	private:
 		std::map<std::string, std::string> headers;
+		bool isExist(const std::string& field);
 
 	public:
 		void addHeader(const std::string& line);
-		std::string getHeader(const std::string& header);
+		std::string getHeader(const std::string& field);
 
 		// 테스트용
 		std::map<std::string, std::string>::iterator getBegin();

@@ -26,19 +26,9 @@ void HttpRequest::parseRequestHeaders()
 	while (true)
 	{
 		std::string line = reader->getLine();
-		if (line == "")
+		if (line == "") // 빈 줄이 나올 때까지 반복
 			break;
-
-		std::vector<std::string> tockens = HttpRequestUtility::splitString(line, ':');
-		if (tockens.size() >= 2)
-		{
-			request_headers->addHeader(line);
-		}
-		else // line에 콜론이 포함되지 않은 경우
-		{
-			// if (헤더 줄에 화이트스페이스가 포함되었는가)
-			// 	throw std::invalid_argument("400 Bad Request");
-		}
+		request_headers->addHeader(line);
 	}
 }
 
@@ -47,6 +37,9 @@ void HttpRequest::parseRequestParams()
 	request_params = new RequestParams();
 	// request_line의 query_string이 빈 문자열이어도 안 터질까?
 	request_params->addQuearyString(request_line->getQueryString());
+
+	// 요청 메서드가 POST인 경우 Content-Type을 보고 본문 읽기
+	// 요청 헤더드가 GET, DELETE인 경우 본문이 있으면 안 됨
 
 	// 본문 형식이 query string 이라면
 	if (request_headers->getHeader("Content-Type") == "application/x-www-form-urlencoded")

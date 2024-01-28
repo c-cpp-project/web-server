@@ -66,5 +66,6 @@ bool HttpRequestUtility::containWhiteSpace(const std::string& input)
 bool HttpRequestUtility::isImpossibleDuplication(const std::string& header_field)
 {
 	// TODO : 이후 중복이 불가능한 헤더에 대해서만 true, 그 외에는 false를 반환하도록 수정하기
+	if (header_field == "") return (false); // 임시
 	return (true);
 }

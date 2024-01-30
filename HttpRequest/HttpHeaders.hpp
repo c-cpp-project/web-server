@@ -1,17 +1,18 @@
 #ifndef HTTP_HEADERS_HPP
 # define HTTP_HEADERS_HPP
 
-# include "HttpRequestUtility.hpp"
+# include "RequestUtility.hpp"
 
 class HttpHeaders
 {
 	private:
 		std::map<std::string, std::string> headers;
+		static bool weakDuplicationBan(const std::string& field);
+		static bool strongDuplicationBan(const std::string& field);
 
 	public:
 		void addHeader(const std::string& line);
 		std::string getHeader(const std::string& field);
-		bool isExist(const std::string& field);
 
 		// 테스트용
 		std::map<std::string, std::string>::iterator getBegin();

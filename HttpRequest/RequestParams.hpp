@@ -1,7 +1,7 @@
 #ifndef REQUEST_PARAMS_HPP
 # define REQUEST_PARAMS_HPP
 
-# include "HttpRequestUtility.hpp"
+# include "RequestUtility.hpp"
 
 class RequestParams
 {

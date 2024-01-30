@@ -3,15 +3,15 @@
 
 RequestLine::RequestLine(const std::string& input)
 {
-	std::vector<std::string> tockens = HttpRequestUtility::splitString(input, ' ');
+	std::vector<std::string> tockens = RequestUtility::splitString(input, ' ');
 	
 	// 요청 라인이 "[메서드] [경로] [프로토콜]" 형식이 아닌 경우 400 응답
 	if (tockens.size() != 3)
 		throw std::invalid_argument("400 Bad Request");
 
-	parseMethod(tockens[0]);
-	parseURI(tockens[1]);
-	parseProtocol(tockens[2]);
+	parseMethod(tockens[0]); // 메서드 파싱
+	parseURI(tockens[1]); // 경로 파싱
+	parseProtocol(tockens[2]); // 프로토콜 파싱
 }
 
 void RequestLine::parseMethod(std::string method_string)
@@ -32,35 +32,26 @@ void RequestLine::parseMethod(std::string method_string)
 
 void RequestLine::parseURI(std::string uri_string)
 {
-	std::vector<std::string> tockens = HttpRequestUtility::splitString(uri_string, '?');
-	
+	if (uri_string.size() > 8000) // 허용된 URI 길이를 초과하는 경우 414 응답
+		throw std::invalid_argument("414 URI Too Long");
+
+	std::vector<std::string> tockens = RequestUtility::splitString(uri_string, '?');
 	if (tockens.size() < 1 || 2 < tockens.size())
 		throw std::invalid_argument("400 Bad Request");
-	if (tockens[0][0] != '/')
+	if (tockens[0][0] != '/') // 슬래시(/)로 시작하지 않는 경로의 경우 400 응답
 		throw std::invalid_argument("400 Bad Request");
 
+	// ?를 기준으로 앞은 path, 뒤는 query_string으로 저장
 	path = tockens[0];
 	if (tockens.size() == 2)
 		query_string = tockens[1];
-	
-	// TODO : 이후 요청 헤더까지 받고 나서 경로 유효성 검사를 추가로 진행함
 }
 
 void RequestLine::parseProtocol(std::string protocol_string)
 {
+	// TODO: 테스트기 돌려본 후 필요하다면 더 세심한 처리 필요
 	if (protocol_string != "HTTP/1.1")
 		throw std::invalid_argument("400 Bad Request");
-
-// TODO : 테스터기에 따라 추가적인 조건이 더 필요할 가능성 있음
-// 	std::vector<std::string> tockens = HttpRequestUtility::splitString(protocol_string, '/')
-// 	if (tockens.size() != 2)
-// 	{
-// 		throw std::invalid_argument("400 Bad Request");
-// 	}
-// 	if (tockens[0] != "HTTP")
-// 	{
-// 		throw std::invalid_argument("400 Bad Request");
-// 	}
 }
 
 std::string RequestLine::getMethod() const

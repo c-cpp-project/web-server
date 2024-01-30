@@ -3,6 +3,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <cstdio>
+#include <string>
 
 int main()
 {
@@ -42,6 +44,26 @@ int main()
 	}
 
 	std::cout << "Client connected!\n";
+
+	char send_buffer[1024];
+	while (true)
+	{
+		HttpRequest request(clientSocket);
+
+		int send_byte = 0;
+		send_byte += std::snprintf(send_buffer + send_byte, 1024 - send_byte, "--- request line ---\n");
+		send_byte += std::snprintf(send_buffer + send_byte, 1024 - send_byte, "method: %s\n", request.getMethod().c_str());
+		send_byte += std::snprintf(send_buffer + send_byte, 1024 - send_byte, "path: %s\n", request.getPath().c_str());
+		send_byte += std::snprintf(send_buffer + send_byte, 1024 - send_byte, "query_string: %s\n", request.getQueryString().c_str());
+		send_byte += std::snprintf(send_buffer + send_byte, 1024 - send_byte, "--- request headers ---\n");
+		std::map<std::string, std::string>::iterator iter;
+		for(iter = request.getHeadersBegin(); iter != request.getHeadersEnd(); iter++)
+			send_byte += std::snprintf(send_buffer + send_byte, 1024 - send_byte, "%s: %s\n", iter->first.c_str(), iter->second.c_str());
+		send_byte += std::snprintf(send_buffer + send_byte, 1024 - send_byte, "--- request params ---\n");
+		for(iter = request.getParamsBegin(); iter != request.getParamsEnd(); iter++)
+			send_byte += std::snprintf(send_buffer + send_byte, 1024 - send_byte, "%s: %s\n", iter->first.c_str(), iter->second.c_str());
+		send(clientSocket, send_buffer, send_byte, 0);
+	}
 
 	HttpRequest request(clientSocket);
 

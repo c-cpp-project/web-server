@@ -24,7 +24,43 @@ std::string HttpRequestReader::getLine()
 
 		int read_byte = recv(socket_fd, buffer, BUF_SIZE, 0); // CRLF가 없다면 더 읽어오기
 		if (read_byte <= 0) // 다 읽었거나, 실패했다?
+		{
+			remainder = "";
 			return (result);
+		}
 		result += std::string(buffer, read_byte);
 	}
+}
+
+std::string HttpRequestReader::getBytes(size_t byte)
+{
+	char buffer[BUF_SIZE];
+	std::string result = remainder;
+
+	while (true)
+	{
+		if (result.size() >= byte)
+		{
+			remainder = result.substr(byte, result.size() - byte);
+			return (result.substr(0, byte));
+		}
+
+		int read_byte = recv(socket_fd, buffer, BUF_SIZE, 0);
+		if (read_byte <= 0) // 다 읽었거나, 실패했다?
+		{
+			remainder = "";
+			return (result);
+		}
+		result += std::string(buffer, read_byte);
+	}
+}
+
+bool HttpRequestReader::readAll()
+{
+	char buffer[BUF_SIZE];
+	int read_byte = recv(socket_fd, buffer, BUF_SIZE, 0);
+	if (remainder == "" && read_byte == 0)
+		return (true);
+	remainder += std::string(buffer, read_byte);
+	return (false);
 }

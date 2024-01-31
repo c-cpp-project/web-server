@@ -1,22 +1,19 @@
 #include"FrontController.hpp"
 #include"../HttpRequest/HttpRequest.hpp"
 #include"../HttpRequest/HttpRequest.hpp"
-#include"../controllers/ControllerMapping.hpp"
 #include<string>
 
 void    FrontController::run()
 {
     HttpRequest     request(this->socketfd);
     HttpResponse    response(this->socketfd);
+    // HttpResponse    response(this->socketfd, 64);
     std::string     uri;
     Controller      *controller;
-    std::string     fileName = HttpConfig::pathResolver(uri);
 
     uri = request.getPath();
     try
     {
-        if (access(fileName.c_str(), F_OK) == -1 && request.getMethod() != "POST") // Not Found
-            throw ErrorResponse("404", HttpConfig::getHttpStatusMsg("404"));
         controller = ControllerMapping::getController(uri);
         if (controller == 0 || (request.getMethod() == "GET" && request.getQueryString() == ""))
         {
@@ -26,15 +23,17 @@ void    FrontController::run()
                 response.forward(request, response); // get
         }
         else // cgi: GET && POST, FILE POST, DELETE
+        {
+            // std::cout << request.getQueryString() << ", " << uri << "\n";
             controller->service(request, response);
+        }
     }
-    catch(const ErrorResponse& e)
+    catch(char const* e)
     {
-        std::cerr << e.what() << '\n';
-        response.setStatusCode(e.what());
+        std::cerr << e << '\n';
+        response.setStatusCode(e);
         response.forward(request, response);
     }
-    delete controller;
 }
 
 FrontController::FrontController(int socketfd)

@@ -14,6 +14,17 @@ HttpResponse::HttpResponse(int sockfd) // default 지정
 	putHeader("Keep-Alive", "timeout=60, max=999");
 }
 
+HttpResponse::HttpResponse(int sockfd, int max_size) // tokenizer
+{
+	this->sockfd = sockfd;
+	this->send_timeout = "60"; // nginx send_timeout default
+	this->max_size = max_size;
+	this->status_code = "200";
+
+	// header에 대한 기본적인 설정 완료하기
+	putHeader("Keep-Alive", "timeout=60, max=999");
+}
+
 HttpResponse::HttpResponse(int sockfd, std::string send_timeout)
 {
 	this->sockfd = sockfd;
@@ -25,11 +36,16 @@ void    HttpResponse::putHeader(std::string key, std::string value)
 	headers.insert(std::make_pair(key, value));
 }
 
+void	HttpResponse::removeHeader(std::string key)
+{
+	headers.erase(key);
+	std::cout << "[remove header: " << key << "]\n";
+}
+
 void	HttpResponse::redirect(HttpRequest &request, HttpResponse &response)
 {
 	response.getMaxBodySize();
 	setStatusCode("302");
-	ResponseStatusLine();
 	putHeader("Location", HttpConfig::getRedirectPath(request.getPath()));
 	putHeader("Content-Type", "text/html");
 	putHeader("Content-Length", "0");
@@ -43,18 +59,26 @@ void	HttpResponse::forward(HttpRequest &request, HttpResponse &response) // cont
 	std::string bodyLength;
 	std::stringstream ss;
 	std::string	body;
+	std::string	fileName;
 
 	uri = request.getPath();
 	if (response.getStatusCode()[0] == '4' || response.getStatusCode()[0] == '5') // fail.page
-		uri = "fail";
-	fd = open(HttpConfig::pathResolver(uri).c_str(), O_RDONLY);
-	if ((fd < 0 || request.getMethod() != "GET") && uri != "fail") // exception
-		throw ErrorResponse("404", HttpConfig::getHttpStatusMsg("404"));
+		uri = "/fail";
+	fileName = HttpConfig::pathResolver(uri);
+	fd = open(fileName.c_str(), O_RDONLY);
+	if ((fd < 0 || request.getMethod() != "GET") && uri != "fail") 
+	{
+		std::cout << fd << ", " << request.getMethod() << ", " << fileName <<"\n";
+		throw "404";
+	}
 	body = readFile(fd);
+	std::cout << "[DEBUG] " << body << "\n";
 	ss << body.length();
 	bodyLength = ss.str();
-	if (uri.compare(uri.length() - 4, 4, ".css") == 0)
+	if (fileName.compare(fileName.length() - 4, 4, ".css") == 0)
 		putHeader("Content-Type", "text/css");
+	else if (fileName.compare(fileName.length() - 3, 3, ".js") == 0)
+		putHeader("Content-Type", "application/javascript");
 	else
 		putHeader("Content-Type", "text/html;charset=utf-8");
 	putHeader("Content-Length", bodyLength);
@@ -70,23 +94,63 @@ std::string	HttpResponse::readFile(int fd)
 	size = 0;
 	while ((ret = read(fd, &body[size], K)) > 0)
 		size += ret;
+	body[size] = 0;
 	close(fd);
 	return (body);
+}
+
+void	HttpResponse::tokenizerFlush(std::string body)
+{
+	std::stringstream 	ss;
+	std::string			length;
+
+	flush();
+	ss << std::hex << this->max_size;
+    length = ss.str();
+	while (body.size() > this->max_size)
+	{
+		this->buffer.push_back(length + "\r\n");
+		this->buffer.push_back(body.substr(0, this->max_size) + "\r\n");
+		flush();
+		body = body.substr(this->max_size);
+	}
+	ss.str("");
+	ss << std::hex << body.size();
+	length = ss.str();
+	this->buffer.push_back(length + "\r\n");
+	this->buffer.push_back(body + "\r\n");
+	flush();
+	this->buffer.push_back("0\r\n\r\n");
+	flush();
 }
 
 void    HttpResponse::sendBody(std::string body) // api 요청에 대한 응답
 {
 	ResponseStatusLine();
+	// putHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+	if (body.size() > this->max_size) // transfer-tokenizer
+	{
+		putHeader("Transfer-Encoding", "chunked");
+		std::cout << body.size() << ", " << this->max_size;
+	}
 	processHeader();
-	HttpResponseBody(body);
-	flush();
+	if (findValue("Transfer-Encoding") == "chunked")
+		tokenizerFlush(body);
+	else
+	{
+		HttpResponseBody(body);
+		flush();
+	}
 }
 
 void    HttpResponse::ResponseStatusLine()
 {
 	std::string	msg  = "";
 
-	msg = "HTTP/1.1" + this->status_code + " " + HttpConfig::getHttpStatusMsg(this->status_code);
+	msg += "HTTP/1.1 ";
+	msg += this->status_code + " ";
+	msg += HttpConfig::getHttpStatusMsg(this->status_code);
+	msg += "\r\n";
 	this->buffer.push_back(msg);
 }
 
@@ -94,7 +158,9 @@ void    HttpResponse::processHeader()
 {
 	std::string	msg  = "";
 	std::map<std::string, std::string>::iterator it;
-	
+
+	if (findValue("Transfer-Encoding") != "")
+		removeHeader("Content-Length");
 	for (it = this->headers.begin(); it != this->headers.end(); ++it) 
 		msg += (it->first + ": " + it->second + "\r\n");
 	msg += "\r\n";
@@ -114,23 +180,17 @@ void	HttpResponse::flush() // 마지막에 호출
 	int				size;
 	std::string		httpMsg;
 
+	httpMsg = "";
 	i = 0;
 	size = 0;
 	while (i < this->buffer.size())
 	{
+		httpMsg += this->buffer[i];
 		size += this->buffer[i].length();
 		i++;
 	}
-	if (size > this->max_size) // Payload Too Large
-		throw ErrorResponse("413", HttpConfig::getHttpStatusMsg("413"));
-	httpMsg = "";
-	i = 0;
-	while (i < this->buffer.size())
-	{
-		httpMsg += this->buffer[i];
-		i++;
-	}
 	send(this->sockfd, httpMsg.c_str(), httpMsg.length(), 0);
+	this->buffer.clear();
 }
 
 void	HttpResponse::setStatusCode(std::string code)
@@ -151,4 +211,14 @@ long long	HttpResponse::getMaxBodySize()
 int		HttpResponse::getSockfd()
 {
 	return (this->sockfd);
+}
+
+std::string	HttpResponse::findValue(std::string key)
+{
+	std::map<std::string, std::string>::iterator it;
+
+	it = HttpResponse::headers.find(key);
+	if (it != headers.end())
+		return (it->second);
+	return ("");
 }

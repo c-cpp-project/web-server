@@ -43,31 +43,41 @@ HttpConfig::HttpConfig()
 		i++;
 	}
 	// pathRepo.put()
-	redirectRepo.insert(std::make_pair("/src_redirect", "/dest_redirect"));
+	redirectRepo.insert(std::make_pair("/redirect", "/welcome"));
 	// ControllerMapping.insert("/hello", new Hello()); -> CGI에서 처리해야 할 요청을 모두 저장
 	// 예를 들어, ControllerMapping.insert()"form 관련 요청 uri", new FromController());
-	// 하지만 귀찮기 때문에 하나에 다 박자.
-	ControllerMapping::putController("/index", new MyController());
+	ControllerMapping::putController("/controller", new MyController());
 }
 
 // pathResolver는 redirect 요청이나 get 요청을 할 때 사용한다.
 // uri에 대응하는 nginx file을 적용하여 값을 반환 
 std::string HttpConfig::pathResolver(std::string uri)
 {
+	std::cout << "[" << uri << "]\n";
+	if (uri.find('.') != std::string::npos)
+		return (uri.substr(1));
 	if (uri == "/")
-		uri = "/index.html";
+		uri = "/welcome";
 	// std::string uri;
 	// path = pathRepo.get("uri")
 	// return (path);
-	return ("static/html" + uri);
+	return ("static/html" + uri + ".html");
 }
 
 bool    HttpConfig::IsRedriectUri(std::string srcUri)
 {
-	std::map<std::string, std::string>::iterator it = redirectRepo.find(srcUri);
-
-    if (it != redirectRepo.end())
-        return (true);
+	std::cout << srcUri << ", size: " << redirectRepo.size() << "\n";
+	std::map<std::string, std::string>::iterator it;
+	try
+	{
+		it = redirectRepo.find(srcUri);
+		if (it != redirectRepo.end())
+        	return (true);
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << "IsRedriectUri: " << e.what() << '\n';
+	}
 	return (false);
 }
 
@@ -77,4 +87,8 @@ std::string  HttpConfig::getServerName()
 }
 
 HttpConfig::~HttpConfig()
-{}
+{
+	// static 동적 할당 모두 삭제
+	Controller *controller = ControllerMapping::getController("/index");
+	delete controller;
+}

@@ -6,7 +6,6 @@
 
 #include"../HttpRequest/HttpRequest.hpp"
 #include"../HttpConfig.hpp"
-#include"ErrorResponse.hpp"
 #include"sys/fcntl.h"
 #include"../controllers/ControllerMapping.hpp"
 #include<map>
@@ -26,15 +25,18 @@ private:
 	int         sockfd;
 	std::map<std::string, std::string> headers;
 	std::vector<std::string>    buffer;
-	long long max_size;
+	unsigned long	max_size;
 	std::string	send_timeout; // WAS
 	std::string	status_code;
 	HttpResponse();
 public:
 	HttpResponse(int sockfd); // default 지정
 	HttpResponse(int sockfd, std::string send_timeout);
+	HttpResponse(int sockfd, int max_size); // transfer-tokenizer
 
+	std::string	findValue(std::string key);
 	void    putHeader(std::string key, std::string value);
+	void	removeHeader(std::string key);
 	void	HttpResponseBody(std::string body);
 	std::string	readFile(int fd);
 
@@ -44,6 +46,7 @@ public:
 	void    ResponseStatusLine();
 	void    processHeader();
 	
+	void	tokenizerFlush(std::string body);
 	void    flush(); // 마지막에 호출
 	void	setStatusCode(std::string code);
 	std::string	getStatusCode();

@@ -8,10 +8,13 @@ MyController::~MyController()
 
 std::string	MyController::doExecute(HttpRequest &request, std::string data, const char *cgi_python)
 {
+	std::cout << "where\n";
 	if (data == "")
 		return ("");
-	if (request.getMethod() == "POST")
+	std::cout << "here1\n";
+	if (request.getMethod() == "POST" && request.getHeader("Content-Type") == "multipart/form-data")
 		return (doExecuteLarge(data, cgi_python));
+	std::cout << "here2\n";
 	return (doExecuteSmall(data, cgi_python));
 }
 
@@ -63,31 +66,31 @@ std::string    MyController::doExecuteSmall(std::string &data, const char *cgi_p
 {
 	const char    *path[4];
 	char	buffer[64 * K];
-	int     pipefd[2];
+	int		fileOut[2];
 	int		ret;
 
 	path[0] = "/usr/bin/python3";
 	path[1] = cgi_python;
 	path[2] = data.c_str();
 	path[3] = NULL;
-	pipe(pipefd);
+	pipe(fileOut);
 	ret = fork();
 	if (ret == 0)
 	{
-		close(pipefd[0]);
-		dup2(pipefd[1], STDOUT_FILENO);
-		close(pipefd[1]);
+		close(fileOut[0]);
+		std::cout << "here\n";
+		dup2(fileOut[1], STDOUT_FILENO); close(fileOut[1]);
 		execve("/usr/bin/python3", const_cast<char* const*>(path), NULL);
 	}
 	else if (ret > 0)
 	{
-		close(pipefd[1]);
+		close(fileOut[1]);
 		// fcntl(pipefd2[0], F_SETFL, O_NONBLOCK);
-		ret = read(pipefd[0], buffer, 64 * K); // 읽을 수 없어도 반환한다.
-		close(pipefd[1]);
+		ret = read(fileOut[0], buffer, 64 * K);
+		close(fileOut[0]);
 	}
 	if (ret < 0)
-		throw ErrorResponse("500", HttpConfig::getHttpStatusMsg("500"));
+		throw "500";
 	return (buffer);
 }
 
@@ -103,7 +106,7 @@ void    MyController::doGet(HttpRequest &request, HttpResponse &response)
 	cgiFile = "../DoGet.py";
 	body = doExecute(request, request.getQueryString(), cgiFile.c_str());
 	if (body == "500")
-		throw ErrorResponse("500", HttpConfig::getHttpStatusMsg("500"));
+		throw "500";
 	response.ResponseStatusLine();
 	response.putHeader("Content-Type", "text/html;charset=utf-8");
 	ss << body.length();
@@ -151,12 +154,10 @@ void	MyController::doDelete(HttpRequest &request, HttpResponse &response)
 	std::string	body;
 
 	if (access(fileName.c_str(), W_OK) == -1) // Unauthorized -> Access 권한이 없다.
-		throw ErrorResponse("401", HttpConfig::getHttpStatusMsg("401"));
+		throw "401";
 	// cgiFile = HttpConfig::getCgiAddress(request.getMethod());
 	cgiFile = "../DoDelete.py";
 	body = doExecute(request, fileName, cgiFile.c_str());
-	if (body[0] == '5' || body[0] == '4')
-		throw ErrorResponse(body, HttpConfig::getHttpStatusMsg(body));
 	response.setStatusCode("204"); // if the action has been enacted and no further information is to be supplied.
 	response.ResponseStatusLine();
 	response.putHeader("Server", HttpConfig::getServerName());

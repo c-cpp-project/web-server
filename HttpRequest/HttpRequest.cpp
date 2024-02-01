@@ -54,8 +54,8 @@ void HttpRequest::parseRequestParams()
 
 			size_t body_size = RequestUtility::toPositiveInt(getHeader("CONTENT-LENGTH"));
 			std::string body = reader->getBytes(body_size); // Content-Length 값 만큼 본문 읽어오기
-			if (body.size() != body_size || !reader->readAll()) // 소켓 fd에 남은 크기가 Content-Length 값과 일치하지 않으면 400 응답
-				throw std::invalid_argument("400 Bad Request"); // TODO : content-length 값이 안 맞으면 400 응답해버리는 게 과연 맞을까...?
+			// if (body.size() != body_size || !reader->readAll()) // 소켓 fd에 남은 크기가 Content-Length 값과 일치하지 않으면 400 응답
+			// 	throw std::invalid_argument("400 Bad Request"); // TODO : content-length 값이 안 맞으면 400 응답해버리는 게 과연 맞을까...?
 			request_params->addQuearyString(body);
 		}
 		else // Transfer-Encoding, Content-Length 두 헤더 모두 없는 경우

@@ -54,7 +54,7 @@ HttpConfig::HttpConfig()
 std::string HttpConfig::pathResolver(std::string uri)
 {
 	std::cout << "[" << uri << "]\n";
-	if (uri.find('.') != std::string::npos)
+	if (access(uri.substr(1).c_str(), F_OK) == 0)
 		return (uri.substr(1));
 	if (uri == "/")
 		uri = "/welcome";

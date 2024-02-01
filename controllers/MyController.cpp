@@ -8,13 +8,10 @@ MyController::~MyController()
 
 std::string	MyController::doExecute(HttpRequest &request, std::string data, const char *cgi_python)
 {
-	std::cout << "where\n";
 	if (data == "")
 		return ("");
-	std::cout << "here1\n";
 	if (request.getMethod() == "POST" && request.getHeader("Content-Type") == "multipart/form-data")
 		return (doExecuteLarge(data, cgi_python));
-	std::cout << "here2\n";
 	return (doExecuteSmall(data, cgi_python));
 }
 
@@ -42,7 +39,8 @@ std::string    MyController::doExecuteLarge(std::string &data, const char *cgi_p
 		close(pipefd[1]);
 		dup2(pipefd[1], STDOUT_FILENO);
 		close(pipefd[1]);
-		execve("/usr/bin/python3", const_cast<char* const*>(path), NULL);
+		if (execve("/usr/bin/python3", const_cast<char* const*>(path), NULL) < 0)
+			throw "500";
 	}
 	else
 	{
@@ -55,9 +53,9 @@ std::string    MyController::doExecuteLarge(std::string &data, const char *cgi_p
 		close(pipefd[1]);
 		wait(NULL);
 		if (ret < 0)
-			return ("500");
-		buffer[ret] = 0;
+			throw ("500");
 	}
+	buffer[ret] = 0;
 	return (buffer);
 }
 
@@ -78,7 +76,6 @@ std::string    MyController::doExecuteSmall(std::string &data, const char *cgi_p
 	if (ret == 0)
 	{
 		close(fileOut[0]);
-		std::cout << "here\n";
 		dup2(fileOut[1], STDOUT_FILENO); close(fileOut[1]);
 		execve("/usr/bin/python3", const_cast<char* const*>(path), NULL);
 	}
@@ -91,6 +88,7 @@ std::string    MyController::doExecuteSmall(std::string &data, const char *cgi_p
 	}
 	if (ret < 0)
 		throw "500";
+	buffer[ret] = 0;
 	return (buffer);
 }
 
@@ -101,17 +99,41 @@ void    MyController::doGet(HttpRequest &request, HttpResponse &response)
 	std::string	bodyLength;
 	std::string	cgiFile;
 	std::stringstream ss;
+	std::string	tmp[2];
+	std::string	data;
 
-	// cgiFile = HttpConfig::getCgiAddress(request.getMethod());
-	cgiFile = "../DoGet.py";
-	body = doExecute(request, request.getQueryString(), cgiFile.c_str());
-	if (body == "500")
-		throw "500";
+	cgiFile = "cgi-bin/DoGet.py";
+	tmp[0] = request.getParameter("username") == "" ? "" : "username=" + request.getParameter("username");
+	tmp[1] = request.getParameter("password") == "" ? "" : "password=" + request.getParameter("password");
+	data = tmp[0] + tmp[1];
+	if (tmp[0] != "" && tmp[1] != "")
+		data = tmp[0] + "&" + tmp[1];
+	body = doExecute(request, data, cgiFile.c_str());
 	response.ResponseStatusLine();
 	response.putHeader("Content-Type", "text/html;charset=utf-8");
 	ss << body.length();
 	bodyLength = ss.str();
 	response.putHeader("Content-Length", bodyLength);
+	response.sendBody(body);
+}
+
+// delete
+void	MyController::doDelete(HttpRequest &request, HttpResponse &response)
+{
+	std::string currentDate = getCurrentDate();
+	std::string path;
+	std::string	fileName = HttpConfig::pathResolver(request.getPath());
+	std::string	cgiFile;
+	std::string	body;
+
+	if (access(fileName.c_str(), F_OK) == -1) // 존재하지 않는다.
+		throw "404";
+	cgiFile = "cgi-bin/DoDelete.py";
+	body = doExecute(request, fileName, cgiFile.c_str());
+	response.setStatusCode("200"); // if the action has been enacted and no further information is to be supplied.
+	response.ResponseStatusLine();
+	response.putHeader("Server", HttpConfig::getServerName());
+	response.putHeader("Date", getCurrentDate());
 	response.sendBody(body);
 }
 
@@ -124,7 +146,7 @@ void	MyController::doPost(HttpRequest &request, HttpResponse &response)
 	std::string			tmp;
 
 	// cgiFile = HttpConfig::getCgiAddress(request.getMethod());
-	cgiFile = "../DoUpload.py";
+	cgiFile = "cgi-bin/DoUpload.py";
 	tmp = "";
 	while (request.getHeader("Transfer-Encoding") == "chunked"  && tmp != "0")
 	{
@@ -138,27 +160,6 @@ void	MyController::doPost(HttpRequest &request, HttpResponse &response)
 		doExecute(request, request.getQueryString(), cgiFile.c_str());
 		doExecute(request, "0", cgiFile.c_str());
 	}
-	response.ResponseStatusLine();
-	response.putHeader("Server", HttpConfig::getServerName());
-	response.putHeader("Date", getCurrentDate());
-	response.sendBody("");
-}
-
-// delete
-void	MyController::doDelete(HttpRequest &request, HttpResponse &response)
-{
-	std::string currentDate = getCurrentDate();
-	std::string path;
-	std::string	fileName = HttpConfig::pathResolver(request.getPath());
-	std::string	cgiFile;
-	std::string	body;
-
-	if (access(fileName.c_str(), W_OK) == -1) // Unauthorized -> Access 권한이 없다.
-		throw "401";
-	// cgiFile = HttpConfig::getCgiAddress(request.getMethod());
-	cgiFile = "../DoDelete.py";
-	body = doExecute(request, fileName, cgiFile.c_str());
-	response.setStatusCode("204"); // if the action has been enacted and no further information is to be supplied.
 	response.ResponseStatusLine();
 	response.putHeader("Server", HttpConfig::getServerName());
 	response.putHeader("Date", getCurrentDate());

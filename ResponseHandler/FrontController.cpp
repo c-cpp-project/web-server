@@ -24,7 +24,7 @@ void    FrontController::run()
         }
         else // cgi: GET && POST, FILE POST, DELETE
         {
-            // std::cout << request.getQueryString() << ", " << uri << "\n";
+            std::cout << uri <<  ", " << request.getParameter("username") << ", " << request.getParameter("password") << "\n"; 
             controller->service(request, response);
         }
     }

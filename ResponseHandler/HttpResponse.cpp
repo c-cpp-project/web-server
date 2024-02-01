@@ -66,7 +66,7 @@ void	HttpResponse::forward(HttpRequest &request, HttpResponse &response) // cont
 		uri = "/fail";
 	fileName = HttpConfig::pathResolver(uri);
 	fd = open(fileName.c_str(), O_RDONLY);
-	if ((fd < 0 || request.getMethod() != "GET") && uri != "fail") 
+	if ((fd < 0 || request.getMethod() != "GET") && uri != "/fail") 
 	{
 		std::cout << fd << ", " << request.getMethod() << ", " << fileName <<"\n";
 		throw "404";
@@ -189,6 +189,7 @@ void	HttpResponse::flush() // 마지막에 호출
 		size += this->buffer[i].length();
 		i++;
 	}
+	std::cout << httpMsg << "\n";
 	send(this->sockfd, httpMsg.c_str(), httpMsg.length(), 0);
 	this->buffer.clear();
 }

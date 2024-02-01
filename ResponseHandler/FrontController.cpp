@@ -1,7 +1,4 @@
 #include"FrontController.hpp"
-#include"../HttpRequest/HttpRequest.hpp"
-#include"../HttpRequest/HttpRequest.hpp"
-#include<string>
 
 void    FrontController::run()
 {
@@ -9,13 +6,14 @@ void    FrontController::run()
     HttpResponse    response(this->socketfd);
     // HttpResponse    response(this->socketfd, 64);
     std::string     uri;
-    Controller      *controller;
+    Controller      *controller = 0;
 
     uri = request.getPath();
     try
     {
-        controller = ControllerMapping::getController(uri);
-        if (controller == 0 || (request.getMethod() == "GET" && request.getQueryString() == ""))
+        controller = request.getMethod() == "DELETE" ? \
+        (new DeleteController()) : (ControllerMapping::getController(uri));
+        if (controller == 0 || (request.getMethod() == "GET"))
         {
             if (HttpConfig::IsRedriectUri(uri) == true) // redirect
                 response.redirect(request, response);
@@ -26,6 +24,7 @@ void    FrontController::run()
         {
             std::cout << uri <<  ", " << request.getParameter("username") << ", " << request.getParameter("password") << "\n"; 
             controller->service(request, response);
+            delete controller;
         }
     }
     catch(char const* e)
@@ -33,6 +32,8 @@ void    FrontController::run()
         std::cerr << e << '\n';
         response.setStatusCode(e);
         response.forward(request, response);
+        if (controller)
+            delete controller;
     }
 }
 

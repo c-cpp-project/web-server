@@ -4,6 +4,7 @@
 #include<map>
 #include"Controller.hpp"
 #include"MyController.hpp"
+#include"DeleteController.hpp"
 
 class Controller;
 class ControllerMapping

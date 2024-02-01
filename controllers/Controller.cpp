@@ -36,3 +36,18 @@ Controller::Controller()
 
 Controller::~Controller()
 {}
+
+
+std::string Controller::getCurrentDate() {
+	// 현재 시각 얻기
+	std::time_t currentTime_t;
+    std::time(&currentTime_t);
+
+    // 시각을 현지 시간대로 변환
+    std::tm* localTime = std::localtime(&currentTime_t);
+
+	// 현재 날짜 및 시간 문자열 생성
+	std::ostringstream oss;
+	oss << std::put_time(localTime, "%a, %d %b %Y %H:%M:%S GMT");
+	return oss.str();
+}

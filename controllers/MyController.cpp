@@ -59,7 +59,7 @@ std::string    MyController::doExecuteLarge(std::string &data, const char *cgi_p
 	return (buffer);
 }
 
-// get, delete
+// get
 std::string    MyController::doExecuteSmall(std::string &data, const char *cgi_python)
 {
 	const char    *path[4];
@@ -117,26 +117,6 @@ void    MyController::doGet(HttpRequest &request, HttpResponse &response)
 	response.sendBody(body);
 }
 
-// delete
-void	MyController::doDelete(HttpRequest &request, HttpResponse &response)
-{
-	std::string currentDate = getCurrentDate();
-	std::string path;
-	std::string	fileName = HttpConfig::pathResolver(request.getPath());
-	std::string	cgiFile;
-	std::string	body;
-
-	if (access(fileName.c_str(), F_OK) == -1) // 존재하지 않는다.
-		throw "404";
-	cgiFile = "cgi-bin/DoDelete.py";
-	body = doExecute(request, fileName, cgiFile.c_str());
-	response.setStatusCode("200"); // if the action has been enacted and no further information is to be supplied.
-	response.ResponseStatusLine();
-	response.putHeader("Server", HttpConfig::getServerName());
-	response.putHeader("Date", getCurrentDate());
-	response.sendBody(body);
-}
-
 // file post
 void	MyController::doPost(HttpRequest &request, HttpResponse &response)
 {
@@ -164,18 +144,4 @@ void	MyController::doPost(HttpRequest &request, HttpResponse &response)
 	response.putHeader("Server", HttpConfig::getServerName());
 	response.putHeader("Date", getCurrentDate());
 	response.sendBody("");
-}
-
-std::string MyController::getCurrentDate() {
-	// 현재 시각 얻기
-	std::time_t currentTime_t;
-    std::time(&currentTime_t);
-
-    // 시각을 현지 시간대로 변환
-    std::tm* localTime = std::localtime(&currentTime_t);
-
-	// 현재 날짜 및 시간 문자열 생성
-	std::ostringstream oss;
-	oss << std::put_time(localTime, "%a, %d %b %Y %H:%M:%S GMT");
-	return oss.str();
 }

@@ -1,10 +1,11 @@
 
-
 #include<exception>
 #include<iostream>
 #include"../HttpConfig.hpp"
-#include<sys/fcntl.h>
 #include"../controllers/Controller.hpp"
+#include"../HttpRequest/HttpRequest.hpp"
+#include<string>
+#include<sys/fcntl.h>
 
 #ifndef FRONT_CONTROLLER_HPP
 # define FRONT_CONTROLLER_HPP

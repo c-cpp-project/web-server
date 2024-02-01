@@ -1,6 +1,4 @@
 #include"HttpConfig.hpp"
-#include"controllers/ControllerMapping.hpp"
-
 
 std::string HttpConfig::serverName = "WebServe";
 std::map<std::string, std::string>  HttpConfig::statusCodeRepo;

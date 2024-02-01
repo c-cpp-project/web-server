@@ -5,9 +5,12 @@ RequestLine::RequestLine(const std::string& input)
 {
 	std::vector<std::string> tockens = RequestUtility::splitString(input, ' ');
 	
-	// 요청 라인이 "[메서드] [경로] [프로토콜]" 형식이 아닌 경우 400 응답
+	// 요청 라인이 "[메서드] [경로] [프로토콜]" 형식이 아닌 경우 -> 버퍼 비우기
 	if (tockens.size() != 3)
-		throw std::invalid_argument("400 Bad Request");
+	{
+		// TODO : 400 응답 보내고, 버퍼 비우기
+		throw "400";
+	}
 
 	parseMethod(tockens[0]); // 메서드 파싱
 	parseURI(tockens[1]); // 경로 파싱
@@ -16,16 +19,22 @@ RequestLine::RequestLine(const std::string& input)
 
 void RequestLine::parseMethod(std::string method_string)
 {
-	// 영어 대문자 이외의 문자가 포함된 메서드인 경우 400 응답
+	// 영어 대문자 이외의 문자가 포함된 메서드인 경우 -> 버퍼 비우기
 	for(size_t i = 0; i < method_string.size(); i++)
 	{
 		if (!std::isupper(method_string[i]))
-			throw std::invalid_argument("400 Bad Request");
+		{
+			// TODO : 400 응답 보내고, 버퍼 비우기
+			throw "400";
+		}
 	}
 
-	// 유효하지 않거나 지원하지 않은 메서드인 경우 400 응답
+	// 유효하지 않거나 지원하지 않은 메서드인 경우 -> 버퍼 비우기
 	if (method_string != "GET" && method_string != "POST" && method_string != "DELETE")
-		throw std::invalid_argument("400 Bad Request");
+	{
+		// TODO : 400 응답 보내고, 버퍼 비우기
+		throw "400";
+	}
 
 	method = method_string;
 }

@@ -33,7 +33,8 @@ void HttpHeaders::addHeader(const std::string& line)
 
 std::string HttpHeaders::getHeader(const std::string& field)
 {
-	if (RequestUtility::isExist(headers, field))
+	std::string upper_field = RequestUtility::toUpperString(field);
+	if (RequestUtility::isExist(headers, upper_field))
 		return (headers[field]);
 	return ("");
 }

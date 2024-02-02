@@ -9,7 +9,7 @@ class RequestParams
 		std::map<std::string, std::string> params;
 
 	public:
-		void addQuearyString(const std::string& query_string);
+		int addQuearyString(const std::string& query_string);
 		// void addJsonData();
 		std::string getParameter(const std::string& param);
 

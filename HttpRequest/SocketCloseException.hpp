@@ -3,12 +3,21 @@
 
 # include <exception>
 
-class SocketCloseException : public std::exception
+class SocketCloseException400 : public std::exception
 {
 	public:
 		const char *what() const noexcept override
 		{
-			return "disconnect from the client!";
+			return "disconnect from the client with 400 response!";
+		}
+};
+
+class SocketCloseException500 : public std::exception
+{
+	public:
+		const char *what() const noexcept override
+		{
+			return "disconnect from the client with 500 response!";
 		}
 };
 

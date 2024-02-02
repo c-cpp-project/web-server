@@ -3,23 +3,21 @@
 
 # include "HttpRequest.hpp"
 
-# define INCOMPLETE_REQUEST 0 // 불완전한 요청
-# define START_CHUNKED_REQUEST  1 // chunked 수신을 시작하는 요청
-# define WRONG_CHUNKED_REQUEST 2 // 잘못된 chunked 요청
-# define WRONG_REQUEST_UNKNOWN_RANGE 3 // 범위를 모르는 잘못된 일반 요청
-# define WRONG_REQUEST_KNOWN_RANGE 4 // 범위를 아는 잘못된 일반 요청
+# define INCOMPLETE_REQUEST 1 // 요청을 더 읽어오자
+# define START_CHUNKED_REQUEST 2 // 청크 전송을 시작하는 요청
+# define BAD_REQUEST 400 // 400 응답으로 현재 요청을 거부하자
+# define LENGTH_REQUIRED 411 // 411 응답으로 현재 요청을 거부하자
 
 class HttpRequestParser
 {
 	private:
-		static RequestLine *parseRequestLine(const std::string& buffer, int& start);
-		static HttpHeaders *parseRequestHeaders(const std::string& buffer, int& start);
-		static std::string parseRequestBody(HttpRequest& request, const std::string& buffer, int start);
-		static std::string parseFormData(HttpRequest& request, const std::string& buffer, int start);
-		static RequestParams *parseRequestParams(const HttpRequest& request);
+		static void parseRequestLine(HttpRequest *request, const std::string& buffer, int& start);
+		static void parseRequestHeaders(HttpRequest *request, const std::string& buffer, int& start);
+		static void parseRequestBody(HttpRequest *request, const std::string& buffer, int start);
+		static void parseRequestParams(HttpRequest *request);
 
 	public:
-		static HttpRequest *parse(const std::string& buffer);
+		static HttpRequest *parse(const std::string& buffer, HttpRequest *request);
 };
 
 #endif

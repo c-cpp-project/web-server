@@ -1,26 +1,25 @@
 #include "HttpHeaders.hpp"
 
-void HttpHeaders::addHeader(const std::string& line)
+int HttpHeaders::addHeader(const std::string& line)
 {
 	// 헤더 필드와 헤더 값을 적절히 분리
 	std::string field, value;
 	size_t colon_pos = line.find(':');
-	if (colon_pos == std::string::npos) {
+	if (colon_pos == std::string::npos){
 		field = RequestUtility::toUpperString(line);
-		value = "";
 	} else {
 		field = RequestUtility::toUpperString(line.substr(0, colon_pos));
 		value = RequestUtility::trim(line.substr(colon_pos + 1, line.size() - colon_pos - 1), " ");
 	}
 
 	if (RequestUtility::containWhiteSpace(field)) // 헤더 필드에 화이트스페이스가 포함되면 400 응답
-		throw std::invalid_argument("400 Bad Request");
+		return (FAILURE);
 	if (RequestUtility::isExist(headers, field)) // headers에 이미 존재하는 헤더 필드라면
 	{
 		if (strongDuplicationBan(field)) // 중복이 아예 허용되지 않는 헤더 필드라면 400 응답
-			throw std::invalid_argument("400 Bad Request");
+			return (FAILURE);
 		if (weakDuplicationBan(field)) // 중복이 들어와도 첫 값을 유지해야 하는 헤더 필드라면 넘어가기
-			return;
+			return (SUCCESS);
 		// TODO : 여기서 특정 헤더에 대해 값 유효성 검사가 필요할 수 있다. Host 등
 		headers[field] += ", " + value;
 	}
@@ -29,6 +28,7 @@ void HttpHeaders::addHeader(const std::string& line)
 			// TODO : 여기서 특정 헤더에 대해 값 유효성 검사가 필요할 수 있다. Host 등
 			headers[field] = value;
 	}
+	return (SUCCESS);
 }
 
 std::string HttpHeaders::getHeader(const std::string& field)
@@ -37,6 +37,11 @@ std::string HttpHeaders::getHeader(const std::string& field)
 	if (RequestUtility::isExist(headers, upper_field))
 		return (headers[field]);
 	return ("");
+}
+
+void HttpHeaders::setHeader(const std::string& field, const std::string& value)
+{
+	headers[field] = value;
 }
 
 // 중복이 들어와도 첫 값을 유지하는 헤더들

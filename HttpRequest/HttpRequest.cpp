@@ -41,9 +41,14 @@ void HttpRequest::setRequestHeaders(HttpHeaders *headers)
 	request_headers = headers;
 }
 
-void HttpRequest::addHeader(const std::string& line)
+int HttpRequest::addHeader(const std::string& line)
 {
-	request_headers->addHeader(line);
+	return (request_headers->addHeader(line));
+}
+
+void HttpRequest::setHeader(const std::string& field, const std::string& value)
+{
+	request_headers->setHeader(field, value);
 }
 
 void HttpRequest::setRequestBody(const std::string& body)
@@ -51,9 +56,21 @@ void HttpRequest::setRequestBody(const std::string& body)
 	request_body = body;
 }
 
+void HttpRequest::addRequestBody(const std::string& body)
+{
+	request_body += body;
+}
+
 void HttpRequest::setRequestParams(RequestParams *params)
 {
 	request_params = params;
+}
+
+int HttpRequest::addRequestParamsToQueryString(const std::string& query_string)
+{
+	if (request_params->addQuearyString(query_string) == FAILURE)
+		return (FAILURE);
+	return (SUCCESS);
 }
 
 
@@ -62,14 +79,17 @@ std::map<std::string, std::string>::iterator HttpRequest::getHeadersBegin() cons
 {
 	return (request_headers->getBegin());
 }
+
 std::map<std::string, std::string>::iterator HttpRequest::getHeadersEnd() const
 {
 	return (request_headers->getEnd());
 }
+
 std::map<std::string, std::string>::iterator HttpRequest::getParamsBegin() const
 {
 	return (request_params->getBegin());
 }
+
 std::map<std::string, std::string>::iterator HttpRequest::getParamsEnd() const
 {
 	return (request_params->getEnd());

@@ -27,9 +27,12 @@ class HttpRequest
 
 		void setRequestLine(RequestLine *line);
 		void setRequestHeaders(HttpHeaders *headers);
-		void addHeader(const std::string& line);
+		int addHeader(const std::string& line);
+		void setHeader(const std::string& field, const std::string& value);
 		void setRequestBody(const std::string& body);
+		void addRequestBody(const std::string& body);
 		void setRequestParams(RequestParams *params);
+		int addRequestParamsToQueryString(const std::string& query_string);
 
 		// 테스트용
 		std::map<std::string, std::string>::iterator getHeadersBegin() const;

@@ -21,20 +21,26 @@ std::vector<std::string> RequestUtility::splitString(const std::string& input, c
 }
 
 // query string을 map<string, string> 형태로 변환
-std::map<std::string, std::string> RequestUtility::parseQueryString(const std::string& query_string)
+std::map<std::string, std::string> RequestUtility::parseQueryString(const std::string& query_string, bool& success)
 {
-	if (containWhiteSpace(query_string)) // 화이트스페이스를 포함하는 쿼리스트링은 유효하지 않음
-		throw std::invalid_argument("400 Bad Request");
-
 	std::map<std::string, std::string> result;
+
+	if (containWhiteSpace(query_string)) { // 화이트스페이스를 포함하는 쿼리스트링은 유효하지 않음
+		success = false;
+		return (result);
+	}
+
 	std::vector<std::string> pairs = splitString(query_string, '&');
 	for(size_t i = 0; i < pairs.size(); i++)
 	{
 		std::vector<std::string> tockens = splitString(pairs[i], '=');
-		if (tockens.size() != 2)
-			throw std::invalid_argument("400 Bad Request");
+		if (tockens.size() != 2) {
+			success = false;
+			return (result);
+		}
 		result[tockens[0]] = tockens[1];
 	}
+	success = true;
 	return (result);
 }
 
@@ -70,7 +76,7 @@ bool RequestUtility::isExist(const std::map<std::string, std::string>& map, cons
 	return (true);
 }
 
-int RequestUtility::toPositiveInt(const std::string& input)
+int RequestUtility::strToPositiveInt(const std::string& input)
 {
 	int result = 0;
 	for(size_t i = 0; i < input.size(); i++)
@@ -78,6 +84,36 @@ int RequestUtility::toPositiveInt(const std::string& input)
 		if (input[i] < '0' || '9' < input[i])
 			throw std::invalid_argument("400 Bad Request");
 		result = result * 10 + input[i] -'0';
+	}
+	return (result);
+}
+
+std::string RequestUtility::positiveIntToStr(int input)
+{
+	std::string result;
+	while (input > 0)
+	{
+		result.insert(result.begin(), input % 10 + '0');
+		input /= 10;
+	}
+	return (result);
+}
+
+int RequestUtility::hexToDecimal(const std::string &hex_string)
+{
+	int result = 0;
+	for(size_t i = 0; i < hex_string.size(); i++)
+	{
+		int char_to_decimal;
+		if ('0' <= hex_string[i] && hex_string[i] <= '9')
+			char_to_decimal = hex_string[i] - '0';
+		else if ('A' <= hex_string[i] && hex_string[i] <= 'F')
+			char_to_decimal = hex_string[i] - 'A' + 10;
+		else if ('a' <= hex_string[i] && hex_string[i] <= 'f')
+			char_to_decimal = hex_string[i] - 'a' + 10;
+		else
+			return (FAILURE);
+		result = result * 16 + char_to_decimal;
 	}
 	return (result);
 }

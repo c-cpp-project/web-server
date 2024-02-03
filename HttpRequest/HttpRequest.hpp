@@ -21,10 +21,12 @@ class HttpRequest
 		std::string getPath() const;
 		std::string getQueryString() const; // 테스트용
 		std::string getHeader(const std::string& header) const;
-		std::string getRequestBody() const;
+		std::string getBody() const;
 		std::string getParameter(const std::string& param) const;
 
 		void setRequestLine(RequestLine *line);
+		void setMethod(const std::string& method);
+		void setPath(const std::string& path);
 		void setRequestHeaders(HttpHeaders *headers);
 		int addHeader(const std::string& line);
 		void setHeader(const std::string& field, const std::string& value);

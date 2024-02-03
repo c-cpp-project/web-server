@@ -40,7 +40,7 @@ std::string HttpRequest::getParameter(const std::string& param) const
 	return (request_params->getParameter(param));
 }
 
-std::string HttpRequest::getRequestBody() const
+std::string HttpRequest::getBody() const
 {
 	return (request_body);
 }
@@ -48,6 +48,16 @@ std::string HttpRequest::getRequestBody() const
 void HttpRequest::setRequestLine(RequestLine *line)
 {
 	request_line = line;
+}
+
+void HttpRequest::setMethod(const std::string& method)
+{
+	request_line->setMethod(method);
+}
+
+void HttpRequest::setPath(const std::string& path)
+{
+	request_line->setPath(path);
 }
 
 void HttpRequest::setRequestHeaders(HttpHeaders *headers)

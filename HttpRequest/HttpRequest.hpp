@@ -13,6 +13,7 @@ class HttpRequest
 		RequestLine *request_line;
 		HttpHeaders *request_headers;
 		RequestParams *request_params;
+		std::string body;
 
 		void parseRequestLine();
 		void parseRequestHeaders();
@@ -20,12 +21,15 @@ class HttpRequest
 
 	public:
 		HttpRequest(int socket_fd);
+		HttpRequest();
 
 		std::string getMethod() const;
 		std::string getPath() const;
 		std::string getQueryString() const; // 테스트용
 		std::string getHeader(std::string header) const;
 		std::string getParameter(std::string param) const;
+		void setHeader(const std::string& field, const std::string& value);
+		std::string HttpRequest::getRequestBody() const;
 
 		// 테스트용
 		std::map<std::string, std::string>::iterator getHeadersBegin() const;

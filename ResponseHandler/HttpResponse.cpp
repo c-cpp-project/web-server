@@ -9,6 +9,7 @@ HttpResponse::HttpResponse(int sockfd) // default 지정
 	this->send_timeout = "60"; // nginx send_timeout default
 	this->max_size = 64 * K;
 	this->status_code = "200";
+	this->responseBody = "";
 
 	// header에 대한 기본적인 설정 완료하기
 	putHeader("Keep-Alive", "timeout=60, max=999");
@@ -127,19 +128,18 @@ void	HttpResponse::tokenizerFlush(std::string body)
 void    HttpResponse::sendBody(std::string body) // api 요청에 대한 응답
 {
 	ResponseStatusLine();
-	// putHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-	if (body.size() > this->max_size) // transfer-tokenizer
-	{
-		putHeader("Transfer-Encoding", "chunked");
-		std::cout << body.size() << ", " << this->max_size;
-	}
 	processHeader();
-	if (findValue("Transfer-Encoding") == "chunked")
-		tokenizerFlush(body);
-	else
+	HttpResponseBody(body);
+	unsigned long	clientBodySize = 0;
+	int				i;
+
+	i = 0;
+	while (i < this->buffer.size())
 	{
-		HttpResponseBody(body);
-		flush();
+		clientBodySize += this->buffer[i].length();
+		if (clientBodySize > this->max_size)
+			throw "413";
+		i++;
 	}
 }
 
@@ -159,8 +159,6 @@ void    HttpResponse::processHeader()
 	std::string	msg  = "";
 	std::map<std::string, std::string>::iterator it;
 
-	if (findValue("Transfer-Encoding") != "")
-		removeHeader("Content-Length");
 	for (it = this->headers.begin(); it != this->headers.end(); ++it) 
 		msg += (it->first + ": " + it->second + "\r\n");
 	msg += "\r\n";

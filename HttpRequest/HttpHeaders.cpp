@@ -65,3 +65,9 @@ std::map<std::string, std::string>::iterator HttpHeaders::getEnd()
 {
 	return (headers.end());
 }
+
+void HttpHeaders::setHeader(const std::string& field, const std::string& value)
+{
+    std::string upper_field = RequestUtility::toUpperString(field);
+    headers[upper_field] = value;
+}

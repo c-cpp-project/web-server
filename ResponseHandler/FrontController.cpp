@@ -2,17 +2,13 @@
 
 void    FrontController::run()
 {
-    HttpRequest     request(this->socketfd);
-    HttpResponse    response(this->socketfd);
-    // HttpResponse    response(this->socketfd, 64);
     std::string     uri;
     Controller      *controller = 0;
 
-    uri = request.getPath();
     try
     {
-        controller = request.getMethod() == "DELETE" ? \
-        (new DeleteController()) : (ControllerMapping::getController(uri));
+        uri = request.getPath();
+        controller = request.getMethod() == "DELETE" ? (new DeleteController()) : (ControllerMapping::getController(uri));
         if (controller == 0 || (request.getMethod() == "GET"))
         {
             if (HttpConfig::IsRedriectUri(uri) == true) // redirect
@@ -22,7 +18,6 @@ void    FrontController::run()
         }
         else // cgi: GET && POST, FILE POST, DELETE
         {
-            std::cout << uri <<  ", " << request.getParameter("username") << ", " << request.getParameter("password") << "\n"; 
             controller->service(request, response);
             delete controller;
         }
@@ -35,6 +30,13 @@ void    FrontController::run()
         if (controller)
             delete controller;
     }
+    response.flush();
+}
+
+FrontController::FrontController(HttpRequest &request, HttpResponse &response)
+{
+    this->request = request;
+    this->response = response;
 }
 
 FrontController::FrontController(int socketfd)

@@ -13,6 +13,7 @@ class HttpHeaders
 	public:
 		void addHeader(const std::string& line);
 		std::string getHeader(const std::string& field);
+		void setHeader(const std::string& field, const std::string& value);
 
 		// 테스트용
 		std::map<std::string, std::string>::iterator getBegin();

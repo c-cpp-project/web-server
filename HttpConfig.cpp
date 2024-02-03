@@ -6,6 +6,18 @@ std::map<std::string, std::string>  HttpConfig::pathRepo;
 std::map<std::string, std::string>  HttpConfig::redirectRepo;
 std::map<std::string, std::string>  HttpConfig::cgiAddressRepo;
 
+std::string HttpConfig::testBody = 
+"-----------------------------1234567890123456789012345678\r\n\
+Content-Disposition: form-data; name=\"text_field\"\r\n\
+\r\n\
+This is a simple text field.\r\n\
+-----------------------------1234567890123456789012345678\r\n\
+Content-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\r\n\
+Content-Type: text/plain\r\n\
+\r\n\
+Contents of the file go here.\r\n\
+-----------------------------1234567890123456789012345678--\r\n";
+
 std::string HttpConfig::getHttpStatusMsg(std::string key)
 {
 	return (statusCodeRepo[key]);
@@ -90,3 +102,4 @@ HttpConfig::~HttpConfig()
 	Controller *controller = ControllerMapping::getController("/index");
 	delete controller;
 }
+

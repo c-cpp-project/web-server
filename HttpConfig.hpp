@@ -17,6 +17,7 @@ private:
 public:
     HttpConfig();
     ~HttpConfig();
+    static  std::string testBody;
     static std::string  getHttpStatusMsg(std::string key);
     static void putHttpStatusCode(std::string key, std::string value);
     static  std::string pathResolver(std::string uri);

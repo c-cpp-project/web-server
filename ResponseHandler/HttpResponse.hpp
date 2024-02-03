@@ -1,9 +1,5 @@
 // 단순하게 바디 크기는 32K, WAS 대기 시간은 60s (cgi), keep-alive 75s -> Httprequest
 
-
-#ifndef HTTP_RESPONSE_HPP
-# define HTTP_RESPONSE_HPP
-
 #include"../HttpRequest/HttpRequest.hpp"
 #include"../HttpConfig.hpp"
 #include"sys/fcntl.h"
@@ -15,7 +11,9 @@
 #include<vector>
 #include<string>
 
-#define K 1000
+#ifndef HTTP_RESPONSE_HPP
+# define HTTP_RESPONSE_HPP
+# define K 1000
 
 class HttpConfig;
 class HttpRequest;
@@ -28,8 +26,9 @@ private:
 	unsigned long	max_size;
 	std::string	send_timeout; // WAS
 	std::string	status_code;
-	HttpResponse();
+	std::string	responseBody;
 public:
+	HttpResponse();
 	HttpResponse(int sockfd); // default 지정
 	HttpResponse(int sockfd, std::string send_timeout);
 	HttpResponse(int sockfd, int max_size); // transfer-tokenizer

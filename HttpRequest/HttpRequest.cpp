@@ -9,6 +9,9 @@ HttpRequest::HttpRequest(int socket_fd)
 	parseRequestParams(); // 요청 본문 파싱 (+ URI에 뒤에 붙는 쿼리스트링 파싱)
 }
 
+HttpRequest::HttpRequest()
+{}
+
 void HttpRequest::parseRequestLine()
 {
 	std::string line;
@@ -89,6 +92,11 @@ std::string HttpRequest::getParameter(std::string param) const
 	return (request_params->getParameter(param));
 }
 
+void HttpRequest::setHeader(const std::string& field, const std::string& value)
+{
+    request_headers->setHeader(field, value);
+}
+
 // 테스트용
 std::map<std::string, std::string>::iterator HttpRequest::getHeadersBegin() const
 {
@@ -105,4 +113,9 @@ std::map<std::string, std::string>::iterator HttpRequest::getParamsBegin() const
 std::map<std::string, std::string>::iterator HttpRequest::getParamsEnd() const
 {
 	return (request_params->getEnd());
+}
+
+std::string HttpRequest::getRequestBody() const
+{
+    return (this->body);
 }

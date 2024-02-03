@@ -44,12 +44,7 @@ int main()
 	}
 
 	std::cout << "Client connected!\n";
-
-	HttpRequestHandler request_handler;
-	while (1)
-	{
-		request_handler.run(client_socket);
-	}
+	HttpRequestHandler::handle(client_socket);
 
 	close(server_socket);
 	close(client_socket);

@@ -1,130 +1,130 @@
 #include "HttpRequestHandler.hpp"
-#include "SocketCloseException.hpp"
+#include "HttpRequestFactory.hpp"
 #include <fcntl.h>
-#include <string>
 #include <sys/socket.h>
+
+// #include "../ResponseHandler/HttpResponse.hpp"
+// #include "../ResponseHandler/FrontController.hpp"
+
+std::map<int, std::string> HttpRequestHandler::buffers; // 요청을 읽어오는 소켓, 버퍼
+std::map<int, HttpRequest*> HttpRequestHandler::chunkeds; // chunked 수신 중인 소켓, request 객체
+
+// 1. 소켓으로부터 이벤트가 감지되고, HttpRequestHandler.handle()이 호출된다.
+// 2. 해당 소켓으로부터 (지정된 버퍼 크기만큼) 데이터를 (소켓과 매핑된) 버퍼에 읽어온다.
+// 3. (소켓과 매핑된) 버퍼에 데이터가 남아있는 동안, 아래의 과정을 반복한다.
+//     1. HttpRequestFactory의 create 함수를 호출하여 request 객체를 만든다.
+//     2. request 객체가 NULL이라면 (버퍼에 있는 내용이 하나의 완전한 요청이 아님 or 연결이 끊김) 반복을 종료하고 handle()을 빠져나간다.
+//     3. request 객체가 NULL이 아니라면 frontController.run()을 호출한다.
+
+// TODO : Content-Length가 없는 (본문이 있는) POST 요청의 경우, 처음에 411 응답 후 헤더까지만 지우고 바디가 버퍼에 남아버려서 계속 411 오류를 내보냄
+// 그 다음 요청이 들어올 때까지 계속 411 오류가 날텐데 어떡하지
+
 #include <unistd.h>
 
-#define BUF_SIZE 1024
-
-// TODO : chunked 수신 시작 요청에서 content-length를 0으로 세팅해놓기
-// TODO : 본문의 길이가 너무 긴 것과 아직 소켓에 데이터가 안 들어온 상황을 구분해야 한다.
-
-// run 함수는 무조건 완전하고 정상적인 request 객체 하나만 만들어서 뱉는다.
-HttpRequest *HttpRequestHandler::run(int socket_fd)
+void HttpRequestHandler::handle(int socket_fd)
 {
 	try
 	{
-		while (true)
+		// int read_status = readRequest(socket_fd);
+		// if (read_status == FAILURE) // 클라이언트와 연결이 끊긴 경우
+			// return;
+		
+		// buffers[socket_fd] = "GET / HTTP/1.1\r\nhost: 1234\r\n\r\n";
+		buffers[socket_fd] = "POST /example-endpoint HTTP/1.1\r\nHost: example.com\r\nContent-Length: 388\r\nContent-Type: multipart/form-data; boundary=---------------------------1234567890123456789012345678\r\n\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"text_field\"\r\n\r\nThis is a simple text field.\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\r\nContent-Type: text/plain\r\n\r\nContents of the file go here.\r\n-----------------------------1234567890123456789012345678--";
+		// buffers[socket_fd] = "POST /example-endpoint HTTP/1.1\r\nHost: example.com\r\nContent-Type: multipart/form-data; boundary=---------------------------1234567890123456789012345678\r\n\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"text_field\"\r\n\r\nThis is a simple text field.\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\r\nContent-Type: text/plain\r\n\r\nContents of the file go here.\r\n-----------------------------1234567890123456789012345678--";
+		
+		while (buffers[socket_fd] != "")
 		{
-			HttpRequest *request = parseRequestInBuffer(socket_fd);
-			if (request != NULL)
-				return (request);
-			if (buffers[socket_fd].size() == 8000) // TODO : nginx 설정에 따라 최대 헤더 + 바디 크기로 설정하기
-				throw SocketCloseException400(); // 제한된 크기를 초과하는 요청 -> 연결 끊기
-			if (readRequest(socket_fd) == FAILURE) // 소켓에 읽을 데이터가 없음
-				return (NULL);
+			try
+			{
+				HttpRequest *request = HttpRequestFactory::create(socket_fd);
+				if (request == NULL && buffers[socket_fd].size() == 8000) // TODO : nginx 설정에 따라 최대 헤더 + 바디 크기로 설정하기
+					throw SocketCloseException400(); // 제한된 크기를 초과하는 요청
+				if (request == NULL)
+					return; // 버퍼에 완전한 요청이 없거나 연결이 끊김
+				
+				// TODO : chunked 요청과 chunked 끝 요청을 구분할 수 있는 다른 방법이 없을까?
+				// chunked 요청이지만, chunkeds 맵에 포함된 경우 -> 아직 chunked 요청 전체가 끝나지 않았음
+				if (request->getHeader("Transfer-Encoding") != "chunked" && chunkeds.find(socket_fd) != chunkeds.end())
+					continue;
+
+				std::cout << "----- Request line -----\n";
+				std::cout << "method: " << request->getMethod() << '\n';
+				std::cout << "path: " << request->getPath() << '\n';
+				std::cout << "query string: " << request->getQueryString() << "\n\n";
+			
+				std::cout << "----- Request Header ------\n";
+				std::map<std::string, std::string>::iterator it;
+				for(it = request->getHeadersBegin(); it != request->getHeadersEnd(); it++)
+					std::cout << it->first << ": " << it->second << "\n";
+				std::cout << '\n';
+
+				std::cout << "----- Request Body -----\n";
+				std::cout << request->getBody() << "\n\n";
+
+				std::cout << "----- Request Params -----\n";
+				for(it = request->getParamsBegin(); it != request->getParamsEnd(); it++)
+					std::cout << it->first << ": " << it->second << "\n";
+				std::cout << '\n';
+				
+				// HttpResponse response(socket_fd);
+				// FrontController front_controller(*request, response);
+				// front_controller.run();
+
+				delete request;
+			}
+			catch (const char *e)
+			{
+				std::cout << "Error: " << e << '\n';
+			}
 		}
 	}
 	catch (const std::exception& e)
 	{
-		removeInBuffers(socket_fd);
-		removeInChunkeds(socket_fd);
-		throw;
-	}
-}
+		removeBuffer(socket_fd);
+		removeChunkedRequest(socket_fd);
 
-HttpRequest *HttpRequestHandler::parseRequestInBuffer(int socket_fd)
-{
-	HttpRequest *request = NULL;
-	try
-	{
-		request = getRequestInChunkeds(socket_fd);
-		if (request != NULL) // chunked 수신 중인 소켓인 경우
-			return (parseChunkedRequest(socket_fd, request));
-		return (HttpRequestParser::parse(buffers[socket_fd], request));
-	}
-	catch (int status)
-	{
-		delete request;
-		switch(status)
-		{
-			case INCOMPLETE_REQUEST: // 요청을 더 읽어오자
-				return (NULL);
-			case START_CHUNKED_REQUEST: // 청크 맵에 요청을 저장하고, 더 읽어오자
-				chunkeds[socket_fd] = request;
-				buffers[socket_fd].erase(0,  buffers[socket_fd].find("\r\n\r\n") + 3);
-				return (NULL);
-			case BAD_REQUEST: // 현재 요청을 거부하자
-				// TODO : 지금은 무조건 연속된 CRLF까지 제거함. 본문이 있는 경우엔 본문까지 제거해야 함!
-				buffers[socket_fd].erase(0, buffers[socket_fd].find("\r\n\r\n") + 3);
-				throw RequestUtility::positiveIntToStr(status);
-		}
-	}
+		std::cout << "socket 닫기: " << e.what();
 
-	return (request);
+		// HttpRequest request;
+		// HttpResponse response(socket_fd);
+		// response.setStatusCode(e.what());
+		// response.forward(request, response);
+		// response.flush();
+	}
 }
 
 int HttpRequestHandler::readRequest(int socket_fd)
 {
 	if (fcntl(socket_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1) // 소켓을 논블로킹 모드로 설정
 		throw SocketCloseException500();
-	
-	int remaining_size = 8000 - buffers[socket_fd].size(); // 버퍼 여유 크기 / TODO : nginx 설정에 따라 최대 헤더 + 바디 크기로 설정하기
-	char *temp_buffer = new char[remaining_size];
+
+	int remaining_size = 8000 - buffers[socket_fd].size(); // TODO : nginx 설정에 따라 최대 헤더 + 바디 크기로 설정하기
+	char *temp_buffer = new char[remaining_size]; // 여유 크기만큼 버퍼 메모리 할당
+
 	int read_byte = recv(socket_fd, temp_buffer, remaining_size, 0);
-	if (read_byte == -1) // 소켓에 읽을 데이터가 없음
-		return (FAILURE);
-	if (read_byte == 0) // 클라이언트와 연결이 끊김 / TODO : Kqueue 쪽에 (더이상 이 fd를 감시하지 말라고) 알릴 필요는 없을까?
-		throw SocketCloseException400(); // TODO : 오류 응답을 안 보내는 예외 클래스도 필요하겠네
+	if (read_byte <= 0)
+	{
+		delete[] temp_buffer;
+		if (read_byte == -1)
+			throw SocketCloseException500(); // recv 시스템 콜 오류
+		return (FAILURE); // 클라이언트와 연결 끊김 // TODO : 클라이언트 측에서 연결을 끊은 경우, 소켓을 닫는 건 kqueue 쪽에서 해주려나?
+	}
+
 	buffers[socket_fd] += std::string(temp_buffer, read_byte);
+	delete[] temp_buffer;
+
+	return (SUCCESS);
 }
 
-HttpRequest *HttpRequestHandler::getRequestInChunkeds(int socket_fd)
-{
-	std::map<int, HttpRequest*>::iterator it = chunkeds.find(socket_fd);
-	if (it == chunkeds.end())
-		return (NULL);
-	return (it->second);
-}
-
-HttpRequest *HttpRequestHandler::parseChunkedRequest(int socket_fd, HttpRequest *request)
-{
-	size_t nl_pos = buffers[socket_fd].find("\r\n");
-	if (nl_pos == std::string::npos)
-		throw INCOMPLETE_REQUEST; // 버퍼에 CRLF가 없는 경우 -> 불완전한 요청
-	
-	int chunk_size = RequestUtility::hexToDecimal(buffers[socket_fd].substr(0, nl_pos)); // 청크 크기 파싱
-	if (chunk_size == FAILURE || chunk_size > 1000) // TODO : nginx 설정에 따라 최대 바디 크기를 변경하기
-		throw SocketCloseException400(); // 청크 크기를 식별할 수 없거나, 제한된 크기를 초과하는 경우 -> 연결 끊기
-
-	// content-length 헤더 값 갱신
-	int content_length = RequestUtility::strToPositiveInt(request->getHeader("Content-Length"));
-	request->setHeader("Content-Length", RequestUtility::positiveIntToStr(content_length + chunk_size));
-
-	if (buffers[socket_fd].size() < nl_pos + chunk_size + 4)
-		throw INCOMPLETE_REQUEST; // 청크 크기 만큼의 청크 데이터가 없는 경우 -> 불완전한 요청
-
-	if (buffers[socket_fd].substr(nl_pos + 2 + chunk_size, 2) == "\r\n")
-		throw SocketCloseException400(); // 청크 데이터 직후 CRLF가 없는 경우 -> 연결 끊기
-
-	if (chunk_size == 0) // 마지막 청크 요청인 경우 -> request 객체 반환
-		return (request);
-
-	// 청크 데이터를 request body에 추가
-	std::string chunk_data = buffers[socket_fd].substr(nl_pos + 2, chunk_size);
-	request->addRequestBody(chunk_data);
-	throw INCOMPLETE_REQUEST;
-}
-
-void HttpRequestHandler::removeInBuffers(int socket_fd)
+void HttpRequestHandler::removeBuffer(int socket_fd)
 {
 	std::map<int, std::string>::iterator it = buffers.find(socket_fd);
 	if (it != buffers.end())
 		buffers.erase(it);
 }
 
-void HttpRequestHandler::removeInChunkeds(int socket_fd)
+void HttpRequestHandler::removeChunkedRequest(int socket_fd)
 {
 	std::map<int, HttpRequest*>::iterator it = chunkeds.find(socket_fd);
 	if (it != chunkeds.end())
@@ -132,4 +132,27 @@ void HttpRequestHandler::removeInChunkeds(int socket_fd)
 		delete it->second;
 		chunkeds.erase(it);
 	}
+}
+
+HttpRequest *HttpRequestHandler::getChunkedRequest(int socket_fd)
+{
+	std::map<int, HttpRequest*>::iterator it = chunkeds.find(socket_fd);
+	if (it == chunkeds.end())
+		return (NULL);
+	return (it->second);
+}
+
+const std::string& HttpRequestHandler::getBuffer(int socket_fd)
+{
+	return (buffers[socket_fd]);
+}
+
+void HttpRequestHandler::addChunkedRequest(int socket_fd, HttpRequest *request)
+{
+	chunkeds[socket_fd] = request;
+}
+
+void HttpRequestHandler::removePartOfBuffer(int socket_fd, int start, int count)
+{
+	buffers[socket_fd].erase(start, count);
 }

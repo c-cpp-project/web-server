@@ -1,23 +1,25 @@
 #ifndef HTTP_REQUEST_HANDLER_HPP
 # define HTTP_REQUEST_HANDLER_HPP
 
-# include "HttpRequestParser.hpp"
+# include "HttpRequest.hpp"
 
 class HttpRequestHandler
 {
 	private:
-		std::map<int, std::string> buffers; // 요청을 읽어오는 소켓, 버퍼
-		std::map<int, HttpRequest*> chunkeds; // chunked 수신 중인 소켓, request 객체
+		static std::map<int, std::string> buffers; // 요청을 읽어오는 소켓, 버퍼
+		static std::map<int, HttpRequest*> chunkeds; // chunked 수신 중인 소켓, request 객체
 
-		HttpRequest *parseRequestInBuffer(int socket_fd);
-		int readRequest(int socket_fd);
-		HttpRequest *getRequestInChunkeds(int socket_fd);
-		HttpRequest *parseChunkedRequest(int socket_fd, HttpRequest *request);
-		void removeInBuffers(int socket_fd);
-		void removeInChunkeds(int socket_fd);
+		static int readRequest(int socket_fd);
+		static void removeBuffer(int socket_fd);
 
 	public:
-		HttpRequest *run(int socket_fd);
+		static void handle(int socket_fd);
+
+		static void removeChunkedRequest(int socket_fd);
+		static HttpRequest *getChunkedRequest(int socket_fd);
+		static const std::string& getBuffer(int socket_fd);
+		static void addChunkedRequest(int socket_fd, HttpRequest *request);
+		static void removePartOfBuffer(int socket_fd, int start, int count);
 };
 
 #endif

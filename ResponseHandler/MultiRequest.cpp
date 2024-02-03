@@ -40,9 +40,10 @@ HttpRequest			*MultiRequest::makeRequest(HttpRequest request)
 	i = 0;
 	while (i < this->count)
 	{
-		dump->setHeader("METHOD", request.getMethod());
-		
-
+		// POST
+		// /example-endpoint
+		dump[i].setHeader("Content-Type", "");
+		dump[i].setHeader("Content-Disposition", "");
 	}
 	return dump;
 }

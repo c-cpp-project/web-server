@@ -122,26 +122,8 @@ void	MyController::doPost(HttpRequest &request, HttpResponse &response)
 {
 	std::string			data;
 	std::string			cgiFile;
-	HttpRequestReader	reader(response.getSockfd());
+	
 	std::string			tmp;
 
-	// cgiFile = HttpConfig::getCgiAddress(request.getMethod());
-	cgiFile = "cgi-bin/DoUpload.py";
-	tmp = "";
-	while (request.getHeader("Transfer-Encoding") == "chunked"  && tmp != "0")
-	{
-		tmp = reader.getLine(); // 임시 파일 생성
-		doExecute(request, tmp, cgiFile.c_str());
-		if (tmp == "0") // -> 임시 파일 모두 삭제 후 하나의 파일로 merged
-			reader.getLine(); // \r\n remove
-	}
-	if (request.getHeader("Transfer-Encoding") != "chunked")
-	{
-		doExecute(request, request.getQueryString(), cgiFile.c_str());
-		doExecute(request, "0", cgiFile.c_str());
-	}
-	response.ResponseStatusLine();
-	response.putHeader("Server", HttpConfig::getServerName());
-	response.putHeader("Date", getCurrentDate());
-	response.sendBody("");
+
 }

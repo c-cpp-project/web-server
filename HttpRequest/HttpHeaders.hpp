@@ -11,7 +11,7 @@ class HttpHeaders
 		static bool strongDuplicationBan(const std::string& field);
 
 	public:
-		void addHeader(const std::string& line);
+		int addHeader(const std::string& line);
 		std::string getHeader(const std::string& field);
 		void setHeader(const std::string& field, const std::string& value);
 

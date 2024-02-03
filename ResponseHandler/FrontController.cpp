@@ -33,6 +33,14 @@ void    FrontController::run()
     response.flush();
 }
 
+FrontController::FrontController(int kqueuefd, HttpRequest &request, HttpResponse &response)
+{
+    this->kqueuefd = kqueuefd;
+    this->request = request;
+    this->response = response;
+}
+
+
 FrontController::FrontController(HttpRequest &request, HttpResponse &response)
 {
     this->request = request;

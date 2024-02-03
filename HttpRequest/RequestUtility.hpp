@@ -6,7 +6,7 @@
 # include <map>
 
 # define SUCCESS 0
-# define FAILURE 1
+# define FAILURE -1
 
 class RequestUtility
 {

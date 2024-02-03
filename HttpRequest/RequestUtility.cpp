@@ -82,7 +82,7 @@ int RequestUtility::strToPositiveInt(const std::string& input)
 	for(size_t i = 0; i < input.size(); i++)
 	{
 		if (input[i] < '0' || '9' < input[i])
-			throw std::invalid_argument("400 Bad Request");
+			return (-1);
 		result = result * 10 + input[i] -'0';
 	}
 	return (result);

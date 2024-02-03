@@ -35,13 +35,14 @@ std::string HttpHeaders::getHeader(const std::string& field)
 {
 	std::string upper_field = RequestUtility::toUpperString(field);
 	if (RequestUtility::isExist(headers, upper_field))
-		return (headers[field]);
+		return (headers[upper_field]);
 	return ("");
 }
 
 void HttpHeaders::setHeader(const std::string& field, const std::string& value)
 {
-	headers[field] = value;
+	std::string upper_field = RequestUtility::toUpperString(field);
+	headers[upper_field] = value;
 }
 
 // 중복이 들어와도 첫 값을 유지하는 헤더들

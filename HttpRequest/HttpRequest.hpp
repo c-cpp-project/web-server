@@ -13,11 +13,10 @@ class HttpRequest
 		std::string request_body; // 요청 본문
 		RequestParams *request_params; // 요청 URI에 붙는 쿼리스트링 & 본문 쿼리스트링을 파싱하여 저장
 
-		int parseRequestLine(const std::string& buffer);
-		int parseRequestHeaders(const std::string& buffer, int start);
-		void parseRequestBody(const std::string& buffer, int start);
-
 	public:
+		HttpRequest();
+		~HttpRequest();
+
 		std::string getMethod() const;
 		std::string getPath() const;
 		std::string getQueryString() const; // 테스트용

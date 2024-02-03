@@ -1,6 +1,20 @@
 #include "HttpRequest.hpp"
 #include "RequestUtility.hpp"
 
+HttpRequest::HttpRequest()
+{
+	request_line = NULL;
+	request_headers = NULL;
+	request_params = NULL;
+}
+
+HttpRequest::~HttpRequest()
+{
+	delete request_line;
+	delete request_headers;
+	delete request_params;
+}
+
 std::string HttpRequest::getMethod() const
 {
 	return (request_line->getMethod());
@@ -68,11 +82,8 @@ void HttpRequest::setRequestParams(RequestParams *params)
 
 int HttpRequest::addRequestParamsToQueryString(const std::string& query_string)
 {
-	if (request_params->addQuearyString(query_string) == FAILURE)
-		return (FAILURE);
-	return (SUCCESS);
+	return (request_params->addQuearyString(query_string));
 }
-
 
 // 테스트용
 std::map<std::string, std::string>::iterator HttpRequest::getHeadersBegin() const

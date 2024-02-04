@@ -25,8 +25,7 @@ public:
 	virtual void    doGet(HttpRequest &request, HttpResponse &response);
 	virtual void	doPost(HttpRequest &request, HttpResponse &response);
 	virtual	void	doDelete(HttpRequest &request, HttpResponse &response);
-	virtual std::string	doExecute(HttpRequest &request, std::string data, const char *cgi_python) = 0;
-	std::string getCurrentDate();
+	void	   		response200(std::string body, HttpResponse &response);
 	virtual ~Controller();
 	Controller();
 };

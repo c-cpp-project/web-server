@@ -12,11 +12,10 @@ private:
 public:
     void    doGet(HttpRequest &request, HttpResponse &response);
 	void	doPost(HttpRequest &request, HttpResponse &response);
-    std::string	doExecute(HttpRequest &request, std::string data, const char *cgi_python);
     MyController();
     ~MyController();
 
-    std::string    doExecuteLarge(std::string &data, const char *cgi_python);
-    std::string    doExecuteSmall(std::string &data, const char *cgi_python);
+    std::string     doExecuteWrite(std::string &data,  std::string filename, const char *cgi_python);
+    std::string     doExecuteRead(std::string &data, const char *cgi_python);
 };
 #endif

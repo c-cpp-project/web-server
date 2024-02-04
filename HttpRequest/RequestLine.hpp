@@ -20,6 +20,9 @@ class RequestLine
 		std::string getMethod() const;
 		std::string getPath() const;
 		std::string getQueryString() const;
+
+		void setMethod(const std::string& _method);
+		void setPath(const std::string& _path);
 };
 
 #endif

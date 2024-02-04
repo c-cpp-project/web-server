@@ -5,7 +5,7 @@ std::map<std::string, std::string>  HttpConfig::statusCodeRepo;
 std::map<std::string, std::string>  HttpConfig::pathRepo;
 std::map<std::string, std::string>  HttpConfig::redirectRepo;
 std::map<std::string, std::string>  HttpConfig::cgiAddressRepo;
-
+static  std::map<int, int>  fdMap;
 std::string HttpConfig::testBody = 
 "-----------------------------1234567890123456789012345678\r\n\
 Content-Disposition: form-data; name=\"text_field\"\r\n\
@@ -103,3 +103,17 @@ HttpConfig::~HttpConfig()
 	delete controller;
 }
 
+
+std::string HttpConfig::getCurrentDate() {
+	// 현재 시각 얻기
+	std::time_t currentTime_t;
+    std::time(&currentTime_t);
+
+    // 시각을 현지 시간대로 변환
+    std::tm* localTime = std::localtime(&currentTime_t);
+
+	// 현재 날짜 및 시간 문자열 생성
+	std::ostringstream oss;
+	oss << std::put_time(localTime, "%a, %d %b %Y %H:%M:%S GMT");
+	return oss.str();
+}

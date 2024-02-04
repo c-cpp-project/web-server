@@ -2,23 +2,31 @@
 # define MULTI_REQUEST_HPP
 
 #include<string>
+#include<vector>
+#include <sstream>
 #include"../HttpRequest/HttpRequest.hpp"
 #include"../HttpConfig.hpp"
+# define NDEBUG 
+#include <assert.h>
+
+# define INCOMPLETE_REQUEST 1 // 요청을 더 읽어오자
+# define START_CHUNKED_REQUEST 2 // 청크 전송을 시작하는 요청
+# define BAD_REQUEST 400 // 400 응답으로 현재 요청을 거부하자
+# define LENGTH_REQUIRED 411 // 411 응답으로 현재 요청을 거부하자
 
 class HttpRequest;
 class MultiRequest
 {
 private:
 	std::string boundary;
-	int			count;
+	HttpRequest	request;
+	bool		isMultipart;
 public:
-	static	bool	isMultipart(std::string contentType); // Content-Type: multipart/form-data; 확인
-	HttpRequest			*makeRequest(HttpRequest request); // CONTENT-TYPE 변경 및 CONTENT-LENGTH 추가 -> 생성 반환
-	
-	int			 	getRequestCount();
-	MultiRequest(HttpRequest request);
-	MultiRequest(std::string body);
+	std::vector<HttpRequest>	*makeRequest(); // CONTENT-TYPE 변경 및 CONTENT-LENGTH 추가 -> 생성 반환
+	void			fillEachRequest(HttpRequest &request, std::string body);
 	MultiRequest();
+	MultiRequest(std::string body);
+	MultiRequest(HttpRequest request);
 	~MultiRequest();
 };
 

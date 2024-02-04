@@ -60,3 +60,13 @@ std::string RequestLine::getQueryString() const
 {
 	return (query_string);
 }
+
+void RequestLine::setMethod(const std::string& _method)
+{
+	method = _method;
+}
+
+void RequestLine::setPath(const std::string& _path)
+{
+	path = _path;
+}

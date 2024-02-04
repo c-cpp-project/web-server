@@ -11,7 +11,7 @@ form = cgi.FieldStorage()
 print ("<html>")
 print ('<head>')
 print ("<link rel='icon' href='data:,'>")
-print ("<title>Hello - Second CGI Program</title>")
+print ("<title>Hello - GET CGI Program</title>")
 print ('</head>')
 print ('<body>')
 

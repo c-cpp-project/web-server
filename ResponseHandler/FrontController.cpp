@@ -2,49 +2,38 @@
 
 void    FrontController::run()
 {
-    std::string     uri;
-    Controller      *controller = 0;
+    std::vector<HttpRequest> 	*request;
+    MultiRequest                multiRequest(this->tmp);
 
-    try
+    request = multiRequest.makeRequest();
+    for (int i = 0; i < request->size(); i++)
     {
-        uri = request.getPath();
-        controller = request.getMethod() == "DELETE" ? (new DeleteController()) : (ControllerMapping::getController(uri));
-        if (controller == 0 || (request.getMethod() == "GET"))
+        HttpResponse    response(this->socketfd);
+        Controller      *controller;
+
+        controller = request->at(i).getMethod() == "DELETE" ? (new DeleteController()) : (ControllerMapping::getController(request->at(i).getPath()));
+        if (controller == 0 || (request->at(i).getMethod() == "GET"))
         {
-            if (HttpConfig::IsRedriectUri(uri) == true) // redirect
-                response.redirect(request, response);
+            if (HttpConfig::IsRedriectUri(request->at(i).getPath()) == true) // redirect
+                response.redirect(request->at(i), response);
             else
-                response.forward(request, response); // get
+                response.forward(request->at(i), response); // get
         }
         else // cgi: GET && POST, FILE POST, DELETE
         {
-            controller->service(request, response);
+            controller->service(request->at(i), response);
             delete controller;
         }
+        response.flush();
     }
-    catch(char const* e)
-    {
-        std::cerr << e << '\n';
-        response.setStatusCode(e);
-        response.forward(request, response);
-        if (controller)
-            delete controller;
-    }
-    response.flush();
+    delete request;
 }
 
-FrontController::FrontController(int kqueuefd, HttpRequest &request, HttpResponse &response)
+FrontController::FrontController(int kqueuefd, int socketfd, HttpRequest &request)
 {
     this->kqueuefd = kqueuefd;
-    this->request = request;
-    this->response = response;
-}
-
-
-FrontController::FrontController(HttpRequest &request, HttpResponse &response)
-{
-    this->request = request;
-    this->response = response;
+    this->socketfd = socketfd;
+    this->tmp = request;
 }
 
 FrontController::FrontController(int socketfd)

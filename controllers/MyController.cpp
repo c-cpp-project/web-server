@@ -6,32 +6,20 @@ MyController::MyController() : Controller()
 MyController::~MyController()
 {}
 
-std::string	MyController::doExecute(HttpRequest &request, std::string data, const char *cgi_python)
-{
-	if (data == "")
-		return ("");
-	if (request.getMethod() == "POST" && request.getHeader("Content-Type") == "multipart/form-data")
-		return (doExecuteLarge(data, cgi_python));
-	return (doExecuteSmall(data, cgi_python));
-}
-
 // post
-std::string    MyController::doExecuteLarge(std::string &data, const char *cgi_python)
+std::string    MyController::doExecuteWrite(std::string &data, std::string filename, const char *cgi_python)
 {
-	int		ret;
-	char	buffer[64 * K];
-	int     pipefd[2];
-	const char    *path[4];
+	int			ret;
+	char		buffer[64 * K];
+	int     	pipefd[2];
+	const char	*path[5];
 	std::string	saved_dir;
-
-	// saved_dir : cgi_pthyon의 결과값을 저장하는 경로
-	
-	// write: 데이터를 갱신하자.
 
 	path[0] = "/usr/bin/python3";
 	path[1] = cgi_python;
 	path[2] = saved_dir.c_str();
-	path[3] = NULL;
+	path[3] = filename.c_str();
+	path[4] = NULL;
 	pipe(pipefd);
 	ret = fork();
 	if (ret == 0)
@@ -60,7 +48,7 @@ std::string    MyController::doExecuteLarge(std::string &data, const char *cgi_p
 }
 
 // get
-std::string    MyController::doExecuteSmall(std::string &data, const char *cgi_python)
+std::string    MyController::doExecuteRead(std::string &data, const char *cgi_python)
 {
 	const char    *path[4];
 	char	buffer[64 * K];
@@ -96,9 +84,7 @@ std::string    MyController::doExecuteSmall(std::string &data, const char *cgi_p
 void    MyController::doGet(HttpRequest &request, HttpResponse &response)
 {
 	std::string	body;
-	std::string	bodyLength;
 	std::string	cgiFile;
-	std::stringstream ss;
 	std::string	tmp[2];
 	std::string	data;
 
@@ -108,22 +94,25 @@ void    MyController::doGet(HttpRequest &request, HttpResponse &response)
 	data = tmp[0] + tmp[1];
 	if (tmp[0] != "" && tmp[1] != "")
 		data = tmp[0] + "&" + tmp[1];
-	body = doExecute(request, data, cgiFile.c_str());
-	response.ResponseStatusLine();
-	response.putHeader("Content-Type", "text/html;charset=utf-8");
-	ss << body.length();
-	bodyLength = ss.str();
-	response.putHeader("Content-Length", bodyLength);
-	response.sendBody(body);
+	body = doExecuteRead(data, cgiFile.c_str());
+	if (body == "500")
+		throw "500";
+	response200(body, response);
 }
 
 // file post
 void	MyController::doPost(HttpRequest &request, HttpResponse &response)
 {
-	std::string			data;
-	std::string			cgiFile;
-	
-	std::string			tmp;
+	std::string	data;
+	std::string	cgiFile;
+	std::string	contentType;
+	std::string	body;
 
-
+	cgiFile = "cgi-bin/DoPost.py";
+	data = request.getBody();
+	contentType = request.getHeader("content-type");
+	body = doExecuteWrite(data, contentType, cgiFile.c_str());
+	if (body == "500")
+		throw "500";
+	response200(body, response);
 }

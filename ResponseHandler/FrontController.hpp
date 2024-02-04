@@ -7,6 +7,7 @@
 #include"HttpResponse.hpp"
 #include<string>
 #include<sys/fcntl.h>
+#include"MultiRequest.hpp"
 
 #ifndef FRONT_CONTROLLER_HPP
 # define FRONT_CONTROLLER_HPP
@@ -16,17 +17,15 @@ class HttpResponse;
 class FrontController
 {
 private:
-    int socketfd;
-    int kqueuefd;
-    HttpRequest request;
-    HttpResponse response;
+	int socketfd;
+	int kqueuefd;
+	HttpRequest tmp;
 public:
-    FrontController(int socketfd);
-    FrontController(HttpRequest &request, HttpResponse &response);
-    FrontController(int kqueuefd, HttpRequest &request, HttpResponse &response);
-    FrontController();
-    ~FrontController();
+	FrontController(int socketfd);
+	FrontController(int kqueuefd, int socketfd, HttpRequest &request);
+	FrontController();
+	~FrontController();
 
-    void    run();
+	void    run();
 };
 #endif

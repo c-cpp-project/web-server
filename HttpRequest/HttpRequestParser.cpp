@@ -84,7 +84,7 @@ void HttpRequestParser::parseRequestParams(HttpRequest *request)
 		throw BAD_REQUEST;
 	if (request->getHeader("Content-Type") == "application/x-www-form-urlencoded")
 	{
-		if (request->addRequestParamsToQueryString(request->getRequestBody()) == FAILURE)
+		if (request->addRequestParamsToQueryString(request->getBody()) == FAILURE)
 			throw BAD_REQUEST;
 	}
 }

@@ -55,12 +55,7 @@ void	DeleteController::doDelete(HttpRequest &request, HttpResponse &response)
 		throw "404";
 	cgiFile = "cgi-bin/DoDelete.py";
 	body = doExecute(request, fileName, cgiFile.c_str());
-	response.setStatusCode("200"); // if the action has been enacted and no further information is to be supplied.
-	response.putHeader("Server", HttpConfig::getServerName());
-	response.putHeader("Date", getCurrentDate());
-	response.putHeader("Content-Type", "text/html;charset=utf-8");
-	ss << body.length();
-	bodyLength = ss.str();
-	response.putHeader("Content-Length", bodyLength);
-	response.sendBody(body);
+	if (body == "500")
+		throw "500";
+	response200(body, response);
 }

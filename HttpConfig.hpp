@@ -14,6 +14,7 @@ private:
     static  std::map<std::string, std::string>  redirectRepo;
     static  std::map<std::string, std::string>  cgiAddressRepo;
     static  std::string serverName;
+    static  std::map<int, int>  fdMap;
 public:
     HttpConfig();
     ~HttpConfig();
@@ -25,6 +26,7 @@ public:
     static  std::string getRedirectPath(std::string srcUri);
     static  std::string getServerName();
     static  std::string getCgiAddress(std::string cgiAddress);
+    static  std::string getCurrentDate();
 };
 
 #endif

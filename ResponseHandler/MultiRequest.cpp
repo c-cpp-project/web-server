@@ -1,56 +1,74 @@
 #include"MultiRequest.hpp"
 
-bool    MultiRequest::isMultipart(std::string contentType)
-{
-	std::string multipart;
-
-	multipart = "MULTIPART/FORM-DATA;";
-	if (multipart.compare(0, multipart.length(), contentType) == 0)
-		return (true);
-	return (false);
-}
-
 MultiRequest::MultiRequest(HttpRequest request)
 {
 	std::string tmp;
 	size_t		i;
-	std::string	body;
+	std::string multipart;
 
-	tmp = request.getHeader("CONTENT-TYPE");
-	i = tmp.find("boundary=");
-	this->boundary = tmp.substr(i);
-	this->count = 0;
-	i = 0;
-	// body = request.getRequestBody();
-	body = HttpConfig::testBody;
-	while (std::string::npos != body.find(this->boundary, i))
+	multipart = "multipart/form-data;";
+	if (multipart.compare(0, multipart.length(), request.getHeader("Content-Type")) != 0)
+		this->isMultipart = false;
+	else
 	{
-		i += this->boundary.length();
-		this->count+=1;
+		tmp = request.getHeader("Content-Type");
+		this->boundary = tmp.substr(tmp.find("boundary="));
 	}
-	this->count-=1;
+	this->request = request;
 }
 
-HttpRequest			*MultiRequest::makeRequest(HttpRequest request)
+// cgi에서 contentDisposition를 분해해서 filename을 뽑자.
+std::vector<HttpRequest>	*MultiRequest::makeRequest()
 {
-	HttpRequest	*dump;
-	int			i;
+	size_t			next;
+	size_t			cur;
+	std::vector<HttpRequest>* requestVec;
+	std::string		body;
 
-	dump = new HttpRequest[this->count]();
-	i = 0;
-	while (i < this->count)
+	requestVec = new std::vector<HttpRequest>();
+	if (this->isMultipart == false)
+		requestVec->push_back(this->request);
+	else
 	{
-		// POST
-		// /example-endpoint
-		dump[i].setHeader("Content-Type", "");
-		dump[i].setHeader("Content-Disposition", "");
+		body = request.getBody();
+		cur = this->boundary.length() + std::string("\r\n").length(); // 이상
+		next = body.find(this->boundary, cur); // 미만
+		while (next != std::string::npos)
+		{
+			HttpRequest	child;
+			
+			child.setHeader("Host", request.getHeader("Host"));
+			child.setHeader("Host", request.getHeader("Host"));
+			fillEachRequest(child, body.substr(cur, next)); // [cur, next)
+			requestVec->push_back(child);
+			cur = next + this->boundary.length() + std::string("\r\n").length();
+			next = body.find(this->boundary, cur);
+		}
 	}
-	return dump;
+	return requestVec;
 }
 
-int	MultiRequest::getRequestCount()
+void			MultiRequest::fillEachRequest(HttpRequest &request, std::string body)
 {
-	return (this->count);
+	size_t				cur;
+	size_t				next;
+	std::stringstream 	ss;
+
+	cur = 0;
+	while (true) // header
+	{
+		next = body.find("\r\n", cur);
+		if (cur == next)
+			break ;
+		std::string line = body.substr(cur, next - cur);
+		request.addHeader(line);
+		cur += std::string("\r\n").length();
+	}
+	cur += std::string("\r\n").length(); // body 시작 index
+	ss << (body.length() - cur);
+	request.setHeader("Content-Length", ss.str());
+	request.setRequestBody(body.substr(cur));
+	assert(ss.str() == body.substr(cur).length());
 }
 
 MultiRequest::MultiRequest()

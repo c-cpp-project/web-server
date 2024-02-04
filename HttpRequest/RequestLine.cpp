@@ -12,6 +12,13 @@ RequestLine::RequestLine(const std::string& input)
 	parseProtocol(tockens[2]); // 프로토콜 파싱
 }
 
+RequestLine::RequestLine(const RequestLine& ref)
+{
+	method = ref.getMethod();
+	path = ref.getPath();
+	query_string = ref.getQueryString();
+}
+
 void RequestLine::parseMethod(std::string method_string)
 {
 	for(size_t i = 0; i < method_string.size(); i++) {

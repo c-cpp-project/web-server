@@ -15,10 +15,10 @@ HttpRequest::HttpRequest(const HttpRequest& ref)
 
 HttpRequest& HttpRequest::operator=(const HttpRequest& ref)
 {
-	*request_line = *ref.request_line;
-	*request_headers = *ref.request_headers;
+	request_line = new RequestLine(*ref.request_line);
+	request_headers = new HttpHeaders(*ref.request_headers);
 	request_body = ref.request_body;
-	*request_params = *ref.request_params;
+	request_params = new RequestParams(*ref.request_params);
 	return (*this);
 }
 

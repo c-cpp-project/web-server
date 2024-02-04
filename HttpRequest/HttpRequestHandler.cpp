@@ -19,7 +19,7 @@ void HttpRequestHandler::handle(int socket_fd)
 		// if (read_status == FAILURE) // 클라이언트와 연결이 끊긴 경우
 			// return;
 		
-		// buffers[socket_fd] = "GET / HTTP/1.1\r\nhost: 1234\r\n\r\n";
+		buffers[socket_fd] = "POST / HTTP/1.1\r\nhost: 1234\r\nContent-Length: 20\r\n\r\nabcd=123&abcde=12345";
 		// buffers[socket_fd] = "POST /example-endpoint HTTP/1.1\r\nHost: example.com\r\nContent-Length: 388\r\nContent-Type: multipart/form-data; boundary=---------------------------1234567890123456789012345678\r\n\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"text_field\"\r\n\r\nThis is a simple text field.\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\r\nContent-Type: text/plain\r\n\r\nContents of the file go here.\r\n-----------------------------1234567890123456789012345678--";
 		// buffers[socket_fd] = "POST /example-endpoint HTTP/1.1\r\nHost: example.com\r\nContent-Type: multipart/form-data; boundary=---------------------------1234567890123456789012345678\r\n\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"text_field\"\r\n\r\nThis is a simple text field.\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\r\nContent-Type: text/plain\r\n\r\nContents of the file go here.\r\n-----------------------------1234567890123456789012345678--";
 		// buffers[socket_fd] = "POST / HTTP/1.1\r\nHOst: 1234\r\nTransfer-Encoding: chunked\r\n\r\n5\r\n12345\r\n4\r\n6789\r\n0\r\n\r\n";
@@ -62,7 +62,7 @@ void HttpRequestHandler::handle(int socket_fd)
 
 				std::cout << "=============== [Request Params] ===============\n";
 				request->printAllParams();
-				
+
 				// HttpResponse response(socket_fd);
 				// FrontController front_controller(*request, response);
 				// front_controller.run();

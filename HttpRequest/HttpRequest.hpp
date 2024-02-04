@@ -40,10 +40,6 @@ class HttpRequest
 		// 테스트용
 		void printAllHeader() const;
 		void printAllParams() const;
-		// std::map<std::string, std::string>::iterator getHeadersBegin() const;
-		// std::map<std::string, std::string>::iterator getHeadersEnd() const;
-		// std::map<std::string, std::string>::iterator getParamsBegin() const;
-		// std::map<std::string, std::string>::iterator getParamsEnd() const;
 };
 
 #endif

@@ -20,10 +20,12 @@ void HttpRequestParser::parse(const std::string& buffer, HttpRequest*& request)
 	// std::cout << "after parse params\n";
 }
 
-// TODO : nginx는 요청 라인 전 일부 개행이 들어와도 무시하고 정상적으로 처리한다.
-// 그러나 그런 상황은 프로토콜 위반으로 보는 것이 표준이라고 한다. (일단 이 방식으로 코드를 짰다.)
 void HttpRequestParser::parseRequestLine(HttpRequest *request, const std::string& buffer, int& start)
 {
+	// 요청 라인 전에 들어오는 CRLF는 무시하고 정상적으로 처리한다.
+	while (buffer.substr(start, 2) == "\r\n")
+		start += 2;
+
 	size_t nl_pos = buffer.find("\r\n");
 	if (nl_pos == std::string::npos)
 		throw "400"; // 요청 라인을 식별할 수 없는 경우 -> 요청 거부

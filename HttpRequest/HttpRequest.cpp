@@ -8,6 +8,20 @@ HttpRequest::HttpRequest()
 	request_params = NULL;
 }
 
+HttpRequest::HttpRequest(const HttpRequest& ref)
+{
+	*this = ref;
+}
+
+HttpRequest& HttpRequest::operator=(const HttpRequest& ref)
+{
+	*request_line = *ref.request_line;
+	*request_headers = *ref.request_headers;
+	request_body = ref.request_body;
+	*request_params = *ref.request_params;
+	return (*this);
+}
+
 HttpRequest::~HttpRequest()
 {
 	delete request_line;

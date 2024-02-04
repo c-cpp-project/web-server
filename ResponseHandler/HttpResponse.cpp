@@ -73,7 +73,6 @@ void	HttpResponse::forward(HttpRequest &request, HttpResponse &response) // cont
 		throw "404";
 	}
 	body = readFile(fd);
-	std::cout << "[DEBUG] " << body << "\n";
 	ss << body.length();
 	bodyLength = ss.str();
 	if (fileName.compare(fileName.length() - 4, 4, ".css") == 0)
@@ -183,13 +182,17 @@ void	HttpResponse::flush() // 마지막에 호출
 	size = 0;
 	while (i < this->buffer.size())
 	{
+		if (httpMsg.find("HTTP/1.1") != std::string::npos && this->buffer[i].find("HTTP/1.1") != std::string::npos)
+			break ;
 		httpMsg += this->buffer[i];
 		size += this->buffer[i].length();
 		i++;
 	}
+	std::cout << "==========================================================\n";
 	std::cout << httpMsg << "\n";
 	send(this->sockfd, httpMsg.c_str(), httpMsg.length(), 0);
 	this->buffer.clear();
+	std::cout << "==========================================================\n";
 }
 
 void	HttpResponse::setStatusCode(std::string code)

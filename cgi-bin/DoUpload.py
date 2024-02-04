@@ -38,11 +38,11 @@ if (fileUpload(data, targetDir, kind)):
     print ('</head>')
     print ('<body>')
 
-    print("<h2> Result {0} </h2>".format(result))
-    print("<h2> Result {0} </h2>".format(result))
-    print("<h2> Result {0} </h2>".format(result))
-    print("<h2> Result {0} </h2>".format(result))
-    print("<h2> Result {0} </h2>".format(result))
+    print("<h2> Result Success </h2>")
+    print("<h2> Result Success </h2>")
+    print("<h2> Result Success </h2>")
+    print("<h2> Result Success </h2>")
+    print("<h2> Result Success </h2>")
 
     print ('</body>')
     print ('</html>')

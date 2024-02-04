@@ -19,8 +19,9 @@ void HttpRequestHandler::handle(int socket_fd)
 		// if (read_status == FAILURE) // 클라이언트와 연결이 끊긴 경우
 			// return;
 		
-		// buffers[socket_fd] = "POST / HTTP/1.1\r\nhost: 1234\r\nContent-Length: 20\r\n\r\nabcd=123&abcde=12345";
-		buffers[socket_fd] = "POST /controller HTTP/1.1\r\nHost: example.com\r\nContent-Length: 388\r\nContent-Type: multipart/form-data; boundary=---------------------------1234567890123456789012345678\r\n\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"text_field\"\r\n\r\nThis is a simple text field.\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\r\nContent-Type: text/plain\r\n\r\nContents of the file go here.\r\n-----------------------------1234567890123456789012345678--";
+		// buffers[socket_fd] = "GET /controller HTTP/1.1\r\nhost: 1234\r\nContent-Length: 20\r\n\r\nabcd=123&abcde=12345";
+		// buffers[socket_fd] = "GET /controller?abcd=123&abcde=12345 HTTP/1.1\r\nhost: 1234\r\n\r\n";
+		// buffers[socket_fd] = "POST /controller HTTP/1.1\r\nHost: example.com\r\nContent-Length: 388\r\nContent-Type: multipart/form-data; boundary=---------------------------1234567890123456789012345678\r\n\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"text_field\"\r\n\r\nThis is a simple text field.\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\r\nContent-Type: text/plain\r\n\r\nContents of the file go here.\r\n-----------------------------1234567890123456789012345678--";
 		// buffers[socket_fd] = "POST /example-endpoint HTTP/1.1\r\nHost: example.com\r\nContent-Type: multipart/form-data; boundary=---------------------------1234567890123456789012345678\r\n\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"text_field\"\r\n\r\nThis is a simple text field.\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\r\nContent-Type: text/plain\r\n\r\nContents of the file go here.\r\n-----------------------------1234567890123456789012345678--";
 		// buffers[socket_fd] = "POST / HTTP/1.1\r\nHOst: 1234\r\nTransfer-Encoding: chunked\r\n\r\n5\r\n12345\r\n4\r\n6789\r\n0\r\n\r\n";
 		// buffers[socket_fd] = "POST / HTTP/1.1\r\nHOst: 1234\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n";
@@ -47,24 +48,24 @@ void HttpRequestHandler::handle(int socket_fd)
 				if (request->getHeader("Transfer-Encoding") == "chunked" && chunkeds.find(socket_fd) != chunkeds.end())
 					continue;
 
-				// std::cout << "200 OK\n";
+				std::cout << "200 OK\n";
 
-				// std::cout << "=============== [Request line] ===============\n";
-				// std::cout << "method: " << request->getMethod() << '\n';
-				// std::cout << "path: " << request->getPath() << '\n';
-				// std::cout << "query string: " << request->getQueryString() << '\n';
+				std::cout << "=============== [Request line] ===============\n";
+				std::cout << "method: " << request->getMethod() << '\n';
+				std::cout << "path: " << request->getPath() << '\n';
+				std::cout << "query string: " << request->getQueryString() << '\n';
 			
-				// std::cout << "=============== [Request Header] ==============\n";
-				// request->printAllHeader();
+				std::cout << "=============== [Request Header] ==============\n";
+				request->printAllHeader();
 
-				// std::cout << "=============== [Request Body] ===============\n";
-				// std::cout << request->getBody() << "\n";
+				std::cout << "=============== [Request Body] ===============\n";
+				std::cout << request->getBody() << "\n";
 
-				// std::cout << "=============== [Request Params] ===============\n";
-				// request->printAllParams();
+				std::cout << "=============== [Request Params] ===============\n";
+				request->printAllParams();
 
-				// // HttpResponse response(socket_fd);
-				// std::cout << "================== FrontController ==================\n";
+				// HttpResponse response(socket_fd);
+				std::cout << "================== FrontController ==================\n";
 				int	kqueue_fd = 0;
 				FrontController front_controller(kqueue_fd, socket_fd);
 				front_controller.run(*request);
@@ -74,6 +75,7 @@ void HttpRequestHandler::handle(int socket_fd)
 			catch (const char *e)
 			{
 				std::cout << "Error: " << e << '\n';
+				errorHandling(e, socket_fd);
 			}
 		}
 	}
@@ -81,15 +83,19 @@ void HttpRequestHandler::handle(int socket_fd)
 	{
 		removeBuffer(socket_fd);
 		removeAndDeleteChunkedRequest(socket_fd);
-
 		std::cout << "socket 닫기: " << e.what();
-
-		// HttpRequest request;
-		// HttpResponse response(socket_fd);
-		// response.setStatusCode(e.what());
-		// response.forward(request, response);
-		// response.flush();
+		errorHandling(e.what(), socket_fd);
+		close(socket_fd);
 	}
+}
+
+void	HttpRequestHandler::errorHandling(const char	*erorr_code, int socket_fd)
+{
+	HttpRequest empty;
+	HttpResponse response(socket_fd);
+	response.setStatusCode(erorr_code);
+	response.forward(empty, response);
+	response.flush();
 }
 
 int HttpRequestHandler::readRequest(int socket_fd)

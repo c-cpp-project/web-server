@@ -63,6 +63,7 @@ void HttpRequestParser::parseRequestBody(HttpRequest *request, const std::string
 	if (request->getHeader("Transfer-Encoding") == "chunked") // TODO : chunked 이외는 다 무시하자.. 괜찮나?
 	{
 		request->setHeader("Content-Length", "0");
+		
 		throw START_CHUNKED_REQUEST;
 	}
 	

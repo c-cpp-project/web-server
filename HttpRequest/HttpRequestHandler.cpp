@@ -63,10 +63,8 @@ void HttpRequestHandler::handle(int socket_fd)
 				std::cout << "=============== [Request Params] ===============\n";
 				request->printAllParams();
 				
-				HttpResponse response(socket_fd);
-				int	kqueuefd = 0;
-				FrontController front_controller(kqueuefd, socket_fd);
-				std::cout << "=============== [FrontController] ===============\n";
+				int	kqueue_fd = 0;
+				FrontController front_controller(kqueue_fd, socket_fd);
 				front_controller.run(*request);
 
 				delete request;

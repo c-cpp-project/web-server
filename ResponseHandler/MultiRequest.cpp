@@ -10,14 +10,15 @@ MultiRequest::MultiRequest(std::string contentType)
 	else
 	{
 		this->isMultipart = true;
-		this->boundary = contentType.substr(contentType.find("boundary=") + std::string("boundary=").length());
+		this->boundary = "--" + contentType.substr(contentType.find("boundary=") + std::string("boundary=").length());
+		// std::cout << "[" << this->boundary << "]\n";
 	}
 }
 // cgi에서 contentDisposition를 분해해서 filename을 뽑자.
 std::vector<HttpRequest>	*MultiRequest::makeRequest(HttpRequest request)
 {
-	size_t			next;
 	size_t			cur;
+	size_t			next;
 	std::vector<HttpRequest>* requestVec;
 	std::string		body;
 
@@ -27,22 +28,14 @@ std::vector<HttpRequest>	*MultiRequest::makeRequest(HttpRequest request)
 	else
 	{
 		body = request.getBody();
-		cur = this->boundary.length() + std::string("\r\n").length(); // 이상
-		next = body.find(this->boundary, cur); // 미만
+		cur = this->boundary.length() + std::string("\r\n").length();
+		next = body.find(this->boundary, cur);
 		while (next != std::string::npos)
 		{
 			HttpRequest	child;
 
 			child = request;
-			fillEachRequest(child, body.substr(cur, next)); // [cur, next)
-			std::cout << "=============== [Request line] ===============\n";
-			std::cout << "method: " << child.getMethod() << '\n';
-			std::cout << "path: " << child.getPath() << '\n';
-			std::cout << "query string: " << child.getQueryString() << '\n';
-			std::cout << "=============== [Request Header] ==============\n";
-			child.printAllHeader();
-			std::cout << "=============== [Request Body] ===============\n";
-			std::cout << child.getBody() << "\n";
+			fillEachRequest(child, body.substr(cur, next - cur)); // [cur, next)
 			requestVec->push_back(child);
 			cur = next + this->boundary.length() + std::string("\r\n").length();
 			next = body.find(this->boundary, cur);
@@ -51,26 +44,32 @@ std::vector<HttpRequest>	*MultiRequest::makeRequest(HttpRequest request)
 	return requestVec;
 }
 
-void			MultiRequest::fillEachRequest(HttpRequest &request, std::string body)
+void			MultiRequest::fillEachRequest(HttpRequest &request, std::string data)
 {
 	size_t				cur;
 	size_t				next;
 	std::stringstream 	ss;
+	std::string			body;
 
+	std::cout << "fillEachRequest [" << data << "]\n";
+
+	request.removeHeader("Content-Type");
 	cur = 0;
 	while (true)
 	{
-		next = body.find("\r\n", cur);
-		if (cur == next)
+		next = data.find("\r\n", cur);
+		if (next == cur)
 			break ;
-		std::string line = body.substr(cur, next - cur);
-		request.addHeader(line);
-		cur += std::string("\r\n").length();
+		std::string	line = data.substr(cur, next - cur);
+		if (request.addHeader(line) == FAILURE)
+			throw "400";
+		cur = next + std::string("\r\n").length();
 	}
-	cur = std::string("\r\n").length(); // body 시작 index
-	ss << (body.length() - cur);
+	cur += std::string("\r\n").length();
+	body = data.substr(cur);
+	ss << body.length();
 	request.setHeader("Content-Length", ss.str());
-	request.setRequestBody(body.substr(cur));
+	request.setRequestBody(body);
 }
 
 MultiRequest::MultiRequest()

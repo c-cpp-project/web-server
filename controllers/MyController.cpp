@@ -7,38 +7,47 @@ MyController::~MyController()
 {}
 
 // post
-std::string    MyController::doExecuteWrite(std::string &data, std::string filename, const char *cgi_python)
+std::string    MyController::doExecuteWrite(std::string &data, std::string contentType, const char *cgi_python)
 {
 	int			ret;
 	char		buffer[64 * K];
-	int     	pipefd[2];
+	int     	pipefd1[2];
+	int			pipefd2[2];
 	const char	*path[5];
-	std::string	saved_dir;
+	std::string	saved_dir = "repository";
 
 	path[0] = "/usr/bin/python3";
 	path[1] = cgi_python;
 	path[2] = saved_dir.c_str();
-	path[3] = filename.c_str();
+	path[3] = contentType.c_str();
 	path[4] = NULL;
-	pipe(pipefd);
+	pipe(pipefd1);
+	pipe(pipefd2);
 	ret = fork();
 	if (ret == 0)
 	{
-		close(pipefd[1]);
-		dup2(pipefd[1], STDOUT_FILENO);
-		close(pipefd[1]);
+		// 입력
+		close(pipefd1[1]); dup2(pipefd1[0], STDIN_FILENO);
+		close(pipefd1[0]);
+
+		// 출력
+		close(pipefd2[0]); dup2(pipefd2[1], STDOUT_FILENO);
+		close(pipefd2[1]);
 		if (execve("/usr/bin/python3", const_cast<char* const*>(path), NULL) < 0)
 			throw "500";
 	}
 	else
 	{
-		close(pipefd[0]);
-		// fcntl(pipefd1[1], F_SETFL, O_NONBLOCK);
+		// 입력
+		close(pipefd1[0]);
+		write(pipefd1[1], data.c_str(), data.length());
+		close(pipefd1[1]);
 
-		// doExecuteLarge에서도 출력값을 전달 받아야 한다.
-		// 그렇게 해야 response message를 생성한다.
-		write(pipefd[1], data.c_str(), data.size());
-		close(pipefd[1]);
+		// 출력
+		close(pipefd2[1]);
+		read(pipefd2[0], buffer, 64 * K);
+		close(pipefd2[0]);
+		// fcntl(pipefd1[1], F_SETFL, O_NONBLOCK);
 		wait(NULL);
 		if (ret < 0)
 			throw ("500");
@@ -108,11 +117,12 @@ void	MyController::doPost(HttpRequest &request, HttpResponse &response)
 	std::string	contentType;
 	std::string	body;
 
-	cgiFile = "cgi-bin/DoPost.py";
+	cgiFile = "cgi-bin/DoUpload.py";
 	data = request.getBody();
 	contentType = request.getHeader("content-type");
 	body = doExecuteWrite(data, contentType, cgiFile.c_str());
 	if (body == "500")
 		throw "500";
+	std::cout << "body:[" << body << "]\n";
 	response200(body, response);
 }

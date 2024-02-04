@@ -32,6 +32,7 @@ class HttpRequest
 		void setRequestHeaders(HttpHeaders *headers);
 		int addHeader(const std::string& line);
 		void setHeader(const std::string& field, const std::string& value);
+		void removeHeader(const std::string& field);
 		void setRequestBody(const std::string& body);
 		void addRequestBody(const std::string& body);
 		void setRequestParams(RequestParams *params);

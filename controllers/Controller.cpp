@@ -42,7 +42,6 @@ void	    Controller::response200(std::string body, HttpResponse &response)
 	std::stringstream ss;
 	std::string	bodyLength;
 
-	response.ResponseStatusLine();
 	response.putHeader("Server", HttpConfig::getServerName());
 	response.putHeader("Date", HttpConfig::getCurrentDate());
 	response.putHeader("Content-Type", "text/html;charset=utf-8");

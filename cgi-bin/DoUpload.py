@@ -12,6 +12,8 @@ while (data.find("\r\n") != -1):
 
 def fileUpload(data, targetDir, kind):
     try:
+        if not os.path.exists(targetDir):
+            os.makedirs(targetDir)
         name = len(os.listdir(targetDir))
         if "html" in kind:
             extension = ".html"
@@ -19,14 +21,14 @@ def fileUpload(data, targetDir, kind):
             extension = ".css"
         elif "txt" in kind:
             extension = ".txt"
-        else
+        else:
             extension = ""
-        filename = targetDir + "/" + name + extension
+        filename = targetDir + "/" + str(name) + extension
         with open(filename, 'w') as file:
             file.write(data)
-        return (True)
     except Exception as e:
         return (False)
+    return (True)
 
 if (fileUpload(data, targetDir, kind)):
     print ("<html>")

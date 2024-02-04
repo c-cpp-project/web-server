@@ -6,7 +6,6 @@ void    FrontController::run(HttpRequest tmp)
 	MultiRequest                multiRequest(tmp.getHeader("content-type"));
 
 	request = multiRequest.makeRequest(tmp);
-	return ;
 	for (int i = 0; i < static_cast<int>(request->size()); i++)
 	{
 		HttpResponse    response(this->socketfd);
@@ -24,7 +23,8 @@ void    FrontController::run(HttpRequest tmp)
 		std::cout << request->at(i).getBody() << "\n";
 		
 		controller = request->at(i).getMethod() == "DELETE" ? (new DeleteController()) : (ControllerMapping::getController(request->at(i).getPath()));
-		if (controller == 0 || (request->at(i).getMethod() == "GET"))
+		std::cout << "getPath: [" << request->at(i).getPath() << "]" << "method: [" << request->at(i).getMethod() << "]\n"; 
+		if (controller == nullptr || (request->at(i).getMethod() == "GET"))
 		{
 			if (HttpConfig::IsRedriectUri(request->at(i).getPath()) == true) // redirect
 				response.redirect(request->at(i), response);
@@ -34,7 +34,7 @@ void    FrontController::run(HttpRequest tmp)
 		else // cgi: GET && POST, FILE POST, DELETE
 		{
 			controller->service(request->at(i), response);
-			delete controller;
+			controller = nullptr;
 		}
 		response.flush();
 	}

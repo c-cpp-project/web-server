@@ -99,7 +99,7 @@ std::string  HttpConfig::getServerName()
 HttpConfig::~HttpConfig()
 {
 	// static 동적 할당 모두 삭제
-	Controller *controller = ControllerMapping::getController("/index");
+	Controller *controller = ControllerMapping::getController("/controller");
 	delete controller;
 }
 

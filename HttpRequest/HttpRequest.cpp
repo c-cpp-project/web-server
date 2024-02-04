@@ -108,6 +108,12 @@ void HttpRequest::setHeader(const std::string& field, const std::string& value)
 		request_headers->setHeader(field, value);
 }
 
+void HttpRequest::removeHeader(const std::string& field)
+{
+	if (request_headers != NULL)
+		request_headers->removeHeader(field);
+}
+
 void HttpRequest::setRequestBody(const std::string& body)
 {
 	request_body = body;

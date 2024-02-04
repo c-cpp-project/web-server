@@ -1,24 +1,20 @@
 #include"MultiRequest.hpp"
 
-MultiRequest::MultiRequest(HttpRequest request)
+MultiRequest::MultiRequest(std::string contentType)
 {
-	std::string tmp;
-	size_t		i;
 	std::string multipart;
 
 	multipart = "multipart/form-data;";
-	if (multipart.compare(0, multipart.length(), request.getHeader("Content-Type")) != 0)
+	if (contentType.find(multipart) == std::string::npos)
 		this->isMultipart = false;
 	else
 	{
-		tmp = request.getHeader("Content-Type");
-		this->boundary = tmp.substr(tmp.find("boundary="));
+		this->isMultipart = true;
+		this->boundary = contentType.substr(contentType.find("boundary=") + std::string("boundary=").length());
 	}
-	this->request = request;
 }
-
 // cgi에서 contentDisposition를 분해해서 filename을 뽑자.
-std::vector<HttpRequest>	*MultiRequest::makeRequest()
+std::vector<HttpRequest>	*MultiRequest::makeRequest(HttpRequest request)
 {
 	size_t			next;
 	size_t			cur;
@@ -27,7 +23,7 @@ std::vector<HttpRequest>	*MultiRequest::makeRequest()
 
 	requestVec = new std::vector<HttpRequest>();
 	if (this->isMultipart == false)
-		requestVec->push_back(this->request);
+		requestVec->push_back(request);
 	else
 	{
 		body = request.getBody();
@@ -38,8 +34,23 @@ std::vector<HttpRequest>	*MultiRequest::makeRequest()
 			HttpRequest	child;
 			
 			child.setHeader("Host", request.getHeader("Host"));
-			child.setHeader("Host", request.getHeader("Host"));
+			child.setMethod(request.getMethod());
+			
 			fillEachRequest(child, body.substr(cur, next)); // [cur, next)
+
+			std::cout << "=============== [Request line] ===============\n";
+			std::cout << "method: " << child.getMethod() << '\n';
+			std::cout << "path: " << child.getPath() << '\n';
+			std::cout << "query string: " << child.getQueryString() << '\n';
+		
+			std::cout << "=============== [Request Header] ==============\n";
+			child.printAllHeader();
+
+			std::cout << "=============== [Request Body] ===============\n";
+			std::cout << child.getBody() << "\n";
+
+
+
 			requestVec->push_back(child);
 			cur = next + this->boundary.length() + std::string("\r\n").length();
 			next = body.find(this->boundary, cur);
@@ -68,7 +79,8 @@ void			MultiRequest::fillEachRequest(HttpRequest &request, std::string body)
 	ss << (body.length() - cur);
 	request.setHeader("Content-Length", ss.str());
 	request.setRequestBody(body.substr(cur));
-	assert(ss.str() == body.substr(cur).length());
+	request.printAllHeader();
+	std::cout << "================================================\n";
 }
 
 MultiRequest::MultiRequest()

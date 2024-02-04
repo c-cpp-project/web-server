@@ -8,7 +8,7 @@ class SocketCloseException400 : public std::exception
 	public:
 		const char *what() const throw()
 		{
-			return "disconnect from the client with 400 response!";
+			return "400";
 		}
 };
 
@@ -17,7 +17,7 @@ class SocketCloseException500 : public std::exception
 	public:
 		const char *what() const throw()
 		{
-			return "disconnect from the client with 500 response!";
+			return "500";
 		}
 };
 

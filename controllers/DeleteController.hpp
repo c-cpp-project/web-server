@@ -11,7 +11,6 @@ private:
 public:
     std::string	doExecute(HttpRequest &request, std::string data, const char *cgi_python);
     void        doDelete(HttpRequest &request, HttpResponse &response);
-    void	    response200(std::string body, HttpResponse &response);
     DeleteController();
     ~DeleteController();
 };

@@ -19,13 +19,12 @@ class FrontController
 private:
 	int socketfd;
 	int kqueuefd;
-	HttpRequest tmp;
 public:
 	FrontController(int socketfd);
-	FrontController(int kqueuefd, int socketfd, HttpRequest &request);
+	FrontController(int kqueuefd, int socketfd);
 	FrontController();
 	~FrontController();
 
-	void    run();
+	void    run(HttpRequest request);
 };
 #endif

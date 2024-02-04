@@ -22,11 +22,10 @@ private:
 	HttpRequest	request;
 	bool		isMultipart;
 public:
-	std::vector<HttpRequest>	*makeRequest(); // CONTENT-TYPE 변경 및 CONTENT-LENGTH 추가 -> 생성 반환
+	std::vector<HttpRequest>	*makeRequest(HttpRequest request); // CONTENT-TYPE 변경 및 CONTENT-LENGTH 추가 -> 생성 반환
 	void			fillEachRequest(HttpRequest &request, std::string body);
 	MultiRequest();
-	MultiRequest(std::string body);
-	MultiRequest(HttpRequest request);
+	MultiRequest(std::string contentType);
 	~MultiRequest();
 };
 

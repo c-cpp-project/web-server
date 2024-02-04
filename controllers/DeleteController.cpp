@@ -43,7 +43,7 @@ std::string    DeleteController::doExecute(HttpRequest &request, std::string dat
 
 void	DeleteController::doDelete(HttpRequest &request, HttpResponse &response)
 {
-	std::string currentDate = getCurrentDate();
+	std::string currentDate = HttpConfig::getCurrentDate();
 	std::string	fileName;
 	std::string	cgiFile;
 	std::string	body;

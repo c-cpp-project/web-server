@@ -36,10 +36,12 @@ class HttpRequest
 		int addRequestParamsToQueryString(const std::string& query_string);
 
 		// 테스트용
-		std::map<std::string, std::string>::iterator getHeadersBegin() const;
-		std::map<std::string, std::string>::iterator getHeadersEnd() const;
-		std::map<std::string, std::string>::iterator getParamsBegin() const;
-		std::map<std::string, std::string>::iterator getParamsEnd() const;
+		void printAllHeader() const;
+		void printAllParams() const;
+		// std::map<std::string, std::string>::iterator getHeadersBegin() const;
+		// std::map<std::string, std::string>::iterator getHeadersEnd() const;
+		// std::map<std::string, std::string>::iterator getParamsBegin() const;
+		// std::map<std::string, std::string>::iterator getParamsEnd() const;
 };
 
 #endif

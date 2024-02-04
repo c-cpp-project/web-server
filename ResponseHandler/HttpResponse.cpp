@@ -134,7 +134,7 @@ void    HttpResponse::sendBody(std::string body) // api 요청에 대한 응답
 	int				i;
 
 	i = 0;
-	while (i < this->buffer.size())
+	while (i < static_cast<int>(this->buffer.size()))
 	{
 		clientBodySize += this->buffer[i].length();
 		if (clientBodySize > this->max_size)

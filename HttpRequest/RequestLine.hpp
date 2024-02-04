@@ -16,6 +16,7 @@ class RequestLine
 
 	public:
 		RequestLine(const std::string& input);
+		RequestLine(const RequestLine& ref);
 
 		std::string getMethod() const;
 		std::string getPath() const;

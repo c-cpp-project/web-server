@@ -32,25 +32,17 @@ std::vector<HttpRequest>	*MultiRequest::makeRequest(HttpRequest request)
 		while (next != std::string::npos)
 		{
 			HttpRequest	child;
-			
-			child.setHeader("Host", request.getHeader("Host"));
-			child.setMethod(request.getMethod());
-			
-			fillEachRequest(child, body.substr(cur, next)); // [cur, next)
 
+			child = request;
+			fillEachRequest(child, body.substr(cur, next)); // [cur, next)
 			std::cout << "=============== [Request line] ===============\n";
 			std::cout << "method: " << child.getMethod() << '\n';
 			std::cout << "path: " << child.getPath() << '\n';
 			std::cout << "query string: " << child.getQueryString() << '\n';
-		
 			std::cout << "=============== [Request Header] ==============\n";
 			child.printAllHeader();
-
 			std::cout << "=============== [Request Body] ===============\n";
 			std::cout << child.getBody() << "\n";
-
-
-
 			requestVec->push_back(child);
 			cur = next + this->boundary.length() + std::string("\r\n").length();
 			next = body.find(this->boundary, cur);
@@ -66,7 +58,7 @@ void			MultiRequest::fillEachRequest(HttpRequest &request, std::string body)
 	std::stringstream 	ss;
 
 	cur = 0;
-	while (true) // header
+	while (true)
 	{
 		next = body.find("\r\n", cur);
 		if (cur == next)
@@ -75,12 +67,10 @@ void			MultiRequest::fillEachRequest(HttpRequest &request, std::string body)
 		request.addHeader(line);
 		cur += std::string("\r\n").length();
 	}
-	cur += std::string("\r\n").length(); // body 시작 index
+	cur = std::string("\r\n").length(); // body 시작 index
 	ss << (body.length() - cur);
 	request.setHeader("Content-Length", ss.str());
 	request.setRequestBody(body.substr(cur));
-	request.printAllHeader();
-	std::cout << "================================================\n";
 }
 
 MultiRequest::MultiRequest()

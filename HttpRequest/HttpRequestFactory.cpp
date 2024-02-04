@@ -15,7 +15,6 @@ HttpRequest *HttpRequestFactory::create(int socket_fd)
 	HttpRequest *request = NULL;
 	try
 	{
-		// TODO : 청크 요청을 버퍼에서 지우는 부분이 없다.
 		request = HttpRequestHandler::getChunkedRequest(socket_fd);
 		if (request != NULL) // chunked 전송 요청인 경우
 		{

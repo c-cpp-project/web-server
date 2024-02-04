@@ -29,9 +29,8 @@ void RequestLine::parseURI(std::string uri_string)
 	std::vector<std::string> tockens = RequestUtility::splitString(uri_string, '?');
 	if (tockens.size() < 1 || 2 < tockens.size())
 		throw "400";
-	// if (tockens[0][0] != '/')
-	// 	throw "400"; // 슬래시(/)로 시작하지 않는 경로
-	// TODO : 여기서 경로 유효성 검사를 해야 할 것 같기도 하고
+	if (tockens[0][0] != '/')
+		throw "400"; // 슬래시(/)로 시작하지 않는 경로
 
 	// ?를 기준으로 앞은 path, 뒤는 query_string으로 저장
 	path = tockens[0];

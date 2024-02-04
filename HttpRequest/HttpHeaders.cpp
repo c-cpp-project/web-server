@@ -21,6 +21,7 @@ int HttpHeaders::addHeader(const std::string& line)
 		if (weakDuplicationBan(field)) // 중복이 들어와도 첫 값을 유지해야 하는 헤더 필드라면 넘어가기
 			return (SUCCESS);
 		// TODO : 여기서 특정 헤더에 대해 값 유효성 검사가 필요할 수 있다. Host 등
+		// TODO : nginx는 POST 요청이 아니어도 transfer-encoding 유효성 검사를 한다?
 		headers[field] += ", " + value;
 	}
 	else // headers에에 존재하지 않는 헤더 필드라면

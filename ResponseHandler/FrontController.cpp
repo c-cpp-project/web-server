@@ -2,9 +2,13 @@
 
 void    FrontController::run(HttpRequest tmp)
 {
+	std::cout << tmp.getMethod() << " tmp.getMethod()\n";
 	std::vector<HttpRequest> 	*request;
+
+	std::cout << tmp.getMethod() << " tmp.getMethod()\n";
 	MultiRequest                multiRequest(tmp.getHeader("content-type"));
 
+	std::cout << tmp.getMethod() << " tmp.getMethod()\n";
 	request = multiRequest.makeRequest(tmp);
 	for (int i = 0; i < static_cast<int>(request->size()); i++)
 	{

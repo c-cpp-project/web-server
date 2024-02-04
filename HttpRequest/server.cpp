@@ -6,6 +6,11 @@
 #include <cstdio>
 #include <string>
 
+void leaks()
+{
+	system("leaks server");
+}
+
 int main()
 {
 	/*
@@ -51,6 +56,7 @@ int main()
 	close(client_socket);
 	*/
 
+	atexit(leaks);
 	HttpRequestHandler::handle(1);
 	return (0);
 }

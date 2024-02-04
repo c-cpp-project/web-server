@@ -46,6 +46,14 @@ void HttpHeaders::setHeader(const std::string& field, const std::string& value)
 	headers[upper_field] = value;
 }
 
+void HttpHeaders::removeHeader(const std::string& field)
+{
+	std::string upper_field = RequestUtility::toUpperString(field);
+	std::map<std::string, std::string>::iterator it = headers.find(upper_field);
+	if (it != headers.end())
+		headers.erase(it);
+}
+
 // 중복이 들어와도 첫 값을 유지하는 헤더들
 bool HttpHeaders::weakDuplicationBan(const std::string& field)
 {

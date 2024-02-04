@@ -9,15 +9,7 @@
 std::map<int, std::string> HttpRequestHandler::buffers; // 요청을 읽어오는 소켓, 버퍼
 std::map<int, HttpRequest*> HttpRequestHandler::chunkeds; // chunked 수신 중인 소켓, request 객체
 
-// 1. 소켓으로부터 이벤트가 감지되고, HttpRequestHandler.handle()이 호출된다.
-// 2. 해당 소켓으로부터 (지정된 버퍼 크기만큼) 데이터를 (소켓과 매핑된) 버퍼에 읽어온다.
-// 3. (소켓과 매핑된) 버퍼에 데이터가 남아있는 동안, 아래의 과정을 반복한다.
-//     1. HttpRequestFactory의 create 함수를 호출하여 request 객체를 만든다.
-//     2. request 객체가 NULL이라면 (버퍼에 있는 내용이 하나의 완전한 요청이 아님 or 연결이 끊김) 반복을 종료하고 handle()을 빠져나간다.
-//     3. request 객체가 NULL이 아니라면 frontController.run()을 호출한다.
-
-// TODO : Content-Length가 없는 (본문이 있는) POST 요청의 경우, 처음에 411 응답 후 헤더까지만 지우고 바디가 버퍼에 남아버려서 계속 411 오류를 내보냄
-// 그 다음 요청이 들어올 때까지 계속 411 오류가 날텐데 어떡하지
+// TODO : nginx는 POST 요청이 아니어도 transfer-encoding 유효성 검사를 한다?
 
 #include <unistd.h>
 
@@ -30,11 +22,14 @@ void HttpRequestHandler::handle(int socket_fd)
 			// return;
 		
 		// buffers[socket_fd] = "GET / HTTP/1.1\r\nhost: 1234\r\n\r\n";
-		buffers[socket_fd] = "POST /example-endpoint HTTP/1.1\r\nHost: example.com\r\nContent-Length: 388\r\nContent-Type: multipart/form-data; boundary=---------------------------1234567890123456789012345678\r\n\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"text_field\"\r\n\r\nThis is a simple text field.\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\r\nContent-Type: text/plain\r\n\r\nContents of the file go here.\r\n-----------------------------1234567890123456789012345678--";
+		// buffers[socket_fd] = "POST /example-endpoint HTTP/1.1\r\nHost: example.com\r\nContent-Length: 388\r\nContent-Type: multipart/form-data; boundary=---------------------------1234567890123456789012345678\r\n\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"text_field\"\r\n\r\nThis is a simple text field.\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\r\nContent-Type: text/plain\r\n\r\nContents of the file go here.\r\n-----------------------------1234567890123456789012345678--";
 		// buffers[socket_fd] = "POST /example-endpoint HTTP/1.1\r\nHost: example.com\r\nContent-Type: multipart/form-data; boundary=---------------------------1234567890123456789012345678\r\n\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"text_field\"\r\n\r\nThis is a simple text field.\r\n-----------------------------1234567890123456789012345678\r\nContent-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\r\nContent-Type: text/plain\r\n\r\nContents of the file go here.\r\n-----------------------------1234567890123456789012345678--";
-		
+		buffers[socket_fd] = "POST / HTTP/1.1\r\nHOst: 1234\r\nTransfer-Encoding: chunked\r\n\r\n5\r\n12345\r\n4\r\n6789\r\n0\r\n\r\n";
+
 		while (buffers[socket_fd] != "")
 		{
+			// std::cout << "\n\n********************* loop ***********************\n";
+			// std::cout << "buffer:\n" << buffers[socket_fd] << "\n!buffer end!\n";
 			try
 			{
 				HttpRequest *request = HttpRequestFactory::create(socket_fd);
@@ -45,27 +40,24 @@ void HttpRequestHandler::handle(int socket_fd)
 				
 				// TODO : chunked 요청과 chunked 끝 요청을 구분할 수 있는 다른 방법이 없을까?
 				// chunked 요청이지만, chunkeds 맵에 포함된 경우 -> 아직 chunked 요청 전체가 끝나지 않았음
-				if (request->getHeader("Transfer-Encoding") != "chunked" && chunkeds.find(socket_fd) != chunkeds.end())
+				if (request->getHeader("Transfer-Encoding") == "chunked" && chunkeds.find(socket_fd) != chunkeds.end())
 					continue;
 
-				std::cout << "----- Request line -----\n";
+				std::cout << "200 OK\n";
+
+				std::cout << "=============== [Request line] ===============\n";
 				std::cout << "method: " << request->getMethod() << '\n';
 				std::cout << "path: " << request->getPath() << '\n';
-				std::cout << "query string: " << request->getQueryString() << "\n\n";
+				std::cout << "query string: " << request->getQueryString() << '\n';
 			
-				std::cout << "----- Request Header ------\n";
-				std::map<std::string, std::string>::iterator it;
-				for(it = request->getHeadersBegin(); it != request->getHeadersEnd(); it++)
-					std::cout << it->first << ": " << it->second << "\n";
-				std::cout << '\n';
+				std::cout << "=============== [Request Header] ==============\n";
+				request->printAllHeader();
 
-				std::cout << "----- Request Body -----\n";
-				std::cout << request->getBody() << "\n\n";
+				std::cout << "=============== [Request Body] ===============\n";
+				std::cout << request->getBody() << "\n";
 
-				std::cout << "----- Request Params -----\n";
-				for(it = request->getParamsBegin(); it != request->getParamsEnd(); it++)
-					std::cout << it->first << ": " << it->second << "\n";
-				std::cout << '\n';
+				std::cout << "=============== [Request Params] ===============\n";
+				request->printAllParams();
 				
 				// HttpResponse response(socket_fd);
 				// FrontController front_controller(*request, response);
@@ -82,7 +74,8 @@ void HttpRequestHandler::handle(int socket_fd)
 	catch (const std::exception& e)
 	{
 		removeBuffer(socket_fd);
-		removeChunkedRequest(socket_fd);
+		HttpRequest *request = removeChunkedRequest(socket_fd);
+		delete request;
 
 		std::cout << "socket 닫기: " << e.what();
 
@@ -124,14 +117,14 @@ void HttpRequestHandler::removeBuffer(int socket_fd)
 		buffers.erase(it);
 }
 
-void HttpRequestHandler::removeChunkedRequest(int socket_fd)
+HttpRequest *HttpRequestHandler::removeChunkedRequest(int socket_fd)
 {
 	std::map<int, HttpRequest*>::iterator it = chunkeds.find(socket_fd);
-	if (it != chunkeds.end())
-	{
-		delete it->second;
-		chunkeds.erase(it);
-	}
+	if (it == chunkeds.end())
+		return (NULL);
+	HttpRequest *request = it->second;
+	chunkeds.erase(it);
+	return (request);
 }
 
 HttpRequest *HttpRequestHandler::getChunkedRequest(int socket_fd)

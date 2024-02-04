@@ -15,7 +15,7 @@ class HttpRequestHandler
 	public:
 		static void handle(int socket_fd);
 
-		static void removeChunkedRequest(int socket_fd);
+		static HttpRequest *removeChunkedRequest(int socket_fd);
 		static HttpRequest *getChunkedRequest(int socket_fd);
 		static const std::string& getBuffer(int socket_fd);
 		static void addChunkedRequest(int socket_fd, HttpRequest *request);

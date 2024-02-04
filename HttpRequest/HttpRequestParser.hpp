@@ -16,7 +16,7 @@ class HttpRequestParser
 		static void parseRequestParams(HttpRequest *request);
 
 	public:
-		static HttpRequest *parse(const std::string& buffer, HttpRequest *request);
+		static void parse(const std::string& buffer, HttpRequest*& request);
 };
 
 #endif

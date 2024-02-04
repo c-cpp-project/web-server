@@ -17,17 +17,19 @@ HttpRequest *HttpRequestFactory::create(int socket_fd)
 	{
 		// TODO : 청크 요청을 버퍼에서 지우는 부분이 없다.
 		request = HttpRequestHandler::getChunkedRequest(socket_fd);
-		if (request != NULL)
-			return (parseChunkedRequest(socket_fd, request)); // chunked 전송 요청인 경우
-
-		request = HttpRequestParser::parse(HttpRequestHandler::getBuffer(socket_fd), request); // 일반 요청인 경우
-		// 일반 요청으로 하나의 유효한 request 객체를 만들어 낸 경우🌟
-		removeRequestInBuffer(socket_fd, request);
-		return (request);
+		if (request != NULL) // chunked 전송 요청인 경우
+		{
+			parseChunkedRequest(socket_fd, request);
+		}
+		else // 일반 요청인 경우
+		{
+			HttpRequestParser::parse(HttpRequestHandler::getBuffer(socket_fd), request);
+			removeRequestInBuffer(socket_fd, request);
+		}
 	}
 	catch (const int& e) // 특별한 예외(완전하지 않은 요청, 청크 시작 요청) 처리
 	{
-		return (handlingSpecialException(e, socket_fd, request));
+		handlingSpecialException(e, socket_fd, request);
 	}
 	catch (const char *e) // 유효하지 않은 요청의 예외 처리
 	{
@@ -35,9 +37,10 @@ HttpRequest *HttpRequestFactory::create(int socket_fd)
 		delete request;
 		throw;
 	}
+	return (request);
 }
 
-HttpRequest *HttpRequestFactory::parseChunkedRequest(int socket_fd, HttpRequest *request)
+void HttpRequestFactory::parseChunkedRequest(int socket_fd, HttpRequest*& request)
 {
 	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
 
@@ -52,14 +55,14 @@ HttpRequest *HttpRequestFactory::parseChunkedRequest(int socket_fd, HttpRequest 
 	if (buffer.size() < nl_pos + chunk_size + 4)
 		throw INCOMPLETE_REQUEST; // 청크 크기 만큼의 청크 데이터가 없는 경우 -> 불완전한 요청
 
-	if (buffer.substr(nl_pos + 2 + chunk_size, 2) == "\r\n")
+	if (buffer.substr(nl_pos + 2 + chunk_size, 2) != "\r\n")
 		throw SocketCloseException400(); // 청크 데이터 직후 CRLF가 없는 경우 -> 연결 끊기
 
-	if (chunk_size == 0) // 마지막 청크 요청인 경우 -> request 객체 반환
+	if (chunk_size == 0) // 마지막 청크 요청인 경우
 	{
 		HttpRequestHandler::removeChunkedRequest(socket_fd);
 		HttpRequestHandler::removePartOfBuffer(socket_fd, 0, 5); // 0\r\n\r\n
-		return (request);
+		return;
 	}
 
 	int content_length = RequestUtility::strToPositiveInt(request->getHeader("Content-Length")) + chunk_size;
@@ -71,25 +74,23 @@ HttpRequest *HttpRequestFactory::parseChunkedRequest(int socket_fd, HttpRequest 
 	std::string chunk_data = buffer.substr(nl_pos + 2, chunk_size);
 	request->addRequestBody(chunk_data);
 	HttpRequestHandler::removePartOfBuffer(socket_fd, 0, nl_pos + chunk_size + 4);
-	return (request);
 }
 
-HttpRequest *HttpRequestFactory::handlingSpecialException(const int& e, int socket_fd, HttpRequest *request)
+void HttpRequestFactory::handlingSpecialException(const int& e, int socket_fd, HttpRequest*& request)
 {
 	if (e == INCOMPLETE_REQUEST) // 불완전한 요청
 	{
 		delete request;
-		return (NULL);
+		request = NULL;
 	}
 	else // 청크 전송 시작 요청(START_CHUNKED_REQUEST)
 	{
 		HttpRequestHandler::addChunkedRequest(socket_fd, request);
 		removeRequestInBuffer(socket_fd, request);
-		return (request);
 	}
 }
 
-void HttpRequestFactory::removeRequestInBuffer(int socket_fd, HttpRequest *request)
+void HttpRequestFactory::removeRequestInBuffer(int socket_fd, HttpRequest* request)
 {
 	if (!request)
 		return;

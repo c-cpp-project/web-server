@@ -1,6 +1,6 @@
 #include "HttpRequestParser.hpp"
 
-HttpRequest *HttpRequestParser::parse(const std::string& buffer, HttpRequest *request)
+void HttpRequestParser::parse(const std::string& buffer, HttpRequest*& request)
 {
 	size_t end_of_headers = buffer.find("\r\n\r\n");
 	if (end_of_headers == std::string::npos)
@@ -11,15 +11,13 @@ HttpRequest *HttpRequestParser::parse(const std::string& buffer, HttpRequest *re
 	int start = 0;
 	request = new HttpRequest();
 	parseRequestLine(request, buffer, start);
-	std::cout << "after parse request line\n";
+	// std::cout << "after parse request line\n";
 	parseRequestHeaders(request, buffer, start);
-	std::cout << "after parse headers\n";
+	// std::cout << "after parse headers\n";
 	parseRequestBody(request, buffer, start);
-	std::cout << "after parse body\n";
+	// std::cout << "after parse body\n";
 	parseRequestParams(request);
-	std::cout << "after parse params\n";
-
-	return (request);
+	// std::cout << "after parse params\n";
 }
 
 // TODO : nginx는 요청 라인 전 일부 개행이 들어와도 무시하고 정상적으로 처리한다.
@@ -59,7 +57,6 @@ void HttpRequestParser::parseRequestBody(HttpRequest *request, const std::string
 	if (request->getMethod() != "POST")
 		return;
 
-
 	// chunked 헤더를 포함하는 POST 요청 -> chunked 수신을 시작하는 요청
 	if (request->getHeader("Transfer-Encoding") == "chunked") // TODO : chunked 이외는 다 무시하자.. 괜찮나?
 	{
@@ -74,11 +71,8 @@ void HttpRequestParser::parseRequestBody(HttpRequest *request, const std::string
 	int content_length = RequestUtility::strToPositiveInt(request->getHeader("Content-Length"));
 	if (content_length == -1)
 		throw "400";
-	std::cout << "buffer size: " << buffer.size() << ", start + content-length: " << start + content_length << '\n';
 	if ((int)buffer.size() < start + content_length)
 		throw INCOMPLETE_REQUEST;
-	
-	std::cout << "4\n";
 	
 	// TODO : Content-Type이 없는 경우, 강제로 쿼리스트링으로 인식해도 될까?
 	if (request->getHeader("Content-Type") == "")

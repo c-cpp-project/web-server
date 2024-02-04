@@ -8,6 +8,7 @@
 
 int main()
 {
+	/*
 	// 소켓 생성
 	int server_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_socket == -1) {
@@ -48,5 +49,8 @@ int main()
 
 	close(server_socket);
 	close(client_socket);
+	*/
+
+	HttpRequestHandler::handle(1);
 	return (0);
 }

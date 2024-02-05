@@ -2,13 +2,13 @@
 #define EventManager_HPP
 #include <unistd.h>
 
+#include "../HttpRequest/HttpRequestHandler.hpp"
 #include "Event.hpp"
-#include "FrontController.hpp"
 #include "ServerConfiguration.hpp"
 
 class EventManager {
  private:
-  std::map<int, FrontController> controllers;
+  std::map<int, HttpRequestHandler> requestHandlers;
   /* data */
  public:
   EventManager(/* args*/);
@@ -16,7 +16,7 @@ class EventManager {
   int addNewClient(int serverFd, ServerConfiguration* serverConfig,
                    Event* event);
   void disconnectClient(int clientFd);
-  FrontController& getFrontController(int clientFd);
+  HttpRequestHandler& getRequestHandler(int clientFd);
   bool isClient(int clientFd);
 
   bool processReadEvent(struct kevent& currEvent);

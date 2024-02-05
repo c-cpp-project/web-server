@@ -10,9 +10,10 @@ class ServerConfiguration {
  private:
   std::set<std::string> supportedTypes;
   std::map<int, int> serverSocketPortMap;
-  Server& server;
+  Server* server;
 
  public:
+  ServerConfiguration();
   ServerConfiguration(Server& server);
   ~ServerConfiguration();
   int getPort() const;

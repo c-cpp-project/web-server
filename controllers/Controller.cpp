@@ -2,10 +2,10 @@
 
 void    Controller::service(HttpRequest &request, HttpResponse &response)
 {
-    std::cout << request.getHeader("Content-Type") << ", " << request.getMethod() << "\n";
-    if (request.getHeader("Content-Type") == "application/x-www-form-urlencoded") // get, post
+    std::cout << request.getHeader("CONTENT-TYPE") << ", " << request.getMethod() << "\n";
+    if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded") // get, post
         doGet(request, response);
-    else if (request.getMethod() == "POST" && request.getHeader("Content-Type") == "multipart/form-data") // file upload
+    else if (request.getMethod() == "POST") // file upload
         doPost(request, response);
     else if (request.getMethod() == "DELETE") // delete
         doDelete(request, response);
@@ -36,3 +36,17 @@ Controller::Controller()
 
 Controller::~Controller()
 {}
+
+void	    Controller::response200(std::string body, HttpResponse &response)
+{
+	std::stringstream ss;
+	std::string	bodyLength;
+
+	response.putHeader("Server", HttpConfig::getServerName());
+	response.putHeader("Date", HttpConfig::getCurrentDate());
+	response.putHeader("Content-Type", "text/html;charset=utf-8");
+	ss << body.length();
+	bodyLength = ss.str();
+	response.putHeader("Content-Length", bodyLength);
+	response.sendBody(body);
+}

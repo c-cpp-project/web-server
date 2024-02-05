@@ -1,9 +1,13 @@
 #include "RequestParams.hpp"
 
-void RequestParams::addQuearyString(const std::string& query_string)
+int RequestParams::addQuearyString(const std::string& query_string)
 {
-	std::map<std::string, std::string> parsed = RequestUtility::parseQueryString(query_string);
+	bool success;
+	std::map<std::string, std::string> parsed = RequestUtility::parseQueryString(query_string, success);
+	if (success == false)
+		return (FAILURE);
 	params.insert(parsed.begin(), parsed.end());
+	return (SUCCESS);
 }
 
 std::string RequestParams::getParameter(const std::string& param)

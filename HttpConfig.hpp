@@ -4,6 +4,7 @@
 #include<map>
 #include<string>
 #include<algorithm>
+#include"controllers/ControllerMapping.hpp"
 
 class HttpConfig
 {
@@ -13,9 +14,11 @@ private:
     static  std::map<std::string, std::string>  redirectRepo;
     static  std::map<std::string, std::string>  cgiAddressRepo;
     static  std::string serverName;
+    static  std::map<int, int>  fdMap;
 public:
     HttpConfig();
     ~HttpConfig();
+    static  std::string testBody;
     static std::string  getHttpStatusMsg(std::string key);
     static void putHttpStatusCode(std::string key, std::string value);
     static  std::string pathResolver(std::string uri);
@@ -23,6 +26,7 @@ public:
     static  std::string getRedirectPath(std::string srcUri);
     static  std::string getServerName();
     static  std::string getCgiAddress(std::string cgiAddress);
+    static  std::string getCurrentDate();
 };
 
 #endif

@@ -1,6 +1,4 @@
 #include"HttpConfig.hpp"
-#include"controllers/ControllerMapping.hpp"
-
 
 std::string HttpConfig::serverName = "WebServe";
 std::map<std::string, std::string>  HttpConfig::statusCodeRepo;
@@ -43,7 +41,7 @@ HttpConfig::HttpConfig()
 		i++;
 	}
 	// pathRepo.put()
-	redirectRepo.insert(std::make_pair("/redirect", "/welcome"));
+	redirectRepo.insert(std::make_pair("/redirect", "/hello"));
 	// ControllerMapping.insert("/hello", new Hello()); -> CGI에서 처리해야 할 요청을 모두 저장
 	// 예를 들어, ControllerMapping.insert()"form 관련 요청 uri", new FromController());
 	ControllerMapping::putController("/controller", new MyController());
@@ -54,7 +52,7 @@ HttpConfig::HttpConfig()
 std::string HttpConfig::pathResolver(std::string uri)
 {
 	std::cout << "[" << uri << "]\n";
-	if (uri.find('.') != std::string::npos)
+	if (access(uri.substr(1).c_str(), F_OK) == 0)
 		return (uri.substr(1));
 	if (uri == "/")
 		uri = "/welcome";
@@ -89,6 +87,21 @@ std::string  HttpConfig::getServerName()
 HttpConfig::~HttpConfig()
 {
 	// static 동적 할당 모두 삭제
-	Controller *controller = ControllerMapping::getController("/index");
+	Controller *controller = ControllerMapping::getController("/controller");
 	delete controller;
+}
+
+
+std::string HttpConfig::getCurrentDate() {
+	// 현재 시각 얻기
+	std::time_t currentTime_t;
+    std::time(&currentTime_t);
+
+    // 시각을 현지 시간대로 변환
+    std::tm* localTime = std::localtime(&currentTime_t);
+
+	// 현재 날짜 및 시간 문자열 생성
+	std::ostringstream oss;
+	oss << std::put_time(localTime, "%a, %d %b %Y %H:%M:%S GMT");
+	return oss.str();
 }

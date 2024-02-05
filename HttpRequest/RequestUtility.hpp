@@ -5,16 +5,21 @@
 # include <vector>
 # include <map>
 
+# define SUCCESS 0
+# define FAILURE -1
+
 class RequestUtility
 {
 	public:
 		static std::vector<std::string> splitString(const std::string& input, char delimeter);
-		static std::map<std::string, std::string> parseQueryString(const std::string& query_string);
+		static std::map<std::string, std::string> parseQueryString(const std::string& query_string, bool& success);
 		static std::string trim(std::string string, const char *to_remove = " \t\n\v\f\r");
 		static std::string toUpperString(const std::string& input);
 		static bool containWhiteSpace(const std::string& input);
 		static bool isExist(const std::map<std::string, std::string>& map, const std::string& key);
-		static int toPositiveInt(const std::string& input);
+		static int strToPositiveInt(const std::string& input);
+		static std::string positiveIntToStr(int input);
+		static int hexToDecimal(const std::string &hex_string);
 };
 
 #endif

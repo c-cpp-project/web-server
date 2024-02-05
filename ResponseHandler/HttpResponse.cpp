@@ -9,6 +9,7 @@ HttpResponse::HttpResponse(int sockfd) // default 지정
 	this->send_timeout = "60"; // nginx send_timeout default
 	this->max_size = 64 * K;
 	this->status_code = "200";
+	this->responseBody = "";
 
 	// header에 대한 기본적인 설정 완료하기
 	putHeader("Keep-Alive", "timeout=60, max=999");
@@ -66,13 +67,12 @@ void	HttpResponse::forward(HttpRequest &request, HttpResponse &response) // cont
 		uri = "/fail";
 	fileName = HttpConfig::pathResolver(uri);
 	fd = open(fileName.c_str(), O_RDONLY);
-	if ((fd < 0 || request.getMethod() != "GET") && uri != "fail") 
+	if ((fd < 0 || request.getMethod() != "GET") && uri != "/fail") 
 	{
 		std::cout << fd << ", " << request.getMethod() << ", " << fileName <<"\n";
 		throw "404";
 	}
 	body = readFile(fd);
-	std::cout << "[DEBUG] " << body << "\n";
 	ss << body.length();
 	bodyLength = ss.str();
 	if (fileName.compare(fileName.length() - 4, 4, ".css") == 0)
@@ -127,19 +127,18 @@ void	HttpResponse::tokenizerFlush(std::string body)
 void    HttpResponse::sendBody(std::string body) // api 요청에 대한 응답
 {
 	ResponseStatusLine();
-	// putHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-	if (body.size() > this->max_size) // transfer-tokenizer
-	{
-		putHeader("Transfer-Encoding", "chunked");
-		std::cout << body.size() << ", " << this->max_size;
-	}
 	processHeader();
-	if (findValue("Transfer-Encoding") == "chunked")
-		tokenizerFlush(body);
-	else
+	HttpResponseBody(body);
+	unsigned long	clientBodySize = 0;
+	int				i;
+
+	i = 0;
+	while (i < static_cast<int>(this->buffer.size()))
 	{
-		HttpResponseBody(body);
-		flush();
+		clientBodySize += this->buffer[i].length();
+		if (clientBodySize > this->max_size)
+			throw "413";
+		i++;
 	}
 }
 
@@ -159,8 +158,6 @@ void    HttpResponse::processHeader()
 	std::string	msg  = "";
 	std::map<std::string, std::string>::iterator it;
 
-	if (findValue("Transfer-Encoding") != "")
-		removeHeader("Content-Length");
 	for (it = this->headers.begin(); it != this->headers.end(); ++it) 
 		msg += (it->first + ": " + it->second + "\r\n");
 	msg += "\r\n";
@@ -185,12 +182,17 @@ void	HttpResponse::flush() // 마지막에 호출
 	size = 0;
 	while (i < this->buffer.size())
 	{
+		if (httpMsg.find("HTTP/1.1") != std::string::npos && this->buffer[i].find("HTTP/1.1") != std::string::npos)
+			break ;
 		httpMsg += this->buffer[i];
 		size += this->buffer[i].length();
 		i++;
 	}
+	std::cout << "==========================================================\n";
+	std::cout << httpMsg << "\n";
 	send(this->sockfd, httpMsg.c_str(), httpMsg.length(), 0);
 	this->buffer.clear();
+	std::cout << "==========================================================\n";
 }
 
 void	HttpResponse::setStatusCode(std::string code)

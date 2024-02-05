@@ -63,6 +63,12 @@
         "utility": "cpp",
         "vector": "cpp",
         "iomanip": "cpp",
-        "csignal": "cpp"
+        "csignal": "cpp",
+        "deque": "cpp",
+        "fstream": "cpp",
+        "set": "cpp",
+        "stack": "cpp",
+        "filesystem": "cpp",
+        "memory_resource": "cpp"
     }
 }

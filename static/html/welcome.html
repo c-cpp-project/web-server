@@ -7,36 +7,47 @@
     <title>Feel the Success Page</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            text-align: center;
-            margin: 50px;
-            background-color: #a5d6a7; /* Uplifting green background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+            /* display: flex; */
+            margin-left: 35%;
+            /* margin-top: 20%; */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
-        h1 {
-            color: #2e7d32; /* Uplifting green text */
+        a.button {
+            display: inline-block;
+            padding: 15px 25px;
+            width: 350px;
+            /* height: 30px; Set a fixed height for all links */
+            line-height: 40px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #4caf50;
+            border: 2px solid #45a049;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-align: center; /* Center text horizontally */
         }
 
-        p {
-            font-size: 18px;
-            color: #2e7d32;
-        }
-
-        img {
-            width: 200px;
-            border-radius: 50%;
-            margin-top: 20px;
+        a.button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <h1>&#x1F680;Welcome page!!!!!!!!!!&#x1F680;</h1>
-    <h1>&#x1F44B;Welcome page!!!!!!!!!!&#x1F44B;</h1>
-    <h1>&#x1F44B;Welcome page!!!!!!!!!!&#x1F44B;</h1>
-    <h1>&#x1F44B;Welcome page!!!!!!!!!!&#x1F44B;</h1>
-    <h1>&#x1F44B;Welcome page!!!!!!!!!!&#x1F44B;</h1>
-    <h1>&#x1F680;Welcome page!!!!!!!!!!&#x1F680;</h1>
-    
-    <p>Have you accomplished something great and felt that uplifting moment?</p>
+    <h1><a href="/index" class="button">&#x1F680;Query String request page&#x1F680;</a></h1>
+    <h1><a href="/upload" class="button">&#x1F44B;Upload multiple file page&#x1F44B;</a></h1>
+    <h1><a href="/fail" class="button">&#x1F44B;Default fail page&#x1F44B;</a></h1>
+    <h1><a href="/" class="button">&#x1F44B;Default page&#x1F44B;</a></h1>
+    <h1><a href="/hello" class="button">&#x1F44B;hello page&#x1F44B;</a></h1>
+    <h1><a href="/redirect" class="button">&#x1F680;Redirect to hello page&#x1F680;</a></h1>
 </body>
 </html>
+

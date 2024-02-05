@@ -11,8 +11,10 @@ class HttpHeaders
 		static bool strongDuplicationBan(const std::string& field);
 
 	public:
-		void addHeader(const std::string& line);
+		int addHeader(const std::string& line);
 		std::string getHeader(const std::string& field);
+		void setHeader(const std::string& field, const std::string& value);
+		void removeHeader(const std::string& field);
 
 		// 테스트용
 		std::map<std::string, std::string>::iterator getBegin();

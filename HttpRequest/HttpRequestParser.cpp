@@ -11,13 +11,13 @@ void HttpRequestParser::parse(const std::string& buffer, HttpRequest*& request)
 	int start = 0;
 	request = new HttpRequest();
 	parseRequestLine(request, buffer, start);
-	// std::cout << "after parse request line\n";
+	std::cout << "after parse request line\n";
 	parseRequestHeaders(request, buffer, start);
-	// std::cout << "after parse headers\n";
+	std::cout << "after parse headers\n";
 	parseRequestBody(request, buffer, start);
-	// std::cout << "after parse body\n";
+	std::cout << "after parse body\n";
 	parseRequestParams(request);
-	// std::cout << "after parse params\n";
+	std::cout << "after parse params\n";
 }
 
 void HttpRequestParser::parseRequestLine(HttpRequest *request, const std::string& buffer, int& start)
@@ -63,7 +63,6 @@ void HttpRequestParser::parseRequestBody(HttpRequest *request, const std::string
 	if (request->getHeader("Transfer-Encoding") == "chunked") // TODO : chunked 이외는 다 무시하자.. 괜찮나?
 	{
 		request->setHeader("Content-Length", "0");
-		
 		throw START_CHUNKED_REQUEST;
 	}
 	
@@ -74,6 +73,7 @@ void HttpRequestParser::parseRequestBody(HttpRequest *request, const std::string
 	int content_length = RequestUtility::strToPositiveInt(request->getHeader("Content-Length"));
 	if (content_length == -1)
 		throw "400";
+	// TODO : buffer.size() 최대가 8000일 때도 잘 돌아가는지 확인하기
 	if ((int)buffer.size() < start + content_length)
 		throw INCOMPLETE_REQUEST;
 	

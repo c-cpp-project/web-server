@@ -15,11 +15,14 @@ std::map<int, HttpRequest*> HttpRequestHandler::chunkeds; // chunked 수신 중�
 #define IN_PROGRESS_CHUNKED_REQUEST 2
 #define LAST_CHUNKED_REQUEST 3
 
-void HttpRequestHandler::handle(int socket_fd)
+HttpRequestHandler::HttpRequestHandler(int _socket_fd, const ServerConfiguration& _server_info)
+	: socket_fd(_socket_fd), server_info(_server_info) { }
+
+void HttpRequestHandler::handle()
 {
 	try
 	{
-		int read_status = readRequest(socket_fd);
+		int read_status = readRequest();
 		std::cout << "-------------------------------------------------------------------" << read_status << '\n';
 		if (read_status == FAILURE) // 클라이언트와 연결이 끊긴 경우
 			return;
@@ -48,7 +51,7 @@ void HttpRequestHandler::handle(int socket_fd)
 					throw SocketCloseException400(); // 제한된 크기를 초과하는 요청
 				if (request == NULL)
 					return; // 버퍼에 완전한 요청이 없거나 연결이 끊김
-				if (ChunkedRequestHandling(socket_fd, request) == IN_PROGRESS_CHUNKED_REQUEST)
+				if (ChunkedRequestHandling(request) == IN_PROGRESS_CHUNKED_REQUEST)
 					continue; // 아직 끝나지 않은 chunked 요청
 
 				int	kqueue_fd = 0;
@@ -59,7 +62,7 @@ void HttpRequestHandler::handle(int socket_fd)
 			}
 			catch (const char *e)
 			{
-				errorHandling(e, socket_fd);
+				errorHandling(e);
 			}
 		}
 	}
@@ -69,13 +72,13 @@ void HttpRequestHandler::handle(int socket_fd)
 		removeBuffer(socket_fd);
 		removeAndDeleteChunkedRequest(socket_fd);
 		std::cout << "socket 닫기: " << e.what();
-		errorHandling(e.what(), socket_fd);
+		errorHandling(e.what());
 		// throw;
 		close(socket_fd);
 	}
 }
 
-int HttpRequestHandler::readRequest(int socket_fd)
+int HttpRequestHandler::readRequest()
 {
 	// if (fcntl(socket_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1) // 소켓을 논블로킹 모드로 설정
 	// 	throw SocketCloseException500();
@@ -99,7 +102,7 @@ int HttpRequestHandler::readRequest(int socket_fd)
 	return (SUCCESS);
 }
 
-int HttpRequestHandler::ChunkedRequestHandling(int socket_fd, HttpRequest *request)
+int HttpRequestHandler::ChunkedRequestHandling(HttpRequest *request)
 {
 	if (request->getHeader("Transfer-Encoding") != "chunked")
 		return (NO_CHUNKED_REQUEST);
@@ -113,7 +116,7 @@ int HttpRequestHandler::ChunkedRequestHandling(int socket_fd, HttpRequest *reque
 	return (LAST_CHUNKED_REQUEST);
 }
 
-void	HttpRequestHandler::errorHandling(const char	*erorr_code, int socket_fd)
+void HttpRequestHandler::errorHandling(const char *erorr_code)
 {
 	HttpRequest empty;
 	HttpResponse response(socket_fd);

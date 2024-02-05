@@ -79,9 +79,13 @@ int	endpointTest(void)
 	if (clientSocket== -1)
 		return (-1);
 	// FrontController frontController(clientSocket);
+
+	Server server;
+	ServerConfiguration server_info(server);
+	HttpRequestHandler httpRequestHandler(clientSocket, server_info);
 	while (true)
 	{
-		HttpRequestHandler::handle(clientSocket);
+		httpRequestHandler.handle();
 	}
 	// HttpRequestHandler::handle(clientSocket); // #### 유의사항 2
 	close(clientSocket);
@@ -92,7 +96,10 @@ int	endpointTest(void)
 int	requestToResponseTest(void)
 {
 	HttpConfig httpConfig;
-	HttpRequestHandler::handle(1);
+	Server server;
+	ServerConfiguration server_info(server);
+	HttpRequestHandler httpRequestHandler(1, server_info);
+	httpRequestHandler.handle();
 	return (0);
 }
 

@@ -14,11 +14,13 @@ class ServerConfiguration {
 
  public:
   ServerConfiguration(Server& server);
+  ServerConfiguration();
   ~ServerConfiguration();
   int getPort() const;
   int getKeepAliveTimeout();
   const std::string getServerName() const;
   const std::string getResourcePath(std::string& uri) const;
+  const std::string getResourcePath(std::string& uri, std::string& method) const;
   const std::string getErrorpageResourcePath(int statusCode) const;
   const std::pair<std::string, std::string> getRedirectionPath(
       const std::string& uri) const;

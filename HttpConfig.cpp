@@ -42,9 +42,10 @@ HttpConfig::HttpConfig()
 	}
 	// pathRepo.put()
 	redirectRepo.insert(std::make_pair("/redirect", "/hello"));
-	// ControllerMapping.insert("/hello", new Hello()); -> CGI에서 처리해야 할 요청을 모두 저장
-	// 예를 들어, ControllerMapping.insert()"form 관련 요청 uri", new FromController());
-	ControllerMapping::putController("/controller", new MyController());
+
+	// 생성자로 허용함수를 설정한다.
+	ControllerMapping::putController("default", new defaultController()); // default controller
+	ControllerMapping::putController("location", new MyController()); // 등록된 요청
 }
 
 // pathResolver는 redirect 요청이나 get 요청을 할 때 사용한다.
@@ -52,14 +53,15 @@ HttpConfig::HttpConfig()
 std::string HttpConfig::pathResolver(std::string uri)
 {
 	std::cout << "[" << uri << "]\n";
-	if (access(uri.substr(1).c_str(), F_OK) == 0)
-		return (uri.substr(1));
-	if (uri == "/")
-		uri = "/welcome";
-	// std::string uri;
-	// path = pathRepo.get("uri")
-	// return (path);
-	return ("static/html" + uri + ".html");
+	return (uri);
+	// if (access(uri.substr(1).c_str(), F_OK) == 0)
+	// 	return (uri.substr(1));
+	// if (uri == "/")
+	// 	uri = "/welcome";
+	// // std::string uri;
+	// // path = pathRepo.get("uri")
+	// // return (path);
+	// return ("static/html" + uri + ".html");
 }
 
 bool    HttpConfig::IsRedriectUri(std::string srcUri)

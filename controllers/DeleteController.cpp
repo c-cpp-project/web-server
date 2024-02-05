@@ -43,17 +43,16 @@ std::string    DeleteController::doExecute(HttpRequest &request, std::string dat
 
 void	DeleteController::doDelete(HttpRequest &request, HttpResponse &response)
 {
-	std::string currentDate = HttpConfig::getCurrentDate();
 	std::string	fileName;
 	std::string	cgiFile;
 	std::string	body;
-	std::stringstream ss;
-	std::string	bodyLength;
+	std::string	uri;
 
-	fileName = request.getPath().substr(1);
+	cgiFile = "cgi-bin/DoDelete.py";
+	uri = request.getPath();
+	fileName = uri.substr(uri.find('/', 1) + 1);
 	if (access(fileName.c_str(), F_OK) == -1) // 존재하지 않는다.
 		throw "404";
-	cgiFile = "cgi-bin/DoDelete.py";
 	body = doExecute(request, fileName, cgiFile.c_str());
 	if (body == "500")
 		throw "500";

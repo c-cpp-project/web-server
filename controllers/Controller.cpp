@@ -3,7 +3,14 @@
 void    Controller::service(HttpRequest &request, HttpResponse &response)
 {
     std::cout << request.getHeader("CONTENT-TYPE") << ", " << request.getMethod() << "\n";
-    if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded") // get, post
+    if (request.getMethod() == "GET" && request.getQueryString() == "")
+    {
+        if (HttpConfig::IsRedriectUri(request.getPath()) == true) // redirect
+            response.redirect(request, response);
+        else
+            response.forward(request, response); // get
+    }
+    else if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded") // get, post
         doGet(request, response);
     else if (request.getMethod() == "POST") // file upload
         doPost(request, response);
@@ -32,7 +39,9 @@ void	Controller::doDelete(HttpRequest &request, HttpResponse &response)
 }
 
 Controller::Controller()
-{}
+{
+    this->masking = 15; // 허용 함수는 어떻게 설정하는가?
+}
 
 Controller::~Controller()
 {}

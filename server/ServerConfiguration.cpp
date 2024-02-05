@@ -39,6 +39,10 @@ const std::string ServerConfiguration::getServerName() const {
   return server.getServerName();
 }
 
+const std::string ServerConfiguration::getResourcePath(std::string& uri, std::string& method) const {
+  return "";
+}
+
 const std::string ServerConfiguration::getResourcePath(std::string& uri) const {
   Location location = server.getLocations()[uri];
   std::string root = location.getRoot();

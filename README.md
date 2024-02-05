@@ -24,5 +24,6 @@
 1. Delete: controller에 저장하는 방식으로 사용하기. [기존 방식으로 수정]
 2. request-range하기
 3. pipe에 대한 NON_BLOCK
-
+4. http 하지 말기
+5. png 파일 하기
 

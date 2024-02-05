@@ -1,6 +1,6 @@
 
  
 # 특정 폴더안의 파일 전부 제외
-test_main.cpp
+# test_main.cpp
 
-Makefile
+# Makefile

@@ -15,13 +15,14 @@ class HttpRequestHandler
 	public:
 		static void handle(int socket_fd);
 
+		static int ChunkedRequestHandling(int socket_fd, HttpRequest* request);
+		static void	errorHandling(const char	*erorr_code, int socket_fd);
 		static HttpRequest *removeChunkedRequest(int socket_fd);
 		static void removeAndDeleteChunkedRequest(int socket_fd);
 		static HttpRequest *getChunkedRequest(int socket_fd);
 		static const std::string& getBuffer(int socket_fd);
 		static void addChunkedRequest(int socket_fd, HttpRequest *request);
 		static void removePartOfBuffer(int socket_fd, int start, int count);
-		static void	errorHandling(const char	*erorr_code, int socket_fd);
 };
 
 #endif

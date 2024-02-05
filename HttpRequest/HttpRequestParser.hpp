@@ -13,10 +13,10 @@ class HttpRequestParser
 		static void parseRequestLine(HttpRequest *request, const std::string& buffer, int& start);
 		static void parseRequestHeaders(HttpRequest *request, const std::string& buffer, int& start);
 		static void parseRequestBody(HttpRequest *request, const std::string& buffer, int start);
-		static void parseRequestParams(HttpRequest *request);
 
 	public:
 		static void parse(const std::string& buffer, HttpRequest*& request);
+		static void parseRequestParams(HttpRequest *request);
 };
 
 #endif

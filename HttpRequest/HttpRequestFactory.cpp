@@ -28,7 +28,7 @@ HttpRequest *HttpRequestFactory::create(int socket_fd)
 	}
 	catch (const int& e) // 특별한 예외(완전하지 않은 요청, 청크 시작 요청) 처리
 	{
-		handlingSpecialException(e, socket_fd, request);
+		SpecialExceptionHandling(e, socket_fd, request);
 	}
 	catch (const char *e) // 유효하지 않은 요청의 예외 처리
 	{
@@ -75,7 +75,7 @@ void HttpRequestFactory::parseChunkedRequest(int socket_fd, HttpRequest*& reques
 	HttpRequestHandler::removePartOfBuffer(socket_fd, 0, nl_pos + chunk_size + 4);
 }
 
-void HttpRequestFactory::handlingSpecialException(const int& e, int socket_fd, HttpRequest*& request)
+void HttpRequestFactory::SpecialExceptionHandling(const int& e, int socket_fd, HttpRequest*& request)
 {
 	if (e == INCOMPLETE_REQUEST) // 불완전한 요청
 	{

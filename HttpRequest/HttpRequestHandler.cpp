@@ -11,6 +11,10 @@ std::map<int, HttpRequest*> HttpRequestHandler::chunkeds; // chunked 수신 중�
 
 #include <unistd.h>
 
+#define NO_CHUNKED_REQUEST 1
+#define IN_PROGRESS_CHUNKED_REQUEST 2
+#define LAST_CHUNKED_REQUEST 3
+
 void HttpRequestHandler::handle(int socket_fd)
 {
 	try
@@ -44,29 +48,9 @@ void HttpRequestHandler::handle(int socket_fd)
 					throw SocketCloseException400(); // 제한된 크기를 초과하는 요청
 				if (request == NULL)
 					return; // 버퍼에 완전한 요청이 없거나 연결이 끊김
-				
-				// chunked 요청이지만, chunkeds 맵에 포함된 경우 -> 아직 chunked 요청 전체가 끝나지 않았음
-				if (request->getHeader("Transfer-Encoding") == "chunked" && chunkeds.find(socket_fd) != chunkeds.end())
-					continue;
+				if (ChunkedRequestHandling(socket_fd, request) == IN_PROGRESS_CHUNKED_REQUEST)
+					continue; // 아직 끝나지 않은 chunked 요청
 
-				std::cout << "200 OK\n";
-
-				std::cout << "=============== [Request line] ===============\n";
-				std::cout << "method: " << request->getMethod() << '\n';
-				std::cout << "path: " << request->getPath() << '\n';
-				std::cout << "query string: " << request->getQueryString() << '\n';
-			
-				std::cout << "=============== [Request Header] ==============\n";
-				request->printAllHeader();
-
-				std::cout << "=============== [Request Body] ===============\n";
-				std::cout << request->getBody() << "\n";
-
-				std::cout << "=============== [Request Params] ===============\n";
-				request->printAllParams();
-
-				// HttpResponse response(socket_fd);
-				std::cout << "================== FrontController ==================\n";
 				int	kqueue_fd = 0;
 				FrontController front_controller(kqueue_fd, socket_fd);
 				front_controller.run(*request);
@@ -75,7 +59,6 @@ void HttpRequestHandler::handle(int socket_fd)
 			}
 			catch (const char *e)
 			{
-				std::cout << "Error: " << e << '\n';
 				errorHandling(e, socket_fd);
 			}
 		}
@@ -90,15 +73,6 @@ void HttpRequestHandler::handle(int socket_fd)
 		// throw;
 		close(socket_fd);
 	}
-}
-
-void	HttpRequestHandler::errorHandling(const char	*erorr_code, int socket_fd)
-{
-	HttpRequest empty;
-	HttpResponse response(socket_fd);
-	response.setStatusCode(erorr_code);
-	response.forward(empty, response);
-	response.flush();
 }
 
 int HttpRequestHandler::readRequest(int socket_fd)
@@ -123,6 +97,29 @@ int HttpRequestHandler::readRequest(int socket_fd)
 	delete[] temp_buffer;
 
 	return (SUCCESS);
+}
+
+int HttpRequestHandler::ChunkedRequestHandling(int socket_fd, HttpRequest *request)
+{
+	if (request->getHeader("Transfer-Encoding") != "chunked")
+		return (NO_CHUNKED_REQUEST);
+
+	// chunkeds 맵에 포함된 chunked 요청인 경우 -> 아직 chunked 요청 전체가 끝나지 않았음
+	if (chunkeds.find(socket_fd) != chunkeds.end())
+		return (IN_PROGRESS_CHUNKED_REQUEST);
+
+	// 마지막 chunked 요청인 경우
+	HttpRequestParser::parseRequestParams(request);
+	return (LAST_CHUNKED_REQUEST);
+}
+
+void	HttpRequestHandler::errorHandling(const char	*erorr_code, int socket_fd)
+{
+	HttpRequest empty;
+	HttpResponse response(socket_fd);
+	response.setStatusCode(erorr_code);
+	response.forward(empty, response);
+	response.flush();
 }
 
 void HttpRequestHandler::removeBuffer(int socket_fd)

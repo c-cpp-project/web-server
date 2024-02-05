@@ -38,7 +38,7 @@ void    FrontController::run(HttpRequest tmp)
 		}
 	}
 	std::cout << "====================================================\n\n";
-	response.flush();
+	response.flush(); // response header 수정할게요
 	std::cout << "====================================================\n\n";
 	delete request;
 }

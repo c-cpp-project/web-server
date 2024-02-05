@@ -5,18 +5,6 @@ std::map<std::string, std::string>  HttpConfig::statusCodeRepo;
 std::map<std::string, std::string>  HttpConfig::pathRepo;
 std::map<std::string, std::string>  HttpConfig::redirectRepo;
 std::map<std::string, std::string>  HttpConfig::cgiAddressRepo;
-static  std::map<int, int>  fdMap;
-std::string HttpConfig::testBody = 
-"-----------------------------1234567890123456789012345678\r\n\
-Content-Disposition: form-data; name=\"text_field\"\r\n\
-\r\n\
-This is a simple text field.\r\n\
------------------------------1234567890123456789012345678\r\n\
-Content-Disposition: form-data; name=\"file\"; filename=\"example.txt\"\r\n\
-Content-Type: text/plain\r\n\
-\r\n\
-Contents of the file go here.\r\n\
------------------------------1234567890123456789012345678--\r\n";
 
 std::string HttpConfig::getHttpStatusMsg(std::string key)
 {
@@ -53,7 +41,7 @@ HttpConfig::HttpConfig()
 		i++;
 	}
 	// pathRepo.put()
-	redirectRepo.insert(std::make_pair("/redirect", "/welcome"));
+	redirectRepo.insert(std::make_pair("/redirect", "/hello"));
 	// ControllerMapping.insert("/hello", new Hello()); -> CGI에서 처리해야 할 요청을 모두 저장
 	// 예를 들어, ControllerMapping.insert()"form 관련 요청 uri", new FromController());
 	ControllerMapping::putController("/controller", new MyController());

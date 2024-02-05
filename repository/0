@@ -1,1 +1,6 @@
-This is a simple text field.
+total 16
+drwx------   5 sangwoki  2022_seoul   160 Feb  5 13:55 .
+drwxrwxrwt  63 root      wheel       2016 Feb  3 19:20 ..
+-rw-r--r--   1 sangwoki  2022_seoul   184 Feb  5 13:55 a.txt
+-rw-r--r--   1 sangwoki  2022_seoul   245 Feb  5 13:55 b.txt
+-rw-r--r--   1 sangwoki  2022_seoul     0 Feb  5 13:55 c.txt

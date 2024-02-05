@@ -45,7 +45,7 @@ std::string    MyController::doExecuteWrite(std::string &data, std::string conte
 
 		// 출력
 		close(pipefd2[1]);
-		read(pipefd2[0], buffer, 64 * K);
+		ret = read(pipefd2[0], buffer, 64 * K);
 		close(pipefd2[0]);
 		// fcntl(pipefd1[1], F_SETFL, O_NONBLOCK);
 		wait(NULL);
@@ -53,6 +53,7 @@ std::string    MyController::doExecuteWrite(std::string &data, std::string conte
 			throw ("500");
 	}
 	buffer[ret] = 0;
+	std::cout << "buffer:[" << buffer << "]\n";
 	return (buffer);
 }
 
@@ -123,6 +124,5 @@ void	MyController::doPost(HttpRequest &request, HttpResponse &response)
 	body = doExecuteWrite(data, contentType, cgiFile.c_str());
 	if (body == "500")
 		throw "500";
-	std::cout << "body:[" << body << "]\n";
 	response200(body, response);
 }

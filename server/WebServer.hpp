@@ -11,7 +11,6 @@ class WebServer {
   static const int LISTENCAPACITY = 1000;
   static WebServer& getInstance(
       std::map<int, ServerConfiguration> serverConfigs);
-  void run();
   void execute();
 
  private:

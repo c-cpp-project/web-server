@@ -3,9 +3,10 @@
 
 #include <fstream>
 #include <iostream>
-#include <string>
 #include <map>
 #include <set>
+#include <string>
+
 #include "Location.hpp"
 
 class NginxConfiguration {

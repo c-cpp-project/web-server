@@ -86,14 +86,15 @@ int endpointTest(ServerConfiguration* serverConfig) {
   return (0);
 }
 
-std::map<int, ServerConfiguration> wrapServer(std::map<int, Server> servers) {
-  std::map<int, ServerConfiguration> maps;
+std::map<int, ServerConfiguration*> wrapServer(std::map<int, Server> servers) {
+  std::map<int, ServerConfiguration*> maps;
   std::map<int, Server>::iterator it = servers.begin();
   while (it != servers.end()) {
     int port = it->first;
     Server& server = it->second;
-    const ServerConfiguration& serverConfig = ServerConfiguration(server);
-    maps.insert(std::pair<int, ServerConfiguration>(port, serverConfig));
+    ServerConfiguration* serverConfig = new ServerConfiguration(server);
+    maps.insert(std::pair<int, ServerConfiguration*>(serverConfig->getPort(),serverConfig));
+    std::cout << "server2 : " << maps[serverConfig->getPort()]->getPort() << std::endl;
     it++;
   }
   return maps;
@@ -101,22 +102,26 @@ std::map<int, ServerConfiguration> wrapServer(std::map<int, Server> servers) {
 
 int main(int argc, char** argv) {
   std::string configFileName;
-
   if (argc > 2) {
     std::cout << "[ERROR] invalid args count" << std::endl;
     return 1;
   }
   if (argc == 1) {
-    std::cout << "[INFO] use default conf file" << std::endl;
-    configFileName = "server/config/default.conf";
+    std::cout << "[INFO] use default conf file ./config/default.conf"
+              << std::endl;
+    configFileName = "./config/default.conf";
   } else
     configFileName = argv[1];
   ConfigParser configParser;
-  //   ServerManager serverManager;
-
   configParser.parseConfig(configFileName);
-  std::map<int, ServerConfiguration> serverConfigs =
-      wrapServer(configParser.server);
-  serverConfigs[80].getServerName();
-  endpointTest(&serverConfigs[80]);
+  std::map<int, ServerConfiguration*> serverConfigs;
+  std::map<int, Server>::iterator it = configParser.server.begin();
+  while (it != configParser.server.end()) {
+    int port = it->first;
+    Server& server = it->second;
+    ServerConfiguration* serverConfig = new ServerConfiguration(server);
+    serverConfigs.insert(std::pair<int, ServerConfiguration*>(serverConfig->getPort(),serverConfig));
+    it++;
+  }
+  endpointTest(serverConfigs[80]);
 }

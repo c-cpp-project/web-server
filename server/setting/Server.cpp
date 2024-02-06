@@ -5,7 +5,7 @@
 #include <vector>
 
 Server::Server()
-    : listen(80),
+    : listen(-1),
       serverName(""),
       root("/"),
       autoIndex(false),
@@ -62,6 +62,8 @@ bool Server::fillServer(std::map<std::string, Location>& mapLocations,
       this->setAutoIndex(it->second);
     else if (it->first == "client_max_body_size")
       this->setClientBodySize(it->second);
+    else if (it->first == "client_max_header_size")
+      this->setClientHeaderSize(it->second);
     else if (it->first == "upload_path")
       this->setUploadPath(it->second);
     else if (it->first == "keepalive_timeout")
@@ -77,14 +79,14 @@ void Server::setListen(std::string& input) {
   long parsedPort = strtod(input.c_str(), NULL);
 
   if (parsedPort < 0 || parsedPort > 65535)
-    std::cout << "Warning : invalid port number" << std::endl;
+    std::cout << "[WARN] invalid port number" << std::endl;
   this->listen = parsedPort;
 }
 
 void Server::setKeepAliveTimeout(std::string& input) {
   long keepAliveTimeout = strtod(input.c_str(), NULL);
   if (keepAliveTimeout < 0)
-    std::cout << "Warning : invalid keepAliveTimeout" << std::endl;
+    std::cout << "[WARN] invalid keepAliveTimeout" << std::endl;
   this->keepAliveTimeout = keepAliveTimeout;
 }
 
@@ -145,6 +147,10 @@ void Server::setAutoIndex(std::string& input) {
 }
 
 void Server::setClientBodySize(std::string& input) {
+  this->clientBodySize = std::strtod(input.c_str(), NULL);
+}
+
+void Server::setClientHeaderSize(std::string& input) {
   this->clientBodySize = std::strtod(input.c_str(), NULL);
 }
 

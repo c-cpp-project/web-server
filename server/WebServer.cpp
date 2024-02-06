@@ -16,12 +16,12 @@
 #include "StringUtils.hpp"
 
 WebServer& WebServer::getInstance(
-    std::map<int, ServerConfiguration> serverConfig) {
+    std::map<int, ServerConfiguration*> serverConfig) {
   static WebServer instance(serverConfig);
   return instance;
 }
 
-WebServer::WebServer(std::map<int, ServerConfiguration> serverConfigs) {
+WebServer::WebServer(std::map<int, ServerConfiguration*> serverConfigs) {
   this->serverConfigs = serverConfigs;
 }
 
@@ -33,7 +33,7 @@ void WebServer::segSignalHandler(int signo) {
 }
 
 void WebServer::init() {
-  std::map<int, ServerConfiguration>::iterator it = serverConfigs.begin();
+  std::map<int, ServerConfiguration*>::iterator it = serverConfigs.begin();
   signal(SIGSEGV, WebServer::segSignalHandler);
   int port = 8080;
   if (eventHandler.initKqueue()) {
@@ -41,7 +41,7 @@ void WebServer::init() {
     exit(1);
   }
   while (it != serverConfigs.end()) {
-    ServerConfiguration& serverConfig = it->second;
+    ServerConfiguration* serverConfig = it->second;
     int serversSocket = openPort(serverConfig);
     fcntl(serversSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
     serverSocketPortMap[serversSocket] = it->first;
@@ -50,13 +50,13 @@ void WebServer::init() {
   }
 }
 
-int WebServer::openPort(ServerConfiguration& serverConfig) {
+int WebServer::openPort(ServerConfiguration* serverConfig) {
   struct addrinfo* info;
   struct addrinfo hint;
   struct sockaddr_in socketaddr;
   int opt = 1;
-  int port = serverConfig.getPort();
-  std::string serverName = serverConfig.getServerName();
+  int port = serverConfig->getPort();
+  std::string serverName = serverConfig->getServerName();
 
   std::cout << "[INFO] " << serverName << " "
             << "Port number : " << port << std::endl;

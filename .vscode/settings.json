@@ -69,6 +69,11 @@
         "set": "cpp",
         "stack": "cpp",
         "filesystem": "cpp",
-        "memory_resource": "cpp"
+        "memory_resource": "cpp",
+        "__bits": "cpp",
+        "clocale": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "variant": "cpp"
     }
 }

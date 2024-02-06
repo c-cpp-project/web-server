@@ -16,8 +16,10 @@ class Server {
   std::map<std::string, int> redirection;
   bool autoIndex;
   size_t clientBodySize;
+  size_t clientHeaderSize;
   std::map<std::string, Location> locations;
   std::string uploadedPath;
+  
 
   void setListen(std::string& input);
   void setServerName(std::string& input);
@@ -28,6 +30,7 @@ class Server {
   void setClientBodySize(std::string& input);
   void setUploadPath(std::string& input);
   void setKeepAliveTimeout(std::string& input);
+  void setClientHeaderSize(std::string& input);
 
  public:
   Server();

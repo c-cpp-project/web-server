@@ -10,20 +10,20 @@ class WebServer {
  public:
   static const int LISTENCAPACITY = 1000;
   static WebServer& getInstance(
-      std::map<int, ServerConfiguration> serverConfigs);
+      std::map<int, ServerConfiguration*> serverConfigs);
   void execute();
 
  private:
   Event eventHandler;
-  std::map<int, ServerConfiguration> serverConfigs;
+  std::map<int, ServerConfiguration*> serverConfigs;
   std::map<int, int> serverSocketPortMap;
   WebServer(const WebServer&);
-  WebServer(std::map<int, ServerConfiguration> serverConfig);
+  WebServer(std::map<int, ServerConfiguration*> serverConfig);
   //   WebServer& operator=(const WebServer&);
   static void segSignalHandler(int signo);
   void init();
   void handleEvent();
-  int openPort(ServerConfiguration& serverConfig);
+  int openPort(ServerConfiguration* serverConfig);
 
   void processEvent(struct kevent& currEvent);
   void processErrorEvent(struct kevent& currEvent);

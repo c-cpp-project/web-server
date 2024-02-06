@@ -7,7 +7,7 @@
 
 // constructors
 Location::Location()
-    : root("/"), allowMethod(0), autoIndex(false), clientBodySize(0) {}
+    : root("/"), autoIndex(false), clientBodySize(0) {}
 // destructor
 Location::~Location() {}
 // copy constructors
@@ -30,7 +30,7 @@ std::pair<std::string, std::string> Location::getRedirectionInfo() const {
   return this->redirectionInfo;
 }
 
-unsigned int Location::getAllowMethod(void) const { return this->allowMethod; }
+const std::set<std::string> Location::getAllowMethod() const { return this->allowedMethods; }
 
 std::vector<std::string> Location::getIndex(void) const { return this->index; }
 
@@ -105,15 +105,11 @@ bool Location::setAllowMethod(std::string& sentence) {
   while (sstream >> token) tokens.push_back(token);
   for (size_t i = 0; i < tokens.size(); i++) {
     if (tokens[i] == "GET")
-      allowMethod |= GET;
+      allowedMethods.insert("GET");
     else if (tokens[i] == "POST")
-      allowMethod |= POST;
-    else if (tokens[i] == "PUT")
-      allowMethod |= PUT;
+      allowedMethods.insert("POST");
     else if (tokens[i] == "DELETE")
-      allowMethod |= DELETE;
-    else if (tokens[i] == "HEAD")
-      allowMethod |= HEAD;
+      allowedMethods.insert("DELETE");
     else
       return true;
   }

@@ -1,4 +1,5 @@
 #include "ServerConfiguration.hpp"
+#include <iostream>
 
 ServerConfiguration::ServerConfiguration() : server(NULL) {}
 
@@ -27,11 +28,15 @@ ServerConfiguration::ServerConfiguration(Server& server) : server(&server) {
   this->supportedTypes.insert("audio/ogg");
   this->supportedTypes.insert("video/mp4");
   this->supportedTypes.insert("video/webm");
+  this->defaultAllowedMethods.insert("GET");
 }
 
 ServerConfiguration::~ServerConfiguration() {}
 
-int ServerConfiguration::getPort() const { return server->getListen(); }
+int ServerConfiguration::getPort() const { 
+  std::cout << server->getListen() << std::endl;
+  return server->getListen(); 
+}
 
 int ServerConfiguration::getKeepAliveTimeout() {
   return server->getKeepAliveTimeout();
@@ -41,11 +46,26 @@ const std::string ServerConfiguration::getServerName() const {
   return server->getServerName();
 }
 
-const std::string ServerConfiguration::getResourcePath(std::string& uri) const {
+const std::string ServerConfiguration::getResourcePath(std::string uri) const {
   Location location = server->getLocations()[uri];
-  std::string root = location.getRoot();
-  std::string index = location.getIndex()[0];
-  return root + "/" + index;
+  std::vector<std::string> indexVectors = location.getIndex();
+  if (server->getLocations().find(uri) == server->getLocations().end() || location.getIndex().size() == 0){
+    return getPathByRootAndValue(server->getRoot(), uri);
+  }
+  if (location.getRoot() == "") {
+    return getPathByRootAndValue(server->getRoot(), indexVectors[0]);
+  }
+  return getPathByRootAndValue(location.getRoot(), indexVectors[0]);
+}
+
+const std::string ServerConfiguration::getPathByRootAndValue(std::string root, std::string value ) const {
+  if (value == "/") {
+    return root;
+  }
+  if (root[root.length() - 1] == '/') {
+      return root + value;
+  }
+  return root + '/' + value;
 }
 
 const std::string ServerConfiguration::getErrorpageResourcePath(
@@ -53,16 +73,40 @@ const std::string ServerConfiguration::getErrorpageResourcePath(
   return server->getErrorCodePage()[statusCode];
 }
 
-// Get the redirection path for a given URI
 const std::pair<std::string, std::string>
 ServerConfiguration::getRedirectionPath(const std::string& uri) const {
   return server->getLocations()[uri].getRedirectionInfo();
 }
 
-// Check if a content type is supported
 bool ServerConfiguration::hasContentType(const std::string& contentType) {
-  // Assuming Server class has a method or a set of supported content types
   return supportedTypes.find(contentType) != supportedTypes.end();
 }
 
 const Server& ServerConfiguration::getServer() const { return *server; }
+
+const std::string ServerConfiguration::getRoot() const {
+  return server->getRoot();
+}
+
+const std::string ServerConfiguration::getUploadPath() const {
+  return server->getUploadPath();
+}
+
+const std::set<std::string> ServerConfiguration::getAllowedMethod(const std::string& uri) const {
+  // 'server' 포인터와 'uri' 키의 유효성을 검증합니다.
+  if (!server || server->getLocations().find(uri) == server->getLocations().end()) {
+    std::cout << defaultAllowedMethods.size() << std::endl;
+    return defaultAllowedMethods; // 기본 허용 메소드 반환
+  }
+
+  // 'uri' 키에 해당하는 Location 객체를 안전하게 접근합니다.
+  const std::map<std::string, Location>& locations = server->getLocations();
+  std::map<std::string, Location>::const_iterator it = locations.find(uri);
+  if (it != locations.end()) {
+    const Location& location = it->second;
+    return location.getAllowMethod();
+  }
+
+  // 'uri' 키가 존재하지 않는 경우, 기본 허용 메소드 세트를 반환합니다.
+  return defaultAllowedMethods;
+}

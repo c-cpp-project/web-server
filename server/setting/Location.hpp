@@ -2,6 +2,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <set>
 
 class Location {
  private:
@@ -9,7 +10,7 @@ class Location {
   std::map<std::vector<int>, std::string> errorPage;
   std::map<int, std::string> errorCodePage;
   std::map<std::string, int> redirection;
-  unsigned int allowMethod;
+  std::set<std::string> allowedMethods;
   std::vector<std::string> index;
   bool autoIndex;
   size_t clientBodySize;
@@ -33,7 +34,7 @@ class Location {
   std::map<std::vector<int>, std::string> getErrorPage(void) const;
   std::map<int, std::string> getErrorCodePage(void) const;
   std::map<std::string, int> getRedirection(void) const;
-  unsigned int getAllowMethod(void) const;
+  const std::set<std::string> getAllowMethod() const;
   std::vector<std::string> getIndex(void) const;
   bool getAutoIndex(void) const;
   size_t getClientBodySize(void) const;

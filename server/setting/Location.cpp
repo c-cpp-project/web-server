@@ -7,7 +7,7 @@
 
 // constructors
 Location::Location()
-    : root("/"), autoIndex(false), clientBodySize(0) {}
+    : root("/"), autoIndex(false), clientBodySize(0), redirectionInfo(std::pair<std::string, std::string>("400", "")) {}
 // destructor
 Location::~Location() {}
 // copy constructors

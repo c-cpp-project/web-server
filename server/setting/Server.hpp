@@ -15,8 +15,8 @@ class Server {
   std::map<int, std::string> errorCodePage;
   std::map<std::string, int> redirection;
   bool autoIndex;
-  size_t clientBodySize;
-  size_t clientHeaderSize;
+  long clientBodySize;
+  long clientHeaderSize;
   std::map<std::string, Location> locations;
   std::string uploadedPath;
   
@@ -44,7 +44,8 @@ class Server {
   std::map<int, std::string> getErrorCodePage();
   std::map<std::string, int> getRedirection() const;
   bool getAutoIndex() const;
-  unsigned int getClientBodySize() const;
+  long getClientBodySize() const;
+  long getClientHeaderSize() const;
   std::map<std::string, Location> getLocations() const;
   std::string getServerName() const;
   std::string getUploadPath() const;

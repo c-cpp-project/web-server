@@ -70,11 +70,17 @@ const std::string ServerConfiguration::getPathByRootAndValue(std::string root, s
 
 const std::string ServerConfiguration::getErrorpageResourcePath(
     int statusCode) const {
+  if (!server || server->getErrorCodePage().find(statusCode) == server->getErrorCodePage().end()) {
+    return "";// 존재하지 않음
+  }
   return server->getErrorCodePage()[statusCode];
 }
 
 const std::pair<std::string, std::string>
 ServerConfiguration::getRedirectionPath(const std::string& uri) const {
+  if (!server || server->getLocations().find(uri) == server->getLocations().end()) {
+    return std::pair<std::string, std::string>("400", ""); // 존재하지 않음
+  }
   return server->getLocations()[uri].getRedirectionInfo();
 }
 
@@ -92,10 +98,16 @@ const std::string ServerConfiguration::getUploadPath() const {
   return server->getUploadPath();
 }
 
+long ServerConfiguration::getClientBodySize() const {
+  return server->getClientBodySize();
+};
+long ServerConfiguration::getClientHeaderSize() const {
+  return server->getClientHeaderSize();
+};
+
 const std::set<std::string> ServerConfiguration::getAllowedMethod(const std::string& uri) const {
   // 'server' 포인터와 'uri' 키의 유효성을 검증합니다.
   if (!server || server->getLocations().find(uri) == server->getLocations().end()) {
-    std::cout << defaultAllowedMethods.size() << std::endl;
     return defaultAllowedMethods; // 기본 허용 메소드 반환
   }
 

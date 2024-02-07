@@ -5,11 +5,13 @@
 #include <vector>
 
 Server::Server()
-    : listen(-1),
+    : listen(80),
       serverName(""),
       root("/"),
+      uploadedPath(""),
       autoIndex(false),
-      clientBodySize(100),
+      clientHeaderSize(10000),
+      clientBodySize(10000),
       keepAliveTimeout(500) {}
 
 Server::~Server() {}
@@ -36,9 +38,13 @@ std::map<std::string, int> Server::getRedirection(void) const {
 
 bool Server::getAutoIndex(void) const { return this->autoIndex; }
 
-unsigned int Server::getClientBodySize(void) const {
+long Server::getClientBodySize() const {
   return this->clientBodySize;
 }
+
+long Server::getClientHeaderSize() const {
+  return this->clientHeaderSize;
+};
 
 std::string Server::getUploadPath() const { return this->uploadedPath; }
 

@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
   // std::cout << configParser.server[8080].getKeepAliveTimeout() << std::endl;
   // std::cout << configParser.server[80].getClientBodySize() << std::endl;
 
-  std::cout << configParser.server[80].getErrorCodePage()[403] << std::endl;
+  std::cout << configParser.server[80].getUploadPath() << std::endl;
   // ServerConfiguration serverConfiguration(configParser.server[80]);
   // std::cout << serverConfiguration.getRedirectionPath("/redirection").first
   //           << std::endl;

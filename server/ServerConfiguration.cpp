@@ -104,6 +104,9 @@ long ServerConfiguration::getClientBodySize() const {
 long ServerConfiguration::getClientHeaderSize() const {
   return server->getClientHeaderSize();
 };
+long ServerConfiguration::getClientRequestSize() const {
+  return getClientBodySize() + getClientHeaderSize();
+};
 
 const std::set<std::string> ServerConfiguration::getAllowedMethod(const std::string& uri) const {
   // 'server' 포인터와 'uri' 키의 유효성을 검증합니다.

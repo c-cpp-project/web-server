@@ -64,7 +64,7 @@ std::string HttpRequest::getCookie(const std::string& key) const
 {
 	if (cookie == NULL)
 		return ("");
-	return (cookie->getParameter(key));
+	return (cookie->getCookieValue(key));
 }
 
 std::string HttpRequest::getBody() const

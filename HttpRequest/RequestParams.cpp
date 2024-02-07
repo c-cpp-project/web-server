@@ -27,6 +27,12 @@ std::string RequestParams::getParameter(const std::string& param)
 	return ("");
 }
 
+std::string RequestParams::getCookieValue(const std::string& key)
+{
+	std::string upper_key = RequestUtility::toUpperString(key);
+	return (getParameter(upper_key));
+}
+
 // 테스트용
 std::map<std::string, std::string>::iterator RequestParams::getBegin()
 {

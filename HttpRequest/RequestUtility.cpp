@@ -57,7 +57,8 @@ std::map<std::string, std::string> RequestUtility::parseCookieString(const std::
 			success = false;
 			return (result);
 		}
-		result[tockens[0]] = tockens[1];
+		std::string upper_key = toUpperString(tockens[0]);
+		result[upper_key] = tockens[1];
 	}
 	success = true;
 	return (result);

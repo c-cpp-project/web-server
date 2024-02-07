@@ -13,6 +13,7 @@ class SessionStorage
 	public:
 		static std::string addSessionData(SessionData *session_data);
 		static SessionData *getSessionData(const std::string& session_id);
+		static void removeSessionData(const std::string& session_id);
 };
 
 #endif

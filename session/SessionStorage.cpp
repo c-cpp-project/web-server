@@ -35,3 +35,13 @@ std::string SessionStorage::generateSessionId()
 	
 	return (session_id);
 }
+
+void SessionStorage::removeSessionData(const std::string& session_id)
+{
+	std::map<std::string, SessionData*>::iterator it = storage.find(session_id);
+	if (it != storage.end())
+	{
+		delete it->second;
+		storage.erase(it);
+	}
+}

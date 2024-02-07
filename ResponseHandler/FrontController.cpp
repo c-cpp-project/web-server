@@ -1,7 +1,7 @@
 #include"FrontController.hpp"
 #include"../server/ServerConfiguration.hpp"
 
-void    FrontController::run(HttpRequest tmp)
+void    FrontController::run(HttpRequest tmp, ServerConfiguration serverConfig)
 {
 	std::vector<HttpRequest> 	*request;
 	MultiRequest                multiRequest(tmp.getHeader("content-type"));
@@ -24,15 +24,15 @@ void    FrontController::run(HttpRequest tmp)
 		std::cout << "=============== [Request Body] ===============\n";
 		std::cout << request->at(i).getBody() << "\n";
 		
-		// 
-		ServerConfiguration	serverConfig;
+		// ServerConfiguration	serverConfig;
 		std::string			path;
-
-		path = serverConfig.getResourcePath(request->at(i).getPath(), request->at(i).getMethod());
-		if (path != "")
-			request->at(i).setPath(path);
-		controller = new MyController(); // 허용 함수 설정
-		controller->service(request->at(i), response);
+		Controller			*controller;
+		
+		controller = ControllerMapping::getController(serverConfig.getPort(), request->at(i).getPath());
+		// path = serverConfig.getResourcePath(request->at(i).getPath());
+		// if (path != "")
+		// 	request->at(i).setPath(path);
+		controller->service(request->at(i), response, serverConfig);
 		controller = nullptr;
 	}
 	std::cout << "====================================================\n\n";

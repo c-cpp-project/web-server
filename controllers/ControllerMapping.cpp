@@ -1,8 +1,8 @@
 #include"ControllerMapping.hpp"
 
-std::map<std::pair<std::string, std::string>, Controller *> ControllerMapping::controllers;
+std::map<std::pair<int, std::string>, Controller *> ControllerMapping::controllers;
 
-void ControllerMapping::putController(std::string port, std::string uri, Controller *controller)
+void ControllerMapping::putController(int port, std::string uri, Controller *controller)
 {
 	controllers.insert(std::make_pair(std::make_pair(port, uri), controller));
 }
@@ -17,26 +17,60 @@ std::string	ControllerMapping::getLocationUri(std::string uri)
 	return (location);
 }
 
-Controller *ControllerMapping::getController(std::string port, std::string uri)
+Controller *ControllerMapping::getController(int port, std::string uri)
 {
-	std::pair<std::string, std::string>	key;
+	std::pair<int, std::string>	key;
 
 	key.first = port;
 	key.second = getLocationUri(uri);
+	if (controllers[key] == 0)
+	{
+		key.first = 0;
+		key.second = DEFAULT;
+	}
 	return (controllers[key]);
 }
 
-void		ControllerMapping::mapController()
+void		ControllerMapping::mapController(std::map<int, ServerConfiguration*> &serverConfigs)
 {
-	ServerConfiguration	serverConfig;
+	std::map<std::string, Location>::iterator		configIter;
+	std::map<int, ServerConfiguration*>::iterator	portIter;			
 	Server				server;
-	std::map<std::string, Location>::iterator	iter;
+	std::stringstream 	ss;
 
-	server = serverConfig.getServer();
-	for (iter = server.getLocations().begin(); iter != server.getLocations().end(); iter++)
+	for (portIter = serverConfigs.begin(); portIter != serverConfigs.end(); portIter++)
 	{
-		std::string		locationUri = iter->first;
-		unsigned int	allowMethod = iter->second.getAllowMethod();
+		int					port;
+		ServerConfiguration	config;
 
+		port = portIter->first;
+		config = *portIter->second;
+		server = config.getServer();
+		for (configIter = server.getLocations().begin(); configIter != server.getLocations().end(); configIter++)
+		{
+			std::string				locationUri = configIter->first;
+			std::set<std::string>	allowMethod = configIter->second.getAllowMethod();
+			unsigned int			method;
+
+			method = 0;
+			if (allowMethod.find("GET") != allowMethod.end())
+				method += METHOD::GET;
+			if (allowMethod.find("POST") != allowMethod.end())
+				method += METHOD::POST;
+			if (allowMethod.find("DELETE") != allowMethod.end())
+				method += METHOD::DELETE;
+			putController(port, locationUri, new MyController(method));
+		}
+	}
+	putController(0, DEFAULT, new DefaultController());
+}
+
+void		ControllerMapping::deleteController(void)
+{
+	std::map<std::pair<int, std::string>, Controller *>::iterator iter;
+
+	for (iter = controllers.begin(); iter != controllers.end(); iter++)
+	{
+		delete iter->second;
 	}
 }

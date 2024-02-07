@@ -10,6 +10,7 @@ HttpResponse::HttpResponse(int sockfd) // default 지정
 	this->max_size = 64 * K;
 	this->status_code = "200";
 	this->responseBody = "";
+	this->overlaped = false;
 
 	// header에 대한 기본적인 설정 완료하기
 	putHeader("Keep-Alive", "timeout=60, max=999");
@@ -43,11 +44,11 @@ void	HttpResponse::removeHeader(std::string key)
 	std::cout << "[remove header: " << key << "]\n";
 }
 
-void	HttpResponse::redirect(HttpRequest &request, HttpResponse &response)
+void	HttpResponse::redirect(std::string redirectUri, HttpResponse &response)
 {
 	response.getMaxBodySize();
 	setStatusCode("302");
-	putHeader("Location", ResponseConfig::getRedirectPath(request.getPath()));
+	// putHeader("Location", ResponseConfig::getRedirectPath(redirectUri));
 	putHeader("Content-Type", "text/html");
 	putHeader("Content-Length", "0");
 	sendBody("");
@@ -65,7 +66,7 @@ void	HttpResponse::forward(HttpRequest &request, HttpResponse &response) // cont
 	uri = request.getPath();
 	if (response.getStatusCode()[0] == '4' || response.getStatusCode()[0] == '5') // fail.page
 		uri = "/fail";
-	fileName = ResponseConfig::pathResolver(uri);
+	// fileName = ResponseConfig::pathResolver(uri);
 	fd = open(fileName.c_str(), O_RDONLY);
 	if ((fd < 0 || request.getMethod() != "GET") && uri != "/fail") 
 	{
@@ -73,14 +74,11 @@ void	HttpResponse::forward(HttpRequest &request, HttpResponse &response) // cont
 		throw "404";
 	}
 	body = readFile(fd);
+	if (request.getParameter("Range") != "" && request.getMethod() == "GET")
+		body = readRangeQuery(request.getParameter("Range"), body);
 	ss << body.length();
 	bodyLength = ss.str();
-	if (fileName.compare(fileName.length() - 4, 4, ".css") == 0)
-		putHeader("Content-Type", "text/css");
-	else if (fileName.compare(fileName.length() - 3, 3, ".js") == 0)
-		putHeader("Content-Type", "application/javascript");
-	else
-		putHeader("Content-Type", "text/html;charset=utf-8");
+	putContentType(fileName);
 	putHeader("Content-Length", bodyLength);
 	sendBody(body);
 }
@@ -126,6 +124,10 @@ void	HttpResponse::tokenizerFlush(std::string body)
 
 void    HttpResponse::sendBody(std::string body) // api 요청에 대한 응답
 {
+	if (overlaped == false)
+		overlaped = true;
+	else
+		return ;
 	ResponseStatusLine();
 	processHeader();
 	HttpResponseBody(body);
@@ -182,8 +184,6 @@ void	HttpResponse::flush() // 마지막에 호출
 	size = 0;
 	while (i < this->buffer.size())
 	{
-		if (httpMsg.find("HTTP/1.1") != std::string::npos && this->buffer[i].find("HTTP/1.1") != std::string::npos)
-			break ;
 		httpMsg += this->buffer[i];
 		size += this->buffer[i].length();
 		i++;
@@ -223,4 +223,18 @@ std::string	HttpResponse::findValue(std::string key)
 	if (it != headers.end())
 		return (it->second);
 	return ("");
+}
+
+void		HttpResponse::putContentType(std::string filename)
+{
+	std::string contentType = ResponseConfig::getContentType(filename);
+	putHeader("Content-Type", contentType);
+}
+
+std::string	HttpResponse::readRangeQuery(std::string range, std::string body)
+{
+	std::string value1 = range.substr(range.find("="), range.find("-"));
+	std::string value2 = range.substr(range.find("-"));
+
+    return (body.substr(std::atoi(value1.c_str()), std::atoi(value2.c_str())));
 }

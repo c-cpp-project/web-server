@@ -25,7 +25,7 @@ public:
 	FrontController();
 	~FrontController();
 
-	void    run(HttpRequest request);
+	void    run(HttpRequest tmp, ServerConfiguration serverConfig)
 };
 #endif
 

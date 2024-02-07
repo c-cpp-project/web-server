@@ -1,22 +1,29 @@
 #include"ResponseConfig.hpp"
 
-std::string ResponseConfig::serverName = "WebServe";
 std::map<std::string, std::string>  ResponseConfig::statusCodeRepo;
-std::map<std::string, std::string>  ResponseConfig::pathRepo;
-std::map<std::string, std::string>  ResponseConfig::redirectRepo;
 std::map<std::string, std::string>  ResponseConfig::cgiAddressRepo;
+std::set<std::string>				ResponseConfig::supportedTypesRepo;
+
+ResponseConfig::ResponseConfig()
+{
+	
+}
+
+ResponseConfig::ResponseConfig(std::map<int, ServerConfiguration*> &serverConfigs)
+{
+	setHttpStatusCode(); // StatusCode 초기화 설정
+	ControllerMapping::mapController(serverConfigs); // Contorller 설정
+}
+
+
+ResponseConfig::~ResponseConfig()
+{
+	ControllerMapping::deleteController();
+}
 
 std::string ResponseConfig::getHttpStatusMsg(std::string key)
 {
 	return (statusCodeRepo[key]);
-}
-
-std::string	ResponseConfig::getRedirectPath(std::string srcUri)
-{
-	std::string	destUri;
-
-	destUri = redirectRepo[srcUri];
-	return (pathResolver(destUri));
 }
 
 void    ResponseConfig::putHttpStatusCode(std::string key, std::string value)
@@ -24,7 +31,7 @@ void    ResponseConfig::putHttpStatusCode(std::string key, std::string value)
 	statusCodeRepo[key] = value;
 }
 
-ResponseConfig::ResponseConfig()
+void	ResponseConfig::setHttpStatusCode(void)
 {
 	int	i;
 	std::string	key[32] = {
@@ -40,54 +47,6 @@ ResponseConfig::ResponseConfig()
 		statusCodeRepo.insert(std::make_pair(key[i], value[i]));
 		i++;
 	}
-	// pathRepo.put()
-	redirectRepo.insert(std::make_pair("/redirect", "/hello"));
-
-}
-
-// pathResolver는 redirect 요청이나 get 요청을 할 때 사용한다.
-// uri에 대응하는 nginx file을 적용하여 값을 반환 
-std::string ResponseConfig::pathResolver(std::string uri)
-{
-	std::cout << "[" << uri << "]\n";
-	return (uri);
-	// if (access(uri.substr(1).c_str(), F_OK) == 0)
-	// 	return (uri.substr(1));
-	// if (uri == "/")
-	// 	uri = "/welcome";
-	// // std::string uri;
-	// // path = pathRepo.get("uri")
-	// // return (path);
-	// return ("static/html" + uri + ".html");
-}
-
-bool    ResponseConfig::IsRedriectUri(std::string srcUri)
-{
-	std::cout << srcUri << ", size: " << redirectRepo.size() << "\n";
-	std::map<std::string, std::string>::iterator it;
-	try
-	{
-		it = redirectRepo.find(srcUri);
-		if (it != redirectRepo.end())
-        	return (true);
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << "IsRedriectUri: " << e.what() << '\n';
-	}
-	return (false);
-}
-
-std::string  ResponseConfig::getServerName()
-{
-	return (ResponseConfig::serverName);
-}
-
-ResponseConfig::~ResponseConfig()
-{
-	// static 동적 할당 모두 삭제
-	Controller *controller = ControllerMapping::getController("/controller");
-	delete controller;
 }
 
 std::string ResponseConfig::getCurrentDate() {
@@ -103,3 +62,54 @@ std::string ResponseConfig::getCurrentDate() {
 	oss << std::put_time(localTime, "%a, %d %b %Y %H:%M:%S GMT");
 	return oss.str();
 }
+
+void	ResponseConfig::setHttpContentType(void)
+{
+	// text 타입
+	supportedTypesRepo.insert("text/html");
+	supportedTypesRepo.insert("text/plain");
+	supportedTypesRepo.insert("text/css");
+	supportedTypesRepo.insert("text/javascript");  // 또는 application/javascript
+
+  	// 애플리케이션 타입
+	supportedTypesRepo.insert("application/json");
+	supportedTypesRepo.insert("application/xml");
+	supportedTypesRepo.insert("application/x-www-form-urlencoded");
+	supportedTypesRepo.insert("application/pdf");
+	supportedTypesRepo.insert("application/octet-stream");
+
+	// 이미지 타입
+	supportedTypesRepo.insert("image/jpeg");
+	supportedTypesRepo.insert("image/png");
+	supportedTypesRepo.insert("image/gif");
+	supportedTypesRepo.insert("image/webp");
+
+	// 오디오/비디오 타입
+	supportedTypesRepo.insert("audio/mpeg");
+	supportedTypesRepo.insert("audio/ogg");
+	supportedTypesRepo.insert("video/mp4");
+	supportedTypesRepo.insert("video/webm");
+}
+
+std::string	ResponseConfig::getContentType(std::string filename)
+{
+	std::set<std::string>::iterator	iter;
+	std::string	extension;
+	std::string	contentType;
+
+	contentType = "text/plain";
+	extension = filename.substr(filename.find(".") + 1);
+	for (iter = supportedTypesRepo.begin(); iter != supportedTypesRepo.end(); iter++)
+	{
+		if ((*iter).find(extension) != std::string::npos)
+		{
+			contentType = *iter;
+			break ;
+		}
+	}
+	return (contentType);
+}
+
+//================================================================================================//
+//									필수적인 설정 부분												   //
+//================================================================================================//

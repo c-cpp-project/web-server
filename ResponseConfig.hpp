@@ -9,24 +9,22 @@
 class ResponseConfig
 {
 private:
-    static  std::map<std::string, std::string>  statusCodeRepo;
-    static  std::map<std::string, std::string>  pathRepo;
-    static  std::map<std::string, std::string>  redirectRepo;
-    static  std::map<std::string, std::string>  cgiAddressRepo;
-    static  std::string serverName;
-    static  std::map<int, int>  fdMap;
+	void    setHttpStatusCode(void);
+	void	setHttpContentType(void);
+	static  std::map<std::string, std::string>  statusCodeRepo;
+	static	std::set<std::string>				supportedTypesRepo;
+
+
+	static  std::map<std::string, std::string>  cgiAddressRepo;
 public:
-    ResponseConfig();
-    ~ResponseConfig();
-    static  std::string testBody;
-    static std::string  getHttpStatusMsg(std::string key);
-    static void putHttpStatusCode(std::string key, std::string value);
-    static  std::string pathResolver(std::string uri);
-    static  bool    IsRedriectUri(std::string srcUri);
-    static  std::string getRedirectPath(std::string srcUri);
-    static  std::string getServerName();
-    static  std::string getCgiAddress(std::string cgiAddress);
-    static  std::string getCurrentDate();
+	ResponseConfig();
+	~ResponseConfig();
+	ResponseConfig(std::map<int, ServerConfiguration*> &serverConfigs);
+	static void putHttpStatusCode(std::string key, std::string value);
+
+	static  std::string getCurrentDate();
+	static  std::string	getContentType(std::string filename);
+	static  std::string	getHttpStatusMsg(std::string key);
 };
 
 #endif

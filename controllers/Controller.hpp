@@ -1,6 +1,8 @@
 
 #include"../ResponseHandler/HttpResponse.hpp"
 #include"../HttpRequest/HttpRequest.hpp"
+#include"../server/setting/ConfigParser.hpp"
+#include"../server/ServerConfiguration.hpp"
 #include <string>
 #include <unistd.h>
 #include <iostream>
@@ -15,10 +17,6 @@
 #ifndef CONTROLLER_HPP
 # define CONTROLLER_HPP
 
-#define	GET		1
-#define	POST	2
-#define	DELETE	4
-
 class   HttpRequest;
 class   HttpResponse;
 class Controller
@@ -26,16 +24,20 @@ class Controller
 private:
 	int masking; // 허용 메서드 7 -> 모두 허용
 public:
-	void    service(HttpRequest &request, HttpResponse &response);
-	virtual void	doSimpleGet(HttpRequest &request, HttpResponse &response);
-	virtual void    doGet(HttpRequest &request, HttpResponse &response);
-	virtual void	doPost(HttpRequest &request, HttpResponse &response);
-	virtual	void	doDelete(HttpRequest &request, HttpResponse &response);
-	void	   		response200(std::string body, HttpResponse &response);
-	bool			isAcceptableMethod(std::string method);
+	virtual void    service(HttpRequest &request, HttpResponse &response, ServerConfiguration serverConfig) = 0;
+	void	doSimpleGet(HttpRequest &request, HttpResponse &response, ServerConfiguration serverConfig);
+	void    doGet(HttpRequest &request, HttpResponse &response);
+	void	doPost(HttpRequest &request, HttpResponse &response);
+	void	doDelete(HttpRequest &request, HttpResponse &response);
+	void	response200(std::string body, HttpResponse &response);
+	bool	isAcceptableMethod(std::string method);
 	virtual ~Controller();
 	Controller();
 	Controller(int masking);
+
+	std::string     doExecuteWrite(std::string &data,  std::string filename, const char *cgi_python);
+    std::string     doExecuteRead(std::string &data, const char *cgi_python);
+	std::string		doExecuteDelete(HttpRequest &request, std::string data, const char *cgi_python);
 };
 
 #endif

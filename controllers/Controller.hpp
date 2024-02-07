@@ -24,7 +24,7 @@ class Controller
 private:
 	int masking; // 허용 메서드 7 -> 모두 허용
 public:
-	virtual void    service(HttpRequest &request, HttpResponse &response, ServerConfiguration serverConfig) = 0;
+	virtual void    service(HttpRequest &request, HttpResponse &response, ServerConfiguration *serverConfig) = 0;
 	void	doSimpleGet(HttpRequest &request, HttpResponse &response, ServerConfiguration serverConfig);
 	void    doGet(HttpRequest &request, HttpResponse &response);
 	void	doPost(HttpRequest &request, HttpResponse &response);

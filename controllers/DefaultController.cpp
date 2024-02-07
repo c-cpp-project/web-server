@@ -7,7 +7,7 @@ DefaultController::DefaultController() : Controller(METHOD::GET)
 DefaultController::~DefaultController()
 {}
 
-void    DefaultController::service(HttpRequest &request, HttpResponse &response, ServerConfiguration serverConfig)
+void    DefaultController::service(HttpRequest &request, HttpResponse &response, ServerConfiguration *serverConfig)
 {
     std::string originPath;
     std::string path;
@@ -15,7 +15,7 @@ void    DefaultController::service(HttpRequest &request, HttpResponse &response,
     if (isAcceptableMethod(request.getMethod()) == false)
         throw "405";
     originPath = request.getPath();
-    path = serverConfig.getResourcePath(originPath);
+    path = serverConfig->getResourcePath(originPath);
     if (path != "")
         request.setPath(path);
     if (ResponseConfig::IsRedriectUri(originPath) == true) // redirect

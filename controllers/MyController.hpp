@@ -9,7 +9,7 @@ class MyController : public Controller
 {
 private:
 public:
-	void    service(HttpRequest &request, HttpResponse &response, ServerConfiguration serverConfig);
+	void    service(HttpRequest &request, HttpResponse &response, ServerConfiguration *serverConfig);
 	MyController();
 	MyController(int masking);
 	~MyController();

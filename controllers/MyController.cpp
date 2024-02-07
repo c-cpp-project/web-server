@@ -9,7 +9,7 @@ MyController::MyController(int masking) : Controller(masking)
 MyController::~MyController()
 {}
 
-void    MyController::service(HttpRequest &request, HttpResponse &response, ServerConfiguration serverConfig)
+void    MyController::service(HttpRequest &request, HttpResponse &response, ServerConfiguration *serverConfig)
 {
     std::string originPath;
     std::string path;
@@ -17,7 +17,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response, Serv
     if (isAcceptableMethod(request.getMethod()) == false)
         throw "405";
     originPath = request.getPath();
-    path = serverConfig.getResourcePath(originPath);
+    path = serverConfig->getResourcePath(originPath);
     if (path != "")
         request.setPath(path);
     if (request.getMethod() == "GET" && request.getQueryString() == "")

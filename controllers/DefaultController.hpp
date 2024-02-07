@@ -11,7 +11,7 @@ private:
 public:
 	private:
 public:
-	void    service(HttpRequest &request, HttpResponse &response, ServerConfiguration serverConfig);
+	void    service(HttpRequest &request, HttpResponse &response, ServerConfiguration *serverConfig);
 	DefaultController();
 	DefaultController(int masking);
 	~DefaultController();

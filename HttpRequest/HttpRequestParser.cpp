@@ -1,11 +1,11 @@
 #include "HttpRequestParser.hpp"
 
-void HttpRequestParser::parse(const std::string& buffer, HttpRequest*& request)
+void HttpRequestParser::parse(const std::string& buffer, HttpRequest*& request, ServerConfiguration *server_config)
 {
 	size_t end_of_headers = buffer.find("\r\n\r\n");
 	if (end_of_headers == std::string::npos)
 		throw INCOMPLETE_REQUEST; // 헤더의 끝을 식별할 수 없는 경우 -> 불완전한 요청
-	if (end_of_headers > 1000) // TODO : nginx 설정에 따라 헤더의 최대 크기 변경
+	if (end_of_headers > (size_t)server_config->getClientHeaderSize())
 		throw SocketCloseException400();
 
 	int start = 0;

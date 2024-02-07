@@ -1,13 +1,12 @@
 #ifndef HTTP_REQUEST_HANDLER_HPP
 #define HTTP_REQUEST_HANDLER_HPP
 
-#include "../server/ServerConfiguration.hpp"
-#include "HttpRequest.hpp"
+#include "HttpRequestFactory.hpp"
 
 class HttpRequestHandler {
  private:
   int socket_fd;
-  ServerConfiguration *server_info;
+  ServerConfiguration *server_config;
 
   static std::map<int, std::string> buffers;  // 요청을 읽어오는 소켓, 버퍼
   static std::map<int, HttpRequest *>
@@ -17,7 +16,7 @@ class HttpRequestHandler {
   static void removeBuffer(int socket_fd);
 
  public:
-  HttpRequestHandler(int socket_fd, ServerConfiguration *server_info);
+  HttpRequestHandler(int socket_fd, ServerConfiguration *server_config);
 
   void handle();
   int ChunkedRequestHandling(HttpRequest *request);

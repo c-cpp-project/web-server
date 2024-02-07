@@ -3,9 +3,6 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 
-#include "HttpRequestFactory.hpp"
-
-// #include "../ResponseHandler/HttpResponse.hpp"
 #include "../ResponseHandler/FrontController.hpp"
 
 std::map<int, std::string>
@@ -20,8 +17,8 @@ std::map<int, HttpRequest *>
 #define LAST_CHUNKED_REQUEST 3
 
 HttpRequestHandler::HttpRequestHandler(int _socket_fd,
-                                       ServerConfiguration *_server_info)
-    : socket_fd(_socket_fd), server_info(_server_info) {}
+                                       ServerConfiguration *_server_config)
+    : socket_fd(_socket_fd), server_config(_server_config) {}
 
 void HttpRequestHandler::handle() {
   try {
@@ -75,10 +72,9 @@ void HttpRequestHandler::handle() {
       // ***********************\n"; std::cout << "buffer:\n" <<
       // buffers[socket_fd] << "\n!buffer end!\n";
       try {
-        HttpRequest *request = HttpRequestFactory::create(socket_fd);
+        HttpRequest *request = HttpRequestFactory::create(socket_fd, server_config);
         if (request == NULL &&
-            buffers[socket_fd].size() == 8000)  // TODO : nginx 설정에 따라 최대
-                                                // 헤더 + 바디 크기로 설정하기
+            buffers[socket_fd].size() == (size_t)server_config->getClientRequestSize())
           throw SocketCloseException400();  // 제한된 크기를 초과하는 요청
         if (request == NULL) return;  // 버퍼에 완전한 요청이 없거나 연결이 끊김
         if (ChunkedRequestHandling(request) == IN_PROGRESS_CHUNKED_REQUEST)
@@ -109,9 +105,9 @@ int HttpRequestHandler::readRequest() {
   // 논블로킹 모드로 설정 	throw SocketCloseException500();
 
   int remaining_size =
-      8000 -
+      server_config->getClientRequestSize() -
       buffers[socket_fd]
-          .size();  // TODO : nginx 설정에 따라 최대 헤더 + 바디 크기로 설정하기
+          .size();
   char *temp_buffer =
       new char[remaining_size];  // 여유 크기만큼 버퍼 메모리 할당
 

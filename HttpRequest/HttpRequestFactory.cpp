@@ -10,7 +10,7 @@
 
 // 완전하고 유효한 request 객체 하나를 만들어서 반환
 // 반환 값이 NULL인 경우, 소켓이 닫혔거나 소켓에 충분한 데이터가 없음을 뜻함
-HttpRequest *HttpRequestFactory::create(int socket_fd)
+HttpRequest *HttpRequestFactory::create(int socket_fd, ServerConfiguration *server_config)
 {
 	HttpRequest *request = NULL;
 	try
@@ -18,11 +18,11 @@ HttpRequest *HttpRequestFactory::create(int socket_fd)
 		request = HttpRequestHandler::getChunkedRequest(socket_fd);
 		if (request != NULL) // chunked 전송 요청인 경우
 		{
-			parseChunkedRequest(socket_fd, request);
+			parseChunkedRequest(socket_fd, request, server_config);
 		}
 		else // 일반 요청인 경우
 		{
-			HttpRequestParser::parse(HttpRequestHandler::getBuffer(socket_fd), request);
+			HttpRequestParser::parse(HttpRequestHandler::getBuffer(socket_fd), request, server_config);
 			removeRequestInBuffer(socket_fd, request);
 		}
 	}
@@ -39,7 +39,7 @@ HttpRequest *HttpRequestFactory::create(int socket_fd)
 	return (request);
 }
 
-void HttpRequestFactory::parseChunkedRequest(int socket_fd, HttpRequest*& request)
+void HttpRequestFactory::parseChunkedRequest(int socket_fd, HttpRequest*& request, ServerConfiguration *server_config)
 {
 	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
 
@@ -65,7 +65,7 @@ void HttpRequestFactory::parseChunkedRequest(int socket_fd, HttpRequest*& reques
 	}
 
 	int content_length = RequestUtility::strToPositiveInt(request->getHeader("Content-Length")) + chunk_size;
-	if (content_length > 5000) // TODO : nginx 설정에 따라 최대 바디 크기를 변경하기
+	if (content_length > server_config->getClientBodySize())
 		throw SocketCloseException400(); // 제한된 바디 크기를 초과하는 경우 -> 연결 끊기
 	request->setHeader("Content-Length", RequestUtility::positiveIntToStr(content_length)); // content-length 값 갱신
 

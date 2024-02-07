@@ -47,7 +47,7 @@ void	HttpResponse::redirect(HttpRequest &request, HttpResponse &response)
 {
 	response.getMaxBodySize();
 	setStatusCode("302");
-	putHeader("Location", HttpConfig::getRedirectPath(request.getPath()));
+	putHeader("Location", ResponseConfig::getRedirectPath(request.getPath()));
 	putHeader("Content-Type", "text/html");
 	putHeader("Content-Length", "0");
 	sendBody("");
@@ -65,7 +65,7 @@ void	HttpResponse::forward(HttpRequest &request, HttpResponse &response) // cont
 	uri = request.getPath();
 	if (response.getStatusCode()[0] == '4' || response.getStatusCode()[0] == '5') // fail.page
 		uri = "/fail";
-	fileName = HttpConfig::pathResolver(uri);
+	fileName = ResponseConfig::pathResolver(uri);
 	fd = open(fileName.c_str(), O_RDONLY);
 	if ((fd < 0 || request.getMethod() != "GET") && uri != "/fail") 
 	{
@@ -148,7 +148,7 @@ void    HttpResponse::ResponseStatusLine()
 
 	msg += "HTTP/1.1 ";
 	msg += this->status_code + " ";
-	msg += HttpConfig::getHttpStatusMsg(this->status_code);
+	msg += ResponseConfig::getHttpStatusMsg(this->status_code);
 	msg += "\r\n";
 	this->buffer.push_back(msg);
 }

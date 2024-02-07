@@ -17,7 +17,7 @@ SRCS = test_main.cpp \
 	HttpRequest/RequestUtility.cpp HttpRequest/HttpRequestFactory.cpp \
 	controllers/Controller.cpp controllers/ControllerMapping.cpp controllers/DeleteController.cpp controllers/MyController.cpp \
 	ResponseHandler/FrontController.cpp ResponseHandler/HttpResponse.cpp ResponseHandler/InterruptApi.cpp ResponseHandler/MultiRequest.cpp \
-	HttpConfig.cpp
+	ResponseConfig.cpp
 
 	
 OBJS = $(SRCS:.cpp=.o)

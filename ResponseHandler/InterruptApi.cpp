@@ -17,8 +17,8 @@ void    InterruptApi::callResponse()
 	    std::string	bodyLength;
 
         response.ResponseStatusLine();
-        response.putHeader("Server", HttpConfig::getServerName());
-        response.putHeader("Date", HttpConfig::getCurrentDate());
+        response.putHeader("Server", ResponseConfig::getServerName());
+        response.putHeader("Date", ResponseConfig::getCurrentDate());
         response.putHeader("Content-Type", "text/html;charset=utf-8");
         ss << ret;
         bodyLength = ss.str();

@@ -8,13 +8,12 @@
 #include"HttpRequest/SocketCloseException.hpp"
 #include"controllers/Controller.hpp"
 #include"controllers/ControllerMapping.hpp"
-#include"controllers/DeleteController.hpp"
 #include"controllers/MyController.hpp"
 #include"ResponseHandler/FrontController.hpp"
 #include"ResponseHandler/HttpResponse.hpp"
 #include"ResponseHandler/InterruptApi.hpp"
 #include"ResponseHandler/MultiRequest.hpp"
-#include"HttpConfig.hpp"
+#include"ResponseConfig.hpp"
 #include <cstring>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -70,7 +69,7 @@ int	tcp_connection(int &clientSocket, int &server_socket)
 int	endpointTest(void)
 {
 	// 소켓 생성
-	HttpConfig	HttpConfig;
+	ResponseConfig	ResponseConfig;
 	int	clientSocket;
 	int	server_socket;
 

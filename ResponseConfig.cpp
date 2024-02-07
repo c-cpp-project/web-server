@@ -1,17 +1,17 @@
-#include"HttpConfig.hpp"
+#include"ResponseConfig.hpp"
 
-std::string HttpConfig::serverName = "WebServe";
-std::map<std::string, std::string>  HttpConfig::statusCodeRepo;
-std::map<std::string, std::string>  HttpConfig::pathRepo;
-std::map<std::string, std::string>  HttpConfig::redirectRepo;
-std::map<std::string, std::string>  HttpConfig::cgiAddressRepo;
+std::string ResponseConfig::serverName = "WebServe";
+std::map<std::string, std::string>  ResponseConfig::statusCodeRepo;
+std::map<std::string, std::string>  ResponseConfig::pathRepo;
+std::map<std::string, std::string>  ResponseConfig::redirectRepo;
+std::map<std::string, std::string>  ResponseConfig::cgiAddressRepo;
 
-std::string HttpConfig::getHttpStatusMsg(std::string key)
+std::string ResponseConfig::getHttpStatusMsg(std::string key)
 {
 	return (statusCodeRepo[key]);
 }
 
-std::string	HttpConfig::getRedirectPath(std::string srcUri)
+std::string	ResponseConfig::getRedirectPath(std::string srcUri)
 {
 	std::string	destUri;
 
@@ -19,12 +19,12 @@ std::string	HttpConfig::getRedirectPath(std::string srcUri)
 	return (pathResolver(destUri));
 }
 
-void    HttpConfig::putHttpStatusCode(std::string key, std::string value)
+void    ResponseConfig::putHttpStatusCode(std::string key, std::string value)
 {
 	statusCodeRepo[key] = value;
 }
 
-HttpConfig::HttpConfig()
+ResponseConfig::ResponseConfig()
 {
 	int	i;
 	std::string	key[32] = {
@@ -42,27 +42,26 @@ HttpConfig::HttpConfig()
 	}
 	// pathRepo.put()
 	redirectRepo.insert(std::make_pair("/redirect", "/hello"));
-	// ControllerMapping.insert("/hello", new Hello()); -> CGI에서 처리해야 할 요청을 모두 저장
-	// 예를 들어, ControllerMapping.insert()"form 관련 요청 uri", new FromController());
-	ControllerMapping::putController("/controller", new MyController());
+
 }
 
 // pathResolver는 redirect 요청이나 get 요청을 할 때 사용한다.
 // uri에 대응하는 nginx file을 적용하여 값을 반환 
-std::string HttpConfig::pathResolver(std::string uri)
+std::string ResponseConfig::pathResolver(std::string uri)
 {
 	std::cout << "[" << uri << "]\n";
-	if (access(uri.substr(1).c_str(), F_OK) == 0)
-		return (uri.substr(1));
-	if (uri == "/")
-		uri = "/welcome";
-	// std::string uri;
-	// path = pathRepo.get("uri")
-	// return (path);
-	return ("static/html" + uri + ".html");
+	return (uri);
+	// if (access(uri.substr(1).c_str(), F_OK) == 0)
+	// 	return (uri.substr(1));
+	// if (uri == "/")
+	// 	uri = "/welcome";
+	// // std::string uri;
+	// // path = pathRepo.get("uri")
+	// // return (path);
+	// return ("static/html" + uri + ".html");
 }
 
-bool    HttpConfig::IsRedriectUri(std::string srcUri)
+bool    ResponseConfig::IsRedriectUri(std::string srcUri)
 {
 	std::cout << srcUri << ", size: " << redirectRepo.size() << "\n";
 	std::map<std::string, std::string>::iterator it;
@@ -79,20 +78,19 @@ bool    HttpConfig::IsRedriectUri(std::string srcUri)
 	return (false);
 }
 
-std::string  HttpConfig::getServerName()
+std::string  ResponseConfig::getServerName()
 {
-	return (HttpConfig::serverName);
+	return (ResponseConfig::serverName);
 }
 
-HttpConfig::~HttpConfig()
+ResponseConfig::~ResponseConfig()
 {
 	// static 동적 할당 모두 삭제
 	Controller *controller = ControllerMapping::getController("/controller");
 	delete controller;
 }
 
-
-std::string HttpConfig::getCurrentDate() {
+std::string ResponseConfig::getCurrentDate() {
 	// 현재 시각 얻기
 	std::time_t currentTime_t;
     std::time(&currentTime_t);

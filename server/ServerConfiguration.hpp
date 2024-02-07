@@ -17,6 +17,7 @@ class ServerConfiguration {
  public:
   ServerConfiguration();
   ServerConfiguration(Server& server);
+  ServerConfiguration();
   ~ServerConfiguration();
   //서버 설정에서 listen 포트번호를 의미한다. 설정파일에서 설정안하면 80
   int getPort() const;

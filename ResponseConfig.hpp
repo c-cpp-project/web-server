@@ -6,7 +6,7 @@
 #include<algorithm>
 #include"controllers/ControllerMapping.hpp"
 
-class HttpConfig
+class ResponseConfig
 {
 private:
     static  std::map<std::string, std::string>  statusCodeRepo;
@@ -16,8 +16,8 @@ private:
     static  std::string serverName;
     static  std::map<int, int>  fdMap;
 public:
-    HttpConfig();
-    ~HttpConfig();
+    ResponseConfig();
+    ~ResponseConfig();
     static  std::string testBody;
     static std::string  getHttpStatusMsg(std::string key);
     static void putHttpStatusCode(std::string key, std::string value);

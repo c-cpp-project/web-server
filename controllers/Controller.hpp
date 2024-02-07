@@ -15,21 +15,29 @@
 #ifndef CONTROLLER_HPP
 # define CONTROLLER_HPP
 
+#define	GET		1
+#define	POST	2
+#define	DELETE	4
+
 class   HttpRequest;
 class   HttpResponse;
 class Controller
 {
 private:
+	int masking; // 허용 메서드 7 -> 모두 허용
 public:
 	void    service(HttpRequest &request, HttpResponse &response);
+	virtual void	doSimpleGet(HttpRequest &request, HttpResponse &response);
 	virtual void    doGet(HttpRequest &request, HttpResponse &response);
 	virtual void	doPost(HttpRequest &request, HttpResponse &response);
 	virtual	void	doDelete(HttpRequest &request, HttpResponse &response);
 	void	   		response200(std::string body, HttpResponse &response);
+	bool			isAcceptableMethod(std::string method);
 	virtual ~Controller();
 	Controller();
+	Controller(int masking);
 };
 
 #endif
 // 자식들이 부모의 service를 통해 자신들의 메서드를 사용한다.
-
+// 구조를 바꿔야 한다.

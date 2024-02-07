@@ -1,7 +1,7 @@
 // 단순하게 바디 크기는 32K, WAS 대기 시간은 60s (cgi), keep-alive 75s -> Httprequest
 
 #include"../HttpRequest/HttpRequest.hpp"
-#include"../HttpConfig.hpp"
+#include"../ResponseConfig.hpp"
 #include"sys/fcntl.h"
 #include"../controllers/ControllerMapping.hpp"
 #include<map>
@@ -15,7 +15,7 @@
 # define HTTP_RESPONSE_HPP
 # define K 1000
 
-class HttpConfig;
+class ResponseConfig;
 class HttpRequest;
 class HttpResponse
 {

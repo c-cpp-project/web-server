@@ -13,6 +13,7 @@ class HttpRequestParser
 	private:
 		static void parseRequestLine(HttpRequest *request, const std::string& buffer, int& start);
 		static void parseRequestHeaders(HttpRequest *request, const std::string& buffer, int& start);
+		static void parseCookie(HttpRequest *request);
 		static void parseRequestBody(HttpRequest *request, const std::string& buffer, int start);
 
 	public:

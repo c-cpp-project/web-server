@@ -5,6 +5,7 @@ HttpRequest::HttpRequest()
 {
 	request_line = NULL;
 	request_headers = NULL;
+	cookie = NULL;
 	request_params = NULL;
 }
 
@@ -17,6 +18,7 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& ref)
 {
 	request_line = new RequestLine(*ref.request_line);
 	request_headers = new HttpHeaders(*ref.request_headers);
+	cookie = new RequestParams(*ref.cookie);
 	request_body = ref.request_body;
 	request_params = new RequestParams(*ref.request_params);
 	return (*this);
@@ -26,6 +28,7 @@ HttpRequest::~HttpRequest()
 {
 	delete request_line;
 	delete request_headers;
+	delete cookie;
 	delete request_params;
 }
 
@@ -57,16 +60,23 @@ std::string HttpRequest::getHeader(const std::string& header) const
 	return (request_headers->getHeader(header));
 }
 
-std::string HttpRequest::getParameter(const std::string& param) const
+std::string HttpRequest::getCookie(const std::string& key) const
 {
-	if (request_params == NULL)
+	if (cookie == NULL)
 		return ("");
-	return (request_params->getParameter(param));
+	return (cookie->getParameter(key));
 }
 
 std::string HttpRequest::getBody() const
 {
 	return (request_body);
+}
+
+std::string HttpRequest::getParameter(const std::string& param) const
+{
+	if (request_params == NULL)
+		return ("");
+	return (request_params->getParameter(param));
 }
 
 void HttpRequest::setRequestLine(RequestLine *line)
@@ -112,6 +122,20 @@ void HttpRequest::removeHeader(const std::string& field)
 {
 	if (request_headers != NULL)
 		request_headers->removeHeader(field);
+}
+
+void HttpRequest::setCookie(RequestParams *_cookie)
+{
+	if (cookie != NULL)
+		delete cookie;
+	cookie = _cookie;
+}
+
+int HttpRequest::addRequestParamsToCookie(const std::string& cookie_string)
+{
+	if (cookie == NULL)
+		return (FAILURE);
+	return (cookie->addCookie(cookie_string));
 }
 
 void HttpRequest::setRequestBody(const std::string& body)

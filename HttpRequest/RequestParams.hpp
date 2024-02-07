@@ -10,7 +10,8 @@ class RequestParams
 
 	public:
 		int addQuearyString(const std::string& query_string);
-		// void addJsonData();
+		int addCookie(const std::string& cookie_string);
+
 		std::string getParameter(const std::string& param);
 
 		// 테스트용

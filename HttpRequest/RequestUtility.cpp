@@ -44,6 +44,25 @@ std::map<std::string, std::string> RequestUtility::parseQueryString(const std::s
 	return (result);
 }
 
+std::map<std::string, std::string> RequestUtility::parseCookieString(const std::string& cookie_string, bool& success)
+{
+	std::map<std::string, std::string> result;
+
+	std::vector<std::string> pairs = splitString(cookie_string, ';');
+	for(size_t i = 0; i < pairs.size(); i++)
+	{
+		pairs[i] = trim(pairs[i], " ");
+		std::vector<std::string> tockens = splitString(pairs[i], '=');
+		if (tockens.size() != 2) {
+			success = false;
+			return (result);
+		}
+		result[tockens[0]] = tockens[1];
+	}
+	success = true;
+	return (result);
+}
+
 // string의 선&후행 화이트스페이스 제거
 std::string RequestUtility::trim(std::string string, const char *to_remove)
 {

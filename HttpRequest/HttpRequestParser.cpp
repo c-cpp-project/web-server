@@ -11,13 +11,15 @@ void HttpRequestParser::parse(const std::string& buffer, HttpRequest*& request, 
 	int start = 0;
 	request = new HttpRequest();
 	parseRequestLine(request, buffer, start);
-	std::cout << "after parse request line\n";
+	// std::cout << "after parse request line\n";
 	parseRequestHeaders(request, buffer, start);
-	std::cout << "after parse headers\n";
+	// std::cout << "after parse headers\n";
+	parseCookie(request);
+	// std::cout << "after parse cookie\n";
 	parseRequestBody(request, buffer, start);
-	std::cout << "after parse body\n";
+	// std::cout << "after parse body\n";
 	parseRequestParams(request);
-	std::cout << "after parse params\n";
+	// std::cout << "after parse params\n";
 }
 
 void HttpRequestParser::parseRequestLine(HttpRequest *request, const std::string& buffer, int& start)
@@ -52,6 +54,15 @@ void HttpRequestParser::parseRequestHeaders(HttpRequest *request, const std::str
 
 	if (request->getHeader("Host") == "")
 		throw "400"; // HOST 헤더가 없는 경우
+}
+
+void HttpRequestParser::parseCookie(HttpRequest *request)
+{
+	std::string cookie_string = request->getHeader("Cookie");
+	if (cookie_string == "")
+		return;
+	request->setCookie(new RequestParams());
+	request->addRequestParamsToCookie(cookie_string);
 }
 
 void HttpRequestParser::parseRequestBody(HttpRequest *request, const std::string& buffer, int start)

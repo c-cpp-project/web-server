@@ -10,6 +10,16 @@ int RequestParams::addQuearyString(const std::string& query_string)
 	return (SUCCESS);
 }
 
+int RequestParams::addCookie(const std::string& cookie_string)
+{
+	bool success;
+	std::map<std::string, std::string> parsed = RequestUtility::parseCookieString(cookie_string, success);
+	if (success == false)
+		return (FAILURE);
+	params.insert(parsed.begin(), parsed.end());
+	return (SUCCESS);
+}
+
 std::string RequestParams::getParameter(const std::string& param)
 {
 	if (RequestUtility::isExist(params, param))

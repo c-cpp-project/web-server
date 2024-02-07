@@ -3,6 +3,9 @@
 MyController::MyController() : Controller()
 {}
 
+MyController::MyController(int masking) : Controller(masking)
+{}
+
 MyController::~MyController()
 {}
 
@@ -160,7 +163,7 @@ std::string    MyController::doExecuteDelete(HttpRequest &request, std::string d
 	return (buffer);
 }
 
-void	DeleteController::doDelete(HttpRequest &request, HttpResponse &response)
+void	MyController::doDelete(HttpRequest &request, HttpResponse &response)
 {
 	std::string	fileName;
 	std::string	cgiFile;
@@ -172,7 +175,7 @@ void	DeleteController::doDelete(HttpRequest &request, HttpResponse &response)
 	fileName = uri.substr(uri.find('/', 1) + 1);
 	if (access(fileName.c_str(), F_OK) == -1) // 존재하지 않는다.
 		throw "404";
-	body = doExecute(request, fileName, cgiFile.c_str());
+	body = doExecuteDelete(request, fileName, cgiFile.c_str());
 	if (body == "500")
 		throw "500";
 	response200(body, response);

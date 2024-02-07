@@ -15,12 +15,16 @@
 #ifndef CONTROLLER_HPP
 # define CONTROLLER_HPP
 
+#define	GET		1
+#define	POST	2
+#define	DELETE	4
+
 class   HttpRequest;
 class   HttpResponse;
 class Controller
 {
 private:
-	int masking; // 허용 메서드 1111 -> 모두 허용
+	int masking; // 허용 메서드 7 -> 모두 허용
 public:
 	void    service(HttpRequest &request, HttpResponse &response);
 	virtual void	doSimpleGet(HttpRequest &request, HttpResponse &response);
@@ -28,6 +32,7 @@ public:
 	virtual void	doPost(HttpRequest &request, HttpResponse &response);
 	virtual	void	doDelete(HttpRequest &request, HttpResponse &response);
 	void	   		response200(std::string body, HttpResponse &response);
+	bool			isAcceptableMethod(std::string method);
 	virtual ~Controller();
 	Controller();
 	Controller(int masking);

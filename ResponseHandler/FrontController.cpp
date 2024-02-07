@@ -31,7 +31,7 @@ void    FrontController::run(HttpRequest tmp)
 		path = serverConfig.getResourcePath(request->at(i).getPath(), request->at(i).getMethod());
 		if (path != "")
 			request->at(i).setPath(path);
-		controller = new MyController();
+		controller = new MyController(); // 허용 함수 설정
 		controller->service(request->at(i), response);
 		controller = nullptr;
 	}

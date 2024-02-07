@@ -1,7 +1,7 @@
 
 #include<exception>
 #include<iostream>
-#include"../HttpConfig.hpp"
+#include"../ResponseConfig.hpp"
 #include"../controllers/Controller.hpp"
 #include"../HttpRequest/HttpRequest.hpp"
 #include"HttpResponse.hpp"

@@ -81,3 +81,11 @@ void Event::registerDisabledWriteEvent(int clientSocket, void* handler) {
 void Event::enableWriteEvent(int clientSocket, void* handler) {
   saveEvent(clientSocket, EVFILT_WRITE, EV_ENABLE, 0, 0, handler);
 }
+
+void Event::disableWriteEvent(int clientSocket, void* handler) {
+  saveEvent(clientSocket, EVFILT_WRITE, EV_DISABLE, 0, 0, handler);
+};
+
+void Event::enableReadEvent(int clientSocket, void* handler) {
+  saveEvent(clientSocket, EVFILT_READ, EV_ENABLE, 0, 0, handler);
+}

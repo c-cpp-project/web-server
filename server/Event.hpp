@@ -24,7 +24,9 @@ class Event {
   void registerServerEvent(int serverSocket, void* serverConfiguration);
   void registerEnabledReadEvent(int clientSocket, void* handler);
   void registerDisabledWriteEvent(int clientSocket, void* handler);
-  void enableWriteEvent(int clientSocket, void* hanlder);
+  void enableWriteEvent(int clientSocket, void* handler);
+  void disableWriteEvent(int clientSocket, void* handler);
+  void enableReadEvent(int clientSocket, void* handler);
 };
 
 std::ostream& operator<<(std::ostream& out, struct kevent& val);

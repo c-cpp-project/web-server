@@ -17,7 +17,7 @@ struct kevent& Event::operator[](int idx) {
   }
 }
 
-void Event::change(int fd, int16_t filter, uint16_t flags, uint32_t fflags,
+void Event::saveEvent(int fd, int16_t filter, uint16_t flags, uint32_t fflags,
                    intptr_t data, void* udata) {
   struct kevent event;
   EV_SET(&event, fd, filter, flags, fflags, data, udata);
@@ -38,7 +38,7 @@ int Event::create(void) {
   int res;
 
   res = kevent(kq, &changedList[0], changedList.size(), eventList,
-               EVENTLIST_SIZE, NULL);
+               EVENTLIST_SIZE, NULL);//TODO: timeout 설정 해야할까?
   return res;
 }
 

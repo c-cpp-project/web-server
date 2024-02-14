@@ -5,6 +5,7 @@
 #include "Event.hpp"
 #include "ServerConfiguration.hpp"
 #include "SocketUtils.hpp"
+#include "mock/Handler.hpp"
 
 class WebServer {
  public:
@@ -17,6 +18,7 @@ class WebServer {
   Event eventHandler;
   std::map<int, ServerConfiguration*> serverConfigs;
   std::map<int, int> serverSocketPortMap;
+  std::map<int, Handler*> handlerMap; //TODO: 요청 관련해서 이벤트, fd 관리 일괄적으로
   WebServer(const WebServer&);
   WebServer(std::map<int, ServerConfiguration*> serverConfig);
   //   WebServer& operator=(const WebServer&);

@@ -45,6 +45,8 @@ void WebServer::init() {
     int serversSocket = openPort(serverConfig);
     fcntl(serversSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
     serverSocketPortMap[serversSocket] = it->first;
+    //TODO: 서버 소켓 관련 이벤트 추가 saveEvent - changeEvents()
+    //TODO: event Listener 이름 만들기
     std::cout << it->first << std::endl;
     it++;
   }
@@ -103,7 +105,7 @@ void WebServer::handleEvent() {
   while (true) {
     newEventCount = eventHandler.create();
     if (newEventCount == -1) {
-      SocketUtils::exitWithPerror("event create error\n" +
+      SocketUtils::exitWithPerror("kevent() error\n" +
                                   std::string(strerror(errno)));
     }
     eventHandler.clearChangedEventList();
@@ -142,7 +144,10 @@ void WebServer::processErrorEvent(struct kevent& currEvent) {
   }
 }
 
-void WebServer::processReadEvent(struct kevent& currEvent) {}
+void WebServer::processReadEvent(struct kevent& currEvent) {
+
+  
+}
 
 int WebServer::acceptClient(int serverSocket) {
   struct _linger linger;

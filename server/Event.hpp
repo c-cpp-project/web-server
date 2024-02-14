@@ -16,7 +16,7 @@ class Event {
   ~Event();
   struct kevent& operator[](int idx);
 
-  void change(int socket, int16_t filter, uint16_t flags, uint32_t fflags,
+  void saveEvent(int socket, int16_t filter, uint16_t flags, uint32_t fflags,
               intptr_t data, void* udata);
   int create(void);
   void clearChangedEventList(void);

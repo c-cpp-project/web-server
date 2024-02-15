@@ -29,5 +29,5 @@ class HttpRequestHandler {
   static void addChunkedRequest(int socket_fd, HttpRequest *request);
   static void removePartOfBuffer(int socket_fd, int start, int count);
 };
-
 #endif
+

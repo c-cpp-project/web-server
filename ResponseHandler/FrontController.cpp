@@ -32,11 +32,11 @@ void    FrontController::run(HttpRequest tmp, ServerConfiguration serverConfig)
 		// path = serverConfig.getResourcePath(request->at(i).getPath());
 		// if (path != "")
 		// 	request->at(i).setPath(path);
-		controller->service(request->at(i), response, &serverConfig);
+		controller->service(request->at(i), response, &serverConfig); // CGI에서 대한 I/O 작업: READ, WRITE
 		controller = nullptr;
 	}
 	std::cout << "====================================================\n\n";
-	response.flush(); // response header 수정할게요
+	response.flush(); // response I/O HTTP 작업: WRITE
 	std::cout << "====================================================\n\n";
 	delete request;
 }

@@ -143,24 +143,31 @@ void WebServer::processErrorEvent(struct kevent& currEvent) {
 }
 
 void WebServer::processReadEvent(struct kevent& currEvent) {
-  Handler* handler =
-      reinterpret_cast<Handler*>(currEvent.udata);  // TODO: 고치기
+  // TODO: 고치기
+  std::cout << "currEvent: " << currEvent << std::endl;
   if (hasServerFd(currEvent)) {
     acceptClient(currEvent.ident);
   } else if (isClient(currEvent.ident)) {
     if (currEvent.flags & EV_EOF) {
       addCandidatesForDisconnection(currEvent.ident);
     }
-    // read process
     Handler* handler = reinterpret_cast<Handler*>(currEvent.udata);
-    // handler->readMessage();
     int status = handler->readRequest();
+    std::cout << "status " << status << std::endl;
     if (status == -1) {
+      std::cout << "statust: " << currEvent << std::endl;
       handler->removeBuffer(currEvent.ident);
+      handler->removeAndDeleteChunkedRequest(currEvent.ident);
+      handler->errorHandling(
+          "400");  // 수정 필요하다. try catch  구문으로 해야할 듯
       addCandidatesForDisconnection(currEvent.ident);
       // handler 관련해서 처리할 부분 처리
       // error response write event 등록. - 하는 게 맞을까?
+      // error Handling 분리할 필요가 있음
+      // Handler 상태를 설정해주면 write 작업 무리 없이 진행할 수도 있다.
     } else {
+      int status = handler->createHttpRequest();
+      // CHUNKED 관련 이벤트 처리
     }
     // TODO: 병합 필요 - request 쪽 읽어들일 필요 있음
     // read 작업 분리

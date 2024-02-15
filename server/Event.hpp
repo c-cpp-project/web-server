@@ -16,11 +16,17 @@ class Event {
   ~Event();
   struct kevent& operator[](int idx);
 
-  void change(int socket, int16_t filter, uint16_t flags, uint32_t fflags,
-              intptr_t data, void* udata);
+  void saveEvent(int socket, int16_t filter, uint16_t flags, uint32_t fflags,
+                 intptr_t data, void* udata);
   int create(void);
   void clearChangedEventList(void);
   bool initKqueue(void);
+  void registerServerEvent(int serverSocket, void* serverConfiguration);
+  void registerEnabledReadEvent(int clientSocket, void* handler);
+  void registerDisabledWriteEvent(int clientSocket, void* handler);
+  void enableWriteEvent(int clientSocket, void* handler);
+  void disableWriteEvent(int clientSocket, void* handler);
+  void enableReadEvent(int clientSocket, void* handler);
 };
 
 std::ostream& operator<<(std::ostream& out, struct kevent& val);

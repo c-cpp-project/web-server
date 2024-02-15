@@ -94,7 +94,7 @@ int	endpointTest(void)
 
 int	requestToResponseTest(void)
 {
-	HttpConfig httpConfig;
+	ResponseConfig httpConfig;
 	Server server;
 	ServerConfiguration server_info(server);
 	HttpRequestHandler httpRequestHandler(1, server_info);

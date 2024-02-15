@@ -5,7 +5,7 @@
 #include<vector>
 #include <sstream>
 #include"../HttpRequest/HttpRequest.hpp"
-#include"../HttpConfig.hpp"
+#include"../ResponseConfig.hpp"
 # define NDEBUG 
 #include <assert.h>
 

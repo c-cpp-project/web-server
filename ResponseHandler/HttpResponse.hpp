@@ -1,7 +1,7 @@
 // 단순하게 바디 크기는 32K, WAS 대기 시간은 60s (cgi), keep-alive 75s -> Httprequest
 
 #include"../HttpRequest/HttpRequest.hpp"
-#include"../HttpConfig.hpp"
+#include"../ResponseConfig.hpp"
 #include"sys/fcntl.h"
 #include"../controllers/ControllerMapping.hpp"
 #include<map>
@@ -10,12 +10,13 @@
 #include <sstream>
 #include<vector>
 #include<string>
+#include <cstdlib>
 
 #ifndef HTTP_RESPONSE_HPP
 # define HTTP_RESPONSE_HPP
 # define K 1000
 
-class HttpConfig;
+class ResponseConfig;
 class HttpRequest;
 class HttpResponse
 {
@@ -27,6 +28,8 @@ private:
 	std::string	send_timeout; // WAS
 	std::string	status_code;
 	std::string	responseBody;
+	bool		authenticated;
+	bool		overlaped;
 public:
 	HttpResponse();
 	HttpResponse(int sockfd); // default 지정
@@ -39,7 +42,7 @@ public:
 	void	HttpResponseBody(std::string body);
 	std::string	readFile(int fd);
 
-	void	redirect(HttpRequest &Httprequest, HttpResponse &Httpresponse);
+	void	redirect(std::string redirectUri, HttpResponse &Httpresponse);
 	void    forward(HttpRequest &Httprequest, HttpResponse &Httpresponse);
 	void    sendBody(std::string body);
 	void    ResponseStatusLine();
@@ -52,5 +55,8 @@ public:
 
 	long long	getMaxBodySize();
 	int		getSockfd();
+	
+	void		putContentType(std::string filename);
+	std::string	readRangeQuery(std::string range, std::string body);
 };
 #endif

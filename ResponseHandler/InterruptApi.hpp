@@ -2,7 +2,7 @@
 // pipefd의 값을 읽어서 완료되면 socketpd로 내보낸다.
 
 #include"HttpResponse.hpp"
-#include"../HttpConfig.hpp"
+#include"../ResponseConfig.hpp"
 #ifndef	INTERRUPT_API_HPP
 # define INTERRUPT_API_HPP
 

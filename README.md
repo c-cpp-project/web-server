@@ -1,29 +1,24 @@
-# kqueue
+# 핵심 변경 사항
 
-### kqueue 3가지
-	1. write -> cgi write => pipefd1[1] event -> write(pipefd1[1], data.c_str(), data.length());
-	2. read -> response => pipefd2[0] event -> ret = read(pipefd2[0], buffer, 64 * K); -> response
-    3. socket -> request
+## Controller
 
+1. MyController: nginx 설정 파일에서 uri의 경로가 location에 등록된 경우, Request가 허용 메서드인 경우 내부적으로 적절한 uri로 변환 후에 Controller 실행
+2. DefaultController: nginx 설정 파일에서 uri의 경로가 등록되지 않은 경우, GET 메서드로 uri 그대로 실행한다.
 
-### 이벤트 등록
+## ResponseConfig.hpp
+1. Controller를 설정하기 위한 Response 설정 파일로 serverConfigs을 생성자의 매개변수로 받아 std::map에 등록한다.
 
-구분해서 처리 (read, write) => std::map
+## default.conf에 맞게 설정값 변경하기
 
-### 서버 설정
+# 추가 변경 사항
 
-해당 서버 설정 - static을 풀고 HttpRequestHandler 풀고 ServerConfiguration 필드로 추가하고 생성자에서 매개변수로 받는 방식으로 바꾸기.
+## transfer-encoding:chunked
+"HTTP 1.1의 문자열" 중복 여부 검사에서 "sendBody의 중복 검사"로 변경 이를 통해 response message는 항상 하나임을 예외없이 구현 가능하다.
 
-# Request
+## Range-request
+get에서 일부 데이터만 보내준다.
 
-1. HttpRequestHandler에서 멤버변수들 static 풀기
-2. ServerConfiguration을 멤버변수로 추가하고, socket_fd랑 같이 생성자에서 매개변수로 받기
+## Cookie-Sesstion
 
-# Response
-
-1. Delete: controller에 저장하는 방식으로 사용하기. [기존 방식으로 수정]
-2. request-range하기
-3. pipe에 대한 NON_BLOCK
-4. http 하지 말기
-5. png 파일 하기
-
+## Controller.run
+포인터 주소를 넘기자.

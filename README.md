@@ -1,3 +1,8 @@
+# 등록해야 할 Event들
+1. 
+2. 
+3. 
+
 # 핵심 변경 사항
 
 ## Controller
@@ -64,79 +69,6 @@ HTTP 메시지를 읽고 파싱
 2. 이벤트 발생: socket fd인지 확인했는데, 아니야, response body에 적어. 그리고 http socket write 이벤트 등록
 3. 순차적인 이벤트의 등록에서 udata: Request 전체와 body 보내야 한다. (class: Reqeust와 Response)
 
-# 궁금한 사항
-### 이벤트 등록에 관한 함수
-
-void Event::saveEvent(int fd, int16_t filter, uint16_t flags, uint32_t fflags,
-                      intptr_t data, void* udata);
-// Event.cpp 참고:
-
-### handler를 어떻게 만들지?
-
-1. fd: cgi read
-
-httphandler -> cgi, file send -> request & repsonse; 
-
-request, response -> cgi, file send => response -> response;;;;;;;;;;;;;;;
-
-yuikim -> http socket request, response
-
-
-std::map<int, *httpHandler> umap
-
-class httpHandler 
-{
-    Event* event; //Event.cpp
-    std::vector<Request> requests; rq rq rq rq
-    Response response;
-    
-    메소드들 모두 넣음
-    1. cgi 관련
-    2. 정적 파일 관련 메소드
-}
-
-udata = httpHandler
-class httpHandler
-{
-    request; // fd
-    response; // fd
-}
-
-셍상자 파라미터
-* int clientFd
-* ServerConfiguration* serverConfig
-* Event* currEvent
-
-HttpHandler 필드
-* request <- fd 담기게끔 생성
-* response <- fd 담기게끔 생성
-* serverConfig
-* currEvent
-
-1. 등록: 
-currEvent.saveEvent(옵션들...);
-2. 등록할 때 udata: request, response
-httpHandler
-메소드 호출
-this->request
-this->response 
-
-test() {
-    this->reqeust
-    this->response
-}
-
-cgi read 이벤트 발생
-HttpHandler cgiRead() 호출
-
-void cgiRead() {
-    this->request 
-    this->response
-}
- 
-### file open (NON_BLOCK)과 fcntl NONBLOCK: file open도 NONBLOCK으로 열 수 있는가?
-
-...
 ---
 
 http recv 이벤트 발생하면, handler -> "httpRequest -> cgi, 정적파일 body I/O 작업" -> response
@@ -154,3 +86,31 @@ return (-1);
 handler에 상태 추가 
 1. socketfd를 닫는 경우
 2. socketfd를 닫지 않는 경우
+
+# 궁금한 사항 [구현사항]: 토요일 저녁 6시
+
+### 이벤트 등록에 관한 함수
+void Event::saveEvent(int fd, int16_t filter, uint16_t flags, uint32_t fflags,
+                      intptr_t data, void* udata);
+// Event.cpp 참고:
+
+### handler를 어떻게 만들지?
+
+class   httpHandler {
+    request;
+    response;
+    serverConfig*;
+    currEvent*;
+}
+
+### Event 등록
+Event.cpp saveEvent();
+### Event에 따른 함수 호출
+* write
+    * cgi write (!socketfd, pipe) #1
+    * response flush #2
+
+* read
+    * cgi (!socketfd, pipe) / static  read: fd만 읽고 body에 담아서 flush #3
+ 
+### file open (NON_BLOCK)과 fcntl NONBLOCK: file open도 NONBLOCK으로 열 수 있는가?

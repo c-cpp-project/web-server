@@ -18,9 +18,9 @@ class HttpRequestHandler {
  public:
   HttpRequestHandler(int socket_fd, ServerConfiguration *server_config);
 
-  void handle();
+  void handle(Event *event);
   int ChunkedRequestHandling(HttpRequest *request);
-  void errorHandling(const char *erorr_code);
+  void errorHandling(const char *erorr_code, ServerConfiguration *serverConfig, Event *event);
 
   static HttpRequest *removeChunkedRequest(int socket_fd);
   static void removeAndDeleteChunkedRequest(int socket_fd);

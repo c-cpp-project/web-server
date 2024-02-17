@@ -19,7 +19,7 @@ private:
 public:
 	ResponseConfig();
 	~ResponseConfig();
-	ResponseConfig(std::map<int, ServerConfiguration*> &serverConfigs);
+	ResponseConfig(std::map<int, ServerConfiguration*> &serverConfigs, Event *event);
 	static void putHttpStatusCode(std::string key, std::string value);
 
 	static  std::string getCurrentDate();

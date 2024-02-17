@@ -31,7 +31,7 @@ Controller *ControllerMapping::getController(int port, std::string uri)
 	return (controllers[key]);
 }
 
-void		ControllerMapping::mapController(std::map<int, ServerConfiguration*> &serverConfigs)
+void		ControllerMapping::mapController(std::map<int, ServerConfiguration*> &serverConfigs, Event *event)
 {
 	std::map<std::string, Location>::iterator		configIter;
 	std::map<int, ServerConfiguration*>::iterator	portIter;			
@@ -62,7 +62,6 @@ void		ControllerMapping::mapController(std::map<int, ServerConfiguration*> &serv
 			putController(port, locationUri, new MyController(method));
 		}
 	}
-	putController(0, DEFAULT, new DefaultController());
 }
 
 void		ControllerMapping::deleteController(void)

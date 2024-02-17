@@ -9,12 +9,11 @@ ResponseConfig::ResponseConfig()
 	
 }
 
-ResponseConfig::ResponseConfig(std::map<int, ServerConfiguration*> &serverConfigs)
+ResponseConfig::ResponseConfig(std::map<int, ServerConfiguration*> &serverConfigs, Event *event)
 {
 	setHttpStatusCode(); // StatusCode 초기화 설정
-	ControllerMapping::mapController(serverConfigs); // Contorller 설정
+	ControllerMapping::mapController(serverConfigs, event); // Contorller 설정
 }
-
 
 ResponseConfig::~ResponseConfig()
 {

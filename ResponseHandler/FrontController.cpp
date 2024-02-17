@@ -1,12 +1,19 @@
 #include"FrontController.hpp"
 #include"../server/ServerConfiguration.hpp"
 
-void    FrontController::run(HttpRequest tmp, ServerConfiguration serverConfig)
+FrontController::FrontController(ServerConfiguration *serverConfig, Event *event)
+{
+	this->serverConfig = serverConfig;
+	this->event = event;
+}
+
+void    FrontController::run(HttpRequest tmp)
 {
 	std::vector<HttpRequest> 	*request;
 	MultiRequest                multiRequest(tmp.getHeader("content-type"));
-	HttpResponse    response(this->socketfd);
+	HttpResponse    			*response;
 
+	response = new HttpResponse(this->socketfd, serverConfig, event);
 	request = multiRequest.makeRequest(tmp);
 	for (int i = 0; i < static_cast<int>(request->size()); i++)
 	{
@@ -28,23 +35,18 @@ void    FrontController::run(HttpRequest tmp, ServerConfiguration serverConfig)
 		std::string			path;
 		Controller			*controller;
 		
-		controller = ControllerMapping::getController(serverConfig.getPort(), request->at(i).getPath());
+		controller = ControllerMapping::getController(serverConfig->getPort(), request->at(i).getPath());
 		// path = serverConfig.getResourcePath(request->at(i).getPath());
 		// if (path != "")
 		// 	request->at(i).setPath(path);
-		controller->service(request->at(i), response, &serverConfig); // CGI에서 대한 I/O 작업: READ, WRITE
+		controller->service(request->at(i), (*response)); // CGI에서 대한 I/O 작업: READ, WRITE
 		controller = nullptr;
 	}
-	std::cout << "====================================================\n\n";
-	response.flush(); // response I/O HTTP 작업: WRITE
-	std::cout << "====================================================\n\n";
+	// std::cout << "====================================================\n\n";
+	// response.flush(); // response I/O HTTP 작업: WRITE
+	// std::cout << "====================================================\n\n";
+	request->clear();
 	delete request;
-}
-
-FrontController::FrontController(int kqueuefd, int socketfd)
-{
-	this->kqueuefd = kqueuefd;
-	this->socketfd = socketfd;
 }
 
 FrontController::FrontController(int socketfd)

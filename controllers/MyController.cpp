@@ -9,11 +9,12 @@ MyController::MyController(int masking) : Controller(masking)
 MyController::~MyController()
 {}
 
-void    MyController::service(HttpRequest &request, HttpResponse &response, ServerConfiguration *serverConfig)
+void    MyController::service(HttpRequest &request, HttpResponse &response)
 {
     std::string originPath;
     std::string path;
-    // 메서드 허용 여부 검사
+    ServerConfiguration *serverConfig = response.getServerConfiguration();
+
     if (isAcceptableMethod(request.getMethod()) == false)
         throw "405";
     originPath = request.getPath();
@@ -22,10 +23,10 @@ void    MyController::service(HttpRequest &request, HttpResponse &response, Serv
         request.setPath(path);
     if (request.getMethod() == "GET" && request.getQueryString() == "")
     {
-        if (ResponseConfig::IsRedriectUri(originPath) == true) // redirect
-            response.redirect(originPath, response);
+        if (serverConfig->getRedirectionPath(originPath).second != "") // redirect
+            response.redirect(request.getPath());
         else
-            response.forward(request, response); // get
+            response.forward(request); // get
     }
     else if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded") // get, post
         doGet(request, response);

@@ -56,7 +56,7 @@ int main()
 	close(client_socket);
 	*/
 
-	atexit(leaks);
-	HttpRequestHandler::handle(1);
+	// atexit(leaks);
+	// HttpRequestHandler::handle(0);
 	return (0);
 }

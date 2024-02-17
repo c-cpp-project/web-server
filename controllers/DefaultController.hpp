@@ -1,4 +1,3 @@
-
 #include"Controller.hpp"
 
 #ifndef DEFAULT_CONTROLLER_HPP
@@ -11,7 +10,7 @@ private:
 public:
 	private:
 public:
-	void    service(HttpRequest &request, HttpResponse &response, ServerConfiguration *serverConfig);
+	void    service(HttpRequest &request, HttpResponse &response);
 	DefaultController();
 	DefaultController(int masking);
 	~DefaultController();

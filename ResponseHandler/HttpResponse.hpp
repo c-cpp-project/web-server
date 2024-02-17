@@ -4,6 +4,7 @@
 #include"../ResponseConfig.hpp"
 #include"sys/fcntl.h"
 #include"../controllers/ControllerMapping.hpp"
+#include"../Bean/BeanFactory.hpp"
 #include<map>
 #include<sys/socket.h>
 #include<unistd.h>
@@ -16,8 +17,8 @@
 # define HTTP_RESPONSE_HPP
 # define K 1000
 
-class ResponseConfig;
 class HttpRequest;
+class ServerConfiguration;
 class HttpResponse
 {
 private:
@@ -30,11 +31,15 @@ private:
 	std::string	responseBody;
 	bool		authenticated;
 	bool		overlaped;
+	ServerConfiguration *serverConfig;
+	Event				*event;
 public:
 	HttpResponse();
-	HttpResponse(int sockfd); // default 지정
-	HttpResponse(int sockfd, std::string send_timeout);
-	HttpResponse(int sockfd, int max_size); // transfer-tokenizer
+	HttpResponse(int sockfd, ServerConfiguration *serverConfig, Event *event); // default 지정
+	HttpResponse(int sockfd, std::string send_timeout, ServerConfiguration *serverConfig, Event *event);
+	HttpResponse(int sockfd, int max_size, ServerConfiguration *serverConfig, Event *event); // transfer-tokenizer
+
+	HttpResponse& operator=(const HttpResponse& ref);
 
 	std::string	findValue(std::string key);
 	void    putHeader(std::string key, std::string value);
@@ -42,8 +47,8 @@ public:
 	void	HttpResponseBody(std::string body);
 	std::string	readFile(int fd);
 
-	void	redirect(std::string redirectUri, HttpResponse &Httpresponse);
-	void    forward(HttpRequest &Httprequest, HttpResponse &Httpresponse);
+	void	redirect(std::string redirectUri);
+	void    forward(HttpRequest &Httprequest);
 	void    sendBody(std::string body);
 	void    ResponseStatusLine();
 	void    processHeader();
@@ -58,5 +63,7 @@ public:
 	
 	void		putContentType(std::string filename);
 	std::string	readRangeQuery(std::string range, std::string body);
+	ServerConfiguration	*getServerConfiguration(void);
+	Event	*getEvent(void);
 };
 #endif

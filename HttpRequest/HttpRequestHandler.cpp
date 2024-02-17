@@ -20,7 +20,7 @@ HttpRequestHandler::HttpRequestHandler(int _socket_fd,
                                        ServerConfiguration *_server_config)
     : socket_fd(_socket_fd), server_config(_server_config) {}
 
-void HttpRequestHandler::handle() {
+void HttpRequestHandler::handle(Event *event) {
   try {
     int read_status = readRequest();
     std::cout
@@ -81,12 +81,12 @@ void HttpRequestHandler::handle() {
           continue;  // 아직 끝나지 않은 chunked 요청
 
         int kqueue_fd = 0;
-        FrontController front_controller(kqueue_fd, socket_fd);
+        FrontController front_controller(server_config, event);
         front_controller.run(*request);
 
         delete request;
       } catch (const char *e) {
-        errorHandling(e);
+        errorHandling(e, server_config, event);
       }
     }
   } catch (const std::exception &e) {
@@ -94,7 +94,7 @@ void HttpRequestHandler::handle() {
     removeBuffer(socket_fd);
     removeAndDeleteChunkedRequest(socket_fd);
     std::cout << "socket 닫기: " << e.what();
-    errorHandling(e.what());
+    errorHandling(e.what(), server_config, event);
     // throw;
     close(socket_fd);
   }
@@ -141,12 +141,12 @@ int HttpRequestHandler::ChunkedRequestHandling(HttpRequest *request) {
   return (LAST_CHUNKED_REQUEST);
 }
 
-void HttpRequestHandler::errorHandling(const char *erorr_code) {
+void HttpRequestHandler::errorHandling(const char *erorr_code, ServerConfiguration *serverConfig, Event *event) {
   HttpRequest empty;
-  HttpResponse response(socket_fd);
+  HttpResponse response(socket_fd, serverConfig, event);
   response.setStatusCode(erorr_code);
-  response.forward(empty, response);
-  response.flush();
+  response.forward(empty);
+  // response.flush();
 }
 
 void HttpRequestHandler::removeBuffer(int socket_fd) {

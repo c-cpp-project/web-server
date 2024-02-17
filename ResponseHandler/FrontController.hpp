@@ -8,24 +8,28 @@
 #include<string>
 #include<sys/fcntl.h>
 #include"MultiRequest.hpp"
+#include"../Bean/HttpHandler.hpp"
+#include"../server/Event.hpp"
 
 #ifndef FRONT_CONTROLLER_HPP
 # define FRONT_CONTROLLER_HPP
 
+class HttpHandler;
 class HttpRequest;
 class HttpResponse;
 class FrontController
 {
 private:
-	int socketfd;
-	int kqueuefd;
+	int 				socketfd;
+	ServerConfiguration	*serverConfig;
+	Event				*event;
 public:
 	FrontController(int socketfd);
-	FrontController(int kqueuefd, int socketfd);
+	FrontController(ServerConfiguration *serverConfig, Event *event);
 	FrontController();
 	~FrontController();
 
-	void    run(HttpRequest tmp, ServerConfiguration serverConfig);
+	void    run(HttpRequest tmp);
 };
 #endif
 

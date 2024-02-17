@@ -3,7 +3,7 @@
 HttpResponse::HttpResponse()
 {}
 
-HttpResponse::HttpResponse(int sockfd) // default 지정
+HttpResponse::HttpResponse(int sockfd, ServerConfiguration *serverConfig, Event *event) // default 지정
 {
 	this->sockfd = sockfd;
 	this->send_timeout = "60"; // nginx send_timeout default
@@ -11,26 +11,49 @@ HttpResponse::HttpResponse(int sockfd) // default 지정
 	this->status_code = "200";
 	this->responseBody = "";
 	this->overlaped = false;
+	this->serverConfig = serverConfig;
+	this->event = event;
 
 	// header에 대한 기본적인 설정 완료하기
 	putHeader("Keep-Alive", "timeout=60, max=999");
 }
 
-HttpResponse::HttpResponse(int sockfd, int max_size) // tokenizer
+HttpResponse::HttpResponse(int sockfd, int max_size, ServerConfiguration *serverConfig, Event *event) // tokenizer
 {
 	this->sockfd = sockfd;
 	this->send_timeout = "60"; // nginx send_timeout default
 	this->max_size = max_size;
 	this->status_code = "200";
+	this->serverConfig = serverConfig;
+	this->event = event;
 
 	// header에 대한 기본적인 설정 완료하기
 	putHeader("Keep-Alive", "timeout=60, max=999");
 }
 
-HttpResponse::HttpResponse(int sockfd, std::string send_timeout)
+HttpResponse::HttpResponse(int sockfd, std::string send_timeout, ServerConfiguration *serverConfig, Event *event)
 {
 	this->sockfd = sockfd;
 	this->send_timeout = send_timeout; // nginx send_timeout default
+	this->serverConfig = serverConfig;
+	this->event = event;
+}
+
+HttpResponse& HttpResponse::operator=(const HttpResponse& ref)
+{
+	if (this == &ref)
+		return (*this);
+	sockfd = ref.sockfd;
+	headers = ref.headers;
+	buffer = ref.buffer;
+	max_size = ref.max_size;
+	send_timeout = ref.send_timeout;
+	status_code = ref.status_code;
+	responseBody = ref.responseBody;
+	authenticated = ref.authenticated;
+	overlaped = ref.overlaped;
+	serverConfig = ref.serverConfig;
+	event = ref.event;
 }
 
 void    HttpResponse::putHeader(std::string key, std::string value)
@@ -44,43 +67,32 @@ void	HttpResponse::removeHeader(std::string key)
 	std::cout << "[remove header: " << key << "]\n";
 }
 
-void	HttpResponse::redirect(std::string redirectUri, HttpResponse &response)
+void	HttpResponse::redirect(std::string redirectUri)
 {
-	response.getMaxBodySize();
 	setStatusCode("302");
-	// putHeader("Location", ResponseConfig::getRedirectPath(redirectUri));
 	putHeader("Content-Type", "text/html");
+	putHeader("Location", redirectUri);
 	putHeader("Content-Length", "0");
 	sendBody("");
+	BeanFactory::registerEvent("SEND", new HttpHandler(getSockfd(), this), event);
 }
 
-void	HttpResponse::forward(HttpRequest &request, HttpResponse &response) // controller에서 사용한다.
+void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한다.
 {
-	std::string	uri;
 	int			fd;
-	std::string bodyLength;
-	std::stringstream ss;
-	std::string	body;
-	std::string	fileName;
+	std::string	uri;
 
 	uri = request.getPath();
-	if (response.getStatusCode()[0] == '4' || response.getStatusCode()[0] == '5') // fail.page
+	if (getStatusCode()[0] == '4' || getStatusCode()[0] == '5') // fail.page
 		uri = "/fail";
-	// fileName = ResponseConfig::pathResolver(uri);
-	fd = open(fileName.c_str(), O_RDONLY);
+	fd = open(uri.c_str(), O_RDONLY);
+	fcntl(fd, F_SETFL, O_NONBLOCK);
 	if ((fd < 0 || request.getMethod() != "GET") && uri != "/fail") 
 	{
-		std::cout << fd << ", " << request.getMethod() << ", " << fileName <<"\n";
+		std::cout << fd << ", " << request.getMethod() << ", " << uri <<"\n";
 		throw "404";
 	}
-	body = readFile(fd);
-	if (request.getParameter("Range") != "" && request.getMethod() == "GET")
-		body = readRangeQuery(request.getParameter("Range"), body);
-	ss << body.length();
-	bodyLength = ss.str();
-	putContentType(fileName);
-	putHeader("Content-Length", bodyLength);
-	sendBody(body);
+	BeanFactory::registerEvent("READ", new HttpHandler(fd, &request, this), event);
 }
 
 std::string	HttpResponse::readFile(int fd)
@@ -94,6 +106,8 @@ std::string	HttpResponse::readFile(int fd)
 		size += ret;
 	body[size] = 0;
 	close(fd);
+	if (ret < 0)
+		return ("");
 	return (body);
 }
 
@@ -190,6 +204,7 @@ void	HttpResponse::flush() // 마지막에 호출
 	}
 	std::cout << "==========================================================\n";
 	std::cout << httpMsg << "\n";
+	// fcntl(this->sockfd, F_SETFD, O_NONBLOCK); -> 어차피 O_NONBLOCK
 	send(this->sockfd, httpMsg.c_str(), httpMsg.length(), 0);
 	this->buffer.clear();
 	std::cout << "==========================================================\n";
@@ -237,4 +252,14 @@ std::string	HttpResponse::readRangeQuery(std::string range, std::string body)
 	std::string value2 = range.substr(range.find("-"));
 
     return (body.substr(std::atoi(value1.c_str()), std::atoi(value2.c_str())));
+}
+
+ServerConfiguration	*HttpResponse::getServerConfiguration(void)
+{
+	return (this->serverConfig);
+}
+
+Event	*HttpResponse::getEvent(void)
+{
+	return (this->event);
 }

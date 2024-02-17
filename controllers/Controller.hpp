@@ -3,6 +3,7 @@
 #include"../HttpRequest/HttpRequest.hpp"
 #include"../server/setting/ConfigParser.hpp"
 #include"../server/ServerConfiguration.hpp"
+#include"../Bean/BeanFactory.hpp"
 #include <string>
 #include <unistd.h>
 #include <iostream>
@@ -22,10 +23,9 @@ class   HttpResponse;
 class Controller
 {
 private:
-	int masking; // 허용 메서드 7 -> 모두 허용
+	int 				masking; // 허용 메서드 7 -> 모두 허용
 public:
-	virtual void    service(HttpRequest &request, HttpResponse &response, ServerConfiguration *serverConfig) = 0;
-	void	doSimpleGet(HttpRequest &request, HttpResponse &response, ServerConfiguration serverConfig);
+	virtual void    service(HttpRequest &request, HttpResponse &response) = 0;
 	void    doGet(HttpRequest &request, HttpResponse &response);
 	void	doPost(HttpRequest &request, HttpResponse &response);
 	void	doDelete(HttpRequest &request, HttpResponse &response);
@@ -35,8 +35,14 @@ public:
 	Controller();
 	Controller(int masking);
 
+	// 모듈화
+	void			classifyEvent(std::string data, std::string filename, const char *cgi_python, HttpResponse &response);
+	void			readEventRegsiter(int readfd[2], HttpResponse &response);
+	void			writeEventRegister(int writefd[2], int readfd[2], HttpResponse &response, std::string data);
+	// test용도
 	std::string     doExecuteWrite(std::string &data,  std::string filename, const char *cgi_python);
     std::string     doExecuteRead(std::string &data, const char *cgi_python);
+	// ================================================ //
 	std::string		doExecuteDelete(HttpRequest &request, std::string data, const char *cgi_python);
 };
 

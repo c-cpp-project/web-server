@@ -17,7 +17,6 @@ class ServerConfiguration {
  public:
   ServerConfiguration();
   ServerConfiguration(Server& server);
-  ServerConfiguration();
   ~ServerConfiguration();
   //서버 설정에서 listen 포트번호를 의미한다. 설정파일에서 설정안하면 80
   int getPort() const;
@@ -51,6 +50,7 @@ class ServerConfiguration {
   //해당 uri 넣으면 Location 존재할 때는 허용 메소드를 std::string 집합으로 반환
   //그게 아니면 GET 메소드 집합만 반환
   const std::set<std::string> getAllowedMethod(const std::string& uri) const;
+  const std::string getCgiPath() const;
 };
 
 #endif

@@ -5,14 +5,13 @@ std::map<std::string, std::string>  ResponseConfig::cgiAddressRepo;
 std::set<std::string>				ResponseConfig::supportedTypesRepo;
 
 ResponseConfig::ResponseConfig()
-{
-	
-}
+{}
 
 ResponseConfig::ResponseConfig(std::map<int, ServerConfiguration*> &serverConfigs, Event *event)
 {
 	setHttpStatusCode(); // StatusCode 초기화 설정
 	ControllerMapping::mapController(serverConfigs, event); // Contorller 설정
+	ControllerMapping::putController(0, DEFAULT, new DefaultController()); // defualt
 }
 
 ResponseConfig::~ResponseConfig()

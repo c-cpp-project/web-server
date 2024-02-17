@@ -70,13 +70,13 @@ int tcp_connection(int& clientSocket, int& server_socket) {
 // 주의사항: 메모리 릭
 // 합의사항: Event 처리할 때, Error가 발생하면 어디서 처리할까?
 // 사용법: beanFactory.runBeanByName("처리해야할 이벤트명", *uData, event);
-void    BeanTest(ServerConfiguration* serverConfig, Event *event)
+void    BeanTest(int socketfd, ServerConfiguration* serverConfig, Event *event)
 {
 		int         fd;
 		BeanFactory beanFactory;
 
 		event = 0;
-		beanFactory.runBeanByName("RECV", new HttpHandler(fd, serverConfig), event);
+		beanFactory.runBeanByName("RECV", new HttpHandler(socketfd, serverConfig), event);
 		// 1. error handle / response.forward / GET, DELETE	 -> READ 등록
 		// 2. redirect						   				 -> SEND 등록
 		// 3. WRITE											 -> WRITE 등록, READ 등록
@@ -84,7 +84,7 @@ void    BeanTest(ServerConfiguration* serverConfig, Event *event)
 		// 1. SEND BODY										 -> SEND 등록
 		beanFactory.runBeanByName("WRITE", new HttpHandler(fd, serverConfig), event);
 		// 1. CGI파일에 WRITE
-		beanFactory.runBeanByName("SEND", new HttpHandler(fd, serverConfig), event);
+		beanFactory.runBeanByName("SEND", new HttpHandler(socketfd, serverConfig), event);
 		// 1. SEND
 }
 
@@ -95,16 +95,10 @@ int endpointTest(ServerConfiguration* serverConfig, Event *event) {
 		tcp_listening(server_socket);
 		clientSocket = tcp_connection(clientSocket, server_socket);
 		if (clientSocket == -1) return (-1);
-		// FrontController frontController(clientSocket);
 
-		BeanTest(serverConfig, event);
-
-		// HttpRequestHandler httpRequestHandler(clientSocket, serverConfig);
-		// while (true) {
-		//     httpRequestHandler.handle(0);
-
-		// }
-		// HttpRequestHandler::handle(clientSocket); // #### 유의사항 2
+		// ================================= Event Test ============================== //
+		BeanTest(clientSocket, serverConfig, event);
+		// ================================= Event Test ============================== //
 		close(clientSocket);
 		close(server_socket);
 		return (0);
@@ -134,7 +128,7 @@ int main(int argc, char** argv)
 	if (argc == 1) {
 		std::cout << "[INFO] use default conf file ./config/default.conf"
 							<< std::endl;
-		configFileName = "./config/default.conf";
+		configFileName = "server/config/default.conf";
 	} else
 		configFileName = argv[1];
 	ConfigParser configParser;
@@ -149,7 +143,7 @@ int main(int argc, char** argv)
 		it++;
 	}
 	// ======================================================================================= //
-	//																		Response 설정	  																			//
+	//											Response 설정	  								//
 	// ======================================================================================= //
 	Event   *event;
 

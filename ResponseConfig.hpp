@@ -5,6 +5,7 @@
 #include<string>
 #include<algorithm>
 #include"controllers/ControllerMapping.hpp"
+#include"controllers/DefaultController.hpp"
 
 class ResponseConfig
 {

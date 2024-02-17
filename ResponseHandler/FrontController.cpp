@@ -32,10 +32,9 @@ void    FrontController::run(HttpRequest tmp)
 		std::cout << request->at(i).getBody() << "\n";
 		
 		// ServerConfiguration	serverConfig;
-		std::string			path;
 		Controller			*controller;
 		
-		controller = ControllerMapping::getController(serverConfig->getPort(), request->at(i).getPath());
+		controller = ControllerMapping::getController(serverConfig->getPort(), ControllerMapping::getLocationUri(request->at(i).getPath()));
 		// path = serverConfig.getResourcePath(request->at(i).getPath());
 		// if (path != "")
 		// 	request->at(i).setPath(path);

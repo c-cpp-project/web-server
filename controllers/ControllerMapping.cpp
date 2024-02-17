@@ -13,7 +13,7 @@ std::string	ControllerMapping::getLocationUri(std::string uri)
 	std::string	location;
 
 	idx = uri.substr(1).find('/');
-	location = uri.substr(1, idx);
+	location = uri.substr(idx);
 	return (location);
 }
 
@@ -41,11 +41,9 @@ void		ControllerMapping::mapController(std::map<int, ServerConfiguration*> &serv
 	for (portIter = serverConfigs.begin(); portIter != serverConfigs.end(); portIter++)
 	{
 		int					port;
-		ServerConfiguration	config;
 
 		port = portIter->first;
-		config = *portIter->second;
-		server = config.getServer();
+		server = portIter->second->getServer();
 		for (configIter = server.getLocations().begin(); configIter != server.getLocations().end(); configIter++)
 		{
 			std::string				locationUri = configIter->first;

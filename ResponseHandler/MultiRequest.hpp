@@ -1,6 +1,6 @@
+
 #ifndef MULTI_REQUEST_HPP
 # define MULTI_REQUEST_HPP
-
 #include<string>
 #include<vector>
 #include <sstream>

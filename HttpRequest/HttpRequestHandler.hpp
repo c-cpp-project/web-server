@@ -2,7 +2,9 @@
 #define HTTP_REQUEST_HANDLER_HPP
 
 #include "HttpRequestFactory.hpp"
+#include "../server/Event.hpp"
 
+class Event;
 class HttpRequestHandler {
  private:
   int socket_fd;

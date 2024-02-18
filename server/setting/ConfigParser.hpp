@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef CONFIG_PARSER_HPP
+# define CONFIG_PARSER_HPP
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -7,7 +9,6 @@
 
 #include "Server.hpp"
 #define CONFIG_ERROR -1
-
 enum METHOD {
   GET = 1,
   POST = 2,
@@ -57,3 +58,4 @@ class ConfigParser {
   static int checkLocationElement(struct s_info& parse_info,
                                   mapPortServer& servers);
 };
+#endif

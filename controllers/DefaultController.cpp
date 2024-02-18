@@ -1,6 +1,6 @@
 #include"DefaultController.hpp"
 
-DefaultController::DefaultController() : Controller(METHOD::GET)
+DefaultController::DefaultController() : Controller(1)
 {}
 
 DefaultController::~DefaultController()
@@ -8,18 +8,24 @@ DefaultController::~DefaultController()
 
 void    DefaultController::service(HttpRequest &request, HttpResponse &response)
 {
-    std::string         originPath;
+    std::string         redirectPath;
+    std::string         staticPath;
     std::string         path;
     ServerConfiguration *serverConfig = response.getServerConfiguration();
     // 메서드 허용 여부 검사
     if (isAcceptableMethod(request.getMethod()) == false)
         throw "405";
-    originPath = request.getPath();
-    path = serverConfig->getResourcePath(originPath);
-    if (path != "")
-        request.setPath(path);
-    if (serverConfig->getRedirectionPath(originPath).second != "") // redirect
+    redirectPath = serverConfig->getRedirectionPath(request.getPath()).second;
+    if (redirectPath != "")
+    {
+        response.setStatusCode(serverConfig->getRedirectionPath(request.getPath()).first);
+        request.setPath(redirectPath);
         response.redirect(request.getPath());
+    }
     else
-        response.forward(request); // get
+    {
+        staticPath = serverConfig->getResourcePath(request.getPath()); // 4. 없으면 무엇을 반환하는가?
+        request.setPath(staticPath);
+        response.forward(request);
+    }
 }

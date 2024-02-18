@@ -1,5 +1,8 @@
 #include"ReadEventBean.hpp"
 
+ReadEventBean::ReadEventBean() {}
+ReadEventBean::~ReadEventBean() {}
+
 void    ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event)
 {
     HttpResponse        *response;
@@ -34,6 +37,7 @@ void	    ReadEventBean::response200(std::string body, HttpHandler *httpHandler, 
 	bodyLength = ss.str();
 	response.putHeader("Content-Length", bodyLength);
     response.sendBody(body); // this->buffer에 string으로 모두 담긴다.
-    BeanFactory::registerEvent("SEND", new HttpHandler(response.getSockfd(), &response), event);
+    // BeanFactory::registerEvent("SEND", new HttpHandler(response.getSockfd(), response), event);
+    event->saveEvent(response.getSockfd(), EVFILT_READ, 0, 0, 0, new HttpHandler(response.getSockfd(), response)); // EVFILT_READ, EVFILT_WRITE
     // Event 등록; flush()
 }

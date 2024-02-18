@@ -53,7 +53,9 @@ void			Controller::writeEventRegister(int writefd[2], int readfd[2], HttpRespons
 	event = response.getEvent();
 	close(writefd[0]);
 	fcntl(writefd[1], F_SETFL, O_NONBLOCK);
-	BeanFactory::registerEvent("WRITE", new HttpHandler(writefd[1], data, serverConfig), event);
+	// BeanFactory::registerEvent("WRITE", new HttpHandler(writefd[1], data, serverConfig), event);
+	event->saveEvent(writefd[1], EVFILT_WRITE, 0, 0, 0, new HttpHandler(writefd[1], data, serverConfig));
+	// event->saveEvent(response.getSockfd(), EVFILT_READ, 0, 0, 0, new HttpHandler(response.getSockfd(), response)); // EVFILT_READ, EVFILT_WRITE
 	readEventRegsiter(readfd, response);
 }
 
@@ -68,7 +70,8 @@ void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response)
 	event = response.getEvent();
 	close(readfd[1]);
 	fcntl(readfd[0], F_SETFL, O_NONBLOCK);
-	BeanFactory::registerEvent("READ", new HttpHandler(readfd[0], &response), event);
+	event->saveEvent(readfd[0], EVFILT_READ, 0, 0, 0, new HttpHandler(readfd[0], response)); // EVFILT_READ, EVFILT_WRITE
+	// BeanFactory::registerEvent("READ", new HttpHandler(readfd[0], response), event);
 }
 
 // parameter
@@ -132,11 +135,11 @@ Controller::~Controller()
 
 bool    Controller::isAcceptableMethod(std::string method)
 {
-	if (method == "GET" && (METHOD::GET & this->masking))
+	if (method == "GET" && (1 & this->masking))
 		return (true);
-	else if (method == "POST" && (METHOD::POST & this->masking))
+	else if (method == "POST" && (2 & this->masking))
 		return (true);
-	else if (method == "DELETE" && (METHOD::DELETE & this->masking))
+	else if (method == "DELETE" && (8 & this->masking))
 		return (true);
 	else
 		return (false);

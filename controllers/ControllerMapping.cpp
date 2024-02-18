@@ -2,6 +2,17 @@
 
 std::map<std::pair<int, std::string>, Controller *> ControllerMapping::controllers;
 
+ControllerMapping::ControllerMapping(std::map<int, ServerConfiguration*> &serverConfigs, Event *event)
+{
+	ControllerMapping::mapController(serverConfigs, event); // Contorller 설정
+	ControllerMapping::putController(0, DEFAULT, new DefaultController()); // defualt
+}
+
+ControllerMapping::~ControllerMapping()
+{
+	ControllerMapping::deleteController();
+}
+
 void ControllerMapping::putController(int port, std::string uri, Controller *controller)
 {
 	controllers.insert(std::make_pair(std::make_pair(port, uri), controller));
@@ -52,11 +63,11 @@ void		ControllerMapping::mapController(std::map<int, ServerConfiguration*> &serv
 
 			method = 0;
 			if (allowMethod.find("GET") != allowMethod.end())
-				method += METHOD::GET;
+				method += 1;
 			if (allowMethod.find("POST") != allowMethod.end())
-				method += METHOD::POST;
+				method += 2;
 			if (allowMethod.find("DELETE") != allowMethod.end())
-				method += METHOD::DELETE;
+				method += 8;
 			putController(port, locationUri, new MyController(method));
 		}
 	}

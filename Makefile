@@ -15,10 +15,10 @@ SRCS = test_main.cpp \
 	HttpRequest/HttpHeaders.cpp	HttpRequest/HttpRequest.cpp HttpRequest/HttpRequestHandler.cpp \
 	HttpRequest/HttpRequestParser.cpp HttpRequest/RequestLine.cpp HttpRequest/RequestParams.cpp \
 	HttpRequest/RequestUtility.cpp HttpRequest/HttpRequestFactory.cpp \
-	controllers/Controller.cpp controllers/ControllerMapping.cpp controllers/DeleteController.cpp controllers/MyController.cpp \
+	controllers/Controller.cpp controllers/ControllerMapping.cpp controllers/MyController.cpp controllers/DefaultController/cpp\
 	ResponseHandler/FrontController.cpp ResponseHandler/HttpResponse.cpp ResponseHandler/InterruptApi.cpp ResponseHandler/MultiRequest.cpp \
-	ResponseConfig.cpp
-
+	ResponseConfig.cpp \
+	Bean/BeanFactory.cpp Bean/ReadEventBean.cpp Bean/RecvEventBean.cpp Bean/SendEventBean.cpp Bean/WriteEventBean.cpp Bean/HttpHandler.cpp \
 	
 OBJS = $(SRCS:.cpp=.o)
 CXX = c++

@@ -1,10 +1,11 @@
-// 단순하게 바디 크기는 32K, WAS 대기 시간은 60s (cgi), keep-alive 75s -> Httprequest
 
+#ifndef HTTP_RESPONSE_HPP
+# define HTTP_RESPONSE_HPP
 #include"../HttpRequest/HttpRequest.hpp"
 #include"../ResponseConfig.hpp"
 #include"sys/fcntl.h"
-#include"../controllers/ControllerMapping.hpp"
-#include"../Bean/BeanFactory.hpp"
+#include"../server/Event.hpp"
+#include"../server/ServerConfiguration.hpp"
 #include<map>
 #include<sys/socket.h>
 #include<unistd.h>
@@ -13,8 +14,6 @@
 #include<string>
 #include <cstdlib>
 
-#ifndef HTTP_RESPONSE_HPP
-# define HTTP_RESPONSE_HPP
 # define K 1000
 
 class HttpRequest;
@@ -35,6 +34,7 @@ private:
 	Event				*event;
 public:
 	HttpResponse();
+	HttpResponse(int sockfd);
 	HttpResponse(int sockfd, ServerConfiguration *serverConfig, Event *event); // default 지정
 	HttpResponse(int sockfd, std::string send_timeout, ServerConfiguration *serverConfig, Event *event);
 	HttpResponse(int sockfd, int max_size, ServerConfiguration *serverConfig, Event *event); // transfer-tokenizer

@@ -1,5 +1,8 @@
 #include"WriteEventBean.hpp"
 
+WriteEventBean::WriteEventBean() {}
+WriteEventBean::~WriteEventBean() {}
+
 void    WriteEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event)
 {
     int                 writeFd;

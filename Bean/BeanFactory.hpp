@@ -1,4 +1,6 @@
 
+#ifndef BEAN_FACTORY_HPP
+# define BEAN_FACTORY_HPP
 #include"Bean.hpp"
 #include"ReadEventBean.hpp"
 #include"SendEventBean.hpp"
@@ -8,9 +10,6 @@
 #include<iostream>
 #include<vector>
 #include"HttpHandler.hpp"
-
-#ifndef BEAN_FACTORY_HPP
-# define BEAN_FACTORY_HPP
 
 class HttpHandler;
 class Bean;
@@ -23,7 +22,6 @@ public:
 	BeanFactory(); // Bean을 생성한다.
 	~BeanFactory(); // Bean을 소멸시킨다.
 
-	static	void	registerEvent(std::string beanName, HttpHandler *eventPending, Event *event);
 	static	void    runBeanByName(std::string beenName, HttpHandler *httpHandler, Event *event);
 };
 #endif

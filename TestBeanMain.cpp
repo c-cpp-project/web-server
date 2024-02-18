@@ -4,6 +4,7 @@
 
 #include <cstring>
 
+// #include"ResponseHandler/HttpResponse.hpp"
 #include "ResponseConfig.hpp"
 #include "HttpRequest/HttpHeaders.hpp"
 #include "HttpRequest/HttpRequest.hpp"
@@ -14,16 +15,22 @@
 #include "HttpRequest/RequestUtility.hpp"
 #include "HttpRequest/SocketCloseException.hpp"
 #include "ResponseHandler/FrontController.hpp"
-#include "ResponseHandler/HttpResponse.hpp"
 #include "ResponseHandler/MultiRequest.hpp"
 #include "controllers/Controller.hpp"
 #include "controllers/ControllerMapping.hpp"
 #include "controllers/MyController.hpp"
 #include "server/ServerConfiguration.hpp"
 #include "server/setting/ConfigParser.hpp"
+#include "server/setting/Server.hpp"
 
 // Bean 설정
-#include"../Bean/BeanFactory.hpp"
+#include"Bean/BeanFactory.hpp"
+#include"Bean/Bean.hpp"
+#include"Bean/HttpHandler.hpp"
+#include"Bean/ReadEventBean.hpp"
+#include"Bean/RecvEventBean.hpp"
+#include"Bean/SendEventBean.hpp"
+#include"Bean/WriteEventBean.hpp"
 
 int tcp_listening(int& server_socket) {
 	server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -148,6 +155,7 @@ int main(int argc, char** argv)
 	Event   *event;
 
 	event = 0; // Event 등록을 제외한 Test
-	ResponseConfig responseConfig(serverConfigs, event);
+	ResponseConfig responseConfig; // response에서 사용하는 메서드 설정
+	ControllerMapping controllerMapping(serverConfigs, event); // Controller 설정
 	endpointTest(serverConfigs[80], event);
 }

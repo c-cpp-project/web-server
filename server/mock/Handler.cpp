@@ -65,7 +65,7 @@ void Handler::errorHandling(const char* erorr_code) {
   HttpRequest empty;
   HttpResponse response(fd);
   response.setStatusCode(erorr_code);
-  response.forward(empty, response);
+  response.forward(empty);
   response.flush();
 }
 

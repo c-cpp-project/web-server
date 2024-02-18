@@ -1,12 +1,16 @@
+
 #ifndef HTTP_CONFIG_HPP
 # define HTTP_CONFIG_HPP
-
 #include<map>
 #include<string>
 #include<algorithm>
-#include"controllers/ControllerMapping.hpp"
-#include"controllers/DefaultController.hpp"
+#include<set>
+#include <iomanip>
+#include <sstream>
+#include <iostream>
 
+class ServerConfiguration;
+class Event;
 class ResponseConfig
 {
 private:

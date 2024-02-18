@@ -1,5 +1,8 @@
 #include"SendEventBean.hpp"
 
+SendEventBean::SendEventBean() {}
+SendEventBean::~SendEventBean() {}
+
 void    SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event)
 {
     ServerConfiguration *serverConfig;

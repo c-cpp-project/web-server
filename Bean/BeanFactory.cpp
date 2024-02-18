@@ -14,7 +14,7 @@ BeanFactory::~BeanFactory()
     std::map<std::string, Bean *>::iterator iter;
 
     for (iter = beanRepository.begin(); iter != beanRepository.end(); iter++)
-        delete iter->second;
+        delete (iter->second);
 }
 
 Bean    *BeanFactory::getBeanByName(std::string beanName)
@@ -23,16 +23,6 @@ Bean    *BeanFactory::getBeanByName(std::string beanName)
 
     bean = beanRepository.at(beanName);
     return (bean);
-}
-
-void	BeanFactory::registerEvent(std::string beanName, HttpHandler *eventPending, Event *event)
-{
-    if (event == 0)
-        return ;
-    if (beanName == "READ" || beanName == "RECV") // 새로운 event 등록
-        event->saveEvent(eventPending->getFd(), EVFILT_READ, 0, 0, 0, eventPending);
-    else
-        event->saveEvent(eventPending->getFd(), EVFILT_WRITE, 0, 0, 0, eventPending);
 }
 
 // event 발생 -> beenFactory.runBeanByName() 호출

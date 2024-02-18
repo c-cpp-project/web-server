@@ -1,3 +1,5 @@
+#ifndef EVENT_HPP
+# define EVENT_HPP
 #include <sys/event.h>
 
 #include <ostream>
@@ -30,3 +32,4 @@ class Event {
 };
 
 std::ostream& operator<<(std::ostream& out, struct kevent& val);
+#endif

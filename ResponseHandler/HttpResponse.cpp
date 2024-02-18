@@ -1,7 +1,13 @@
 #include"HttpResponse.hpp"
+#include"../Bean/HttpHandler.hpp"
 
 HttpResponse::HttpResponse()
 {}
+
+HttpResponse::HttpResponse(int sockfd)
+{
+	this->sockfd = sockfd;
+}
 
 HttpResponse::HttpResponse(int sockfd, ServerConfiguration *serverConfig, Event *event) // default 지정
 {
@@ -54,6 +60,7 @@ HttpResponse& HttpResponse::operator=(const HttpResponse& ref)
 	overlaped = ref.overlaped;
 	serverConfig = ref.serverConfig;
 	event = ref.event;
+	return (*this);
 }
 
 void    HttpResponse::putHeader(std::string key, std::string value)
@@ -74,7 +81,8 @@ void	HttpResponse::redirect(std::string redirectUri)
 	putHeader("Location", redirectUri);
 	putHeader("Content-Length", "0");
 	sendBody("");
-	BeanFactory::registerEvent("SEND", new HttpHandler(getSockfd(), this), event);
+	// BeanFactory::registerEvent("SEND", new HttpHandler(getSockfd(), *this), event);H
+	event->saveEvent(getSockfd(), EVFILT_WRITE, 0, 0, 0, new HttpHandler(getSockfd(), *this)); // EVFILT_READ, EVFILT_WRITE
 }
 
 void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한다.
@@ -84,15 +92,17 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 
 	uri = request.getPath();
 	if (getStatusCode()[0] == '4' || getStatusCode()[0] == '5') // fail.page
-		uri = "/fail";
+		uri = serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str()));
 	fd = open(uri.c_str(), O_RDONLY);
 	fcntl(fd, F_SETFL, O_NONBLOCK);
-	if ((fd < 0 || request.getMethod() != "GET") && uri != "/fail") 
+	if ((fd < 0 || request.getMethod() != "GET") && \
+	serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str())) != "") 
 	{
 		std::cout << fd << ", " << request.getMethod() << ", " << uri <<"\n";
 		throw "404";
 	}
-	BeanFactory::registerEvent("READ", new HttpHandler(fd, &request, this), event);
+	// BeanFactory::registerEvent("READ", new HttpHandler(fd, request, *this), event);
+	event->saveEvent(getSockfd(), EVFILT_READ, 0, 0, 0, new HttpHandler(getSockfd(), *this)); // EVFILT_READ, EVFILT_WRITE
 }
 
 std::string	HttpResponse::readFile(int fd)

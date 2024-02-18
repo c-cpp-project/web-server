@@ -1,9 +1,11 @@
 
+#ifndef CONTROLLER_HPP
+# define CONTROLLER_HPP
 #include"../ResponseHandler/HttpResponse.hpp"
 #include"../HttpRequest/HttpRequest.hpp"
 #include"../server/setting/ConfigParser.hpp"
 #include"../server/ServerConfiguration.hpp"
-#include"../Bean/BeanFactory.hpp"
+#include"../Bean/HttpHandler.hpp"
 #include <string>
 #include <unistd.h>
 #include <iostream>
@@ -15,11 +17,9 @@
 #include <cstdlib>
 #include <vector>
 
-#ifndef CONTROLLER_HPP
-# define CONTROLLER_HPP
-
 class   HttpRequest;
 class   HttpResponse;
+class	HttpHandler;
 class Controller
 {
 private:

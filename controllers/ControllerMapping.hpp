@@ -1,10 +1,11 @@
 #ifndef CONTROLLER_MAPPING_HPP
 # define CONTROLLER_MAPPING_HPP
-
 #include<map>
 #include"Controller.hpp"
 #include"MyController.hpp"
+#include"DefaultController.hpp"
 #include"../server/ServerConfiguration.hpp"
+#include"../server/Event.hpp"
 
 #define	DEFAULT "default"
 class Controller;
@@ -12,7 +13,10 @@ class ControllerMapping
 {
 private:
 	static std::map<std::pair<int, std::string>, Controller *> controllers;
+	ControllerMapping();
 public:
+	ControllerMapping(std::map<int, ServerConfiguration*> &serverConfigs, Event *event);
+	~ControllerMapping();
 	static	void		deleteController();
 	static	void		mapController(std::map<int, ServerConfiguration*> &serverConfigs, Event *event);
 	static	void		putController(int port, std::string location, Controller *controller); // config file에서 설정
@@ -20,3 +24,5 @@ public:
 	static	std::string	getLocationUri(std::string uri); // uri에 대응하는 Location 얻기
 };
 #endif
+
+	

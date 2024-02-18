@@ -7,8 +7,6 @@ HttpHandler::HttpHandler(int fd, ServerConfiguration *serverConfig)
 {
     this->fd = fd;
     this->serverConfig = serverConfig;
-    this->request = NULL;
-    this->response = NULL;
     this->data = "";
 }
 
@@ -17,20 +15,18 @@ HttpHandler::HttpHandler(int fd, std::string data, ServerConfiguration *serverCo
     this->fd = fd;
     this->data = data;
     this->serverConfig = serverConfig;
-    this->request = NULL;
     this->data = "";
 }
 
-HttpHandler::HttpHandler(int fd, HttpResponse *res)
+HttpHandler::HttpHandler(int fd, HttpResponse res)
 {
     this->fd = fd;
-    this->response = res;
     this->serverConfig = NULL;
-    this->request = NULL;
+    this->response = res;
     this->data = "";
 }
 
-HttpHandler::HttpHandler(int fd, HttpRequest *req, HttpResponse *res)
+HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res)
 {
     this->fd = fd;
     this->request = req;
@@ -40,10 +36,7 @@ HttpHandler::HttpHandler(int fd, HttpRequest *req, HttpResponse *res)
 }
 
 HttpHandler::~HttpHandler()
-{
-    if (this->request != 0)
-        delete this->request;
-}
+{}
 
 HttpHandler&	HttpHandler::operator=(const HttpHandler& ref)
 {
@@ -53,6 +46,7 @@ HttpHandler&	HttpHandler::operator=(const HttpHandler& ref)
     request = ref.request;
     response = ref.response;
     serverConfig = ref.serverConfig;
+    return (*this);
 }
 
 int				HttpHandler::getFd(void)
@@ -62,12 +56,12 @@ int				HttpHandler::getFd(void)
 
 HttpRequest&    HttpHandler::getHttpRequest(void)
 {
-    return ((*request));
+    return ((request));
 }
 
 HttpResponse&   HttpHandler::getHttpResponse(void)
 {
-    return ((*response));
+    return ((response));
 }
 
 ServerConfiguration*	HttpHandler::getServerConfiguration(void)

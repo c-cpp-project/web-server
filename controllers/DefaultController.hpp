@@ -1,7 +1,7 @@
-#include"Controller.hpp"
-
 #ifndef DEFAULT_CONTROLLER_HPP
 # define DEFAULT_CONTROLLER_HPP
+#include"Controller.hpp"
+
 class HttpResponse;
 class HttpRequest;
 class DefaultController : public Controller

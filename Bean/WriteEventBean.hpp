@@ -3,6 +3,8 @@
 # define WRITE_EVENT_BEAN__HPP
 
 #include"Bean.hpp"
+class HttpHandler;
+class Bean;
 class WriteEventBean : public Bean
 {
 private:

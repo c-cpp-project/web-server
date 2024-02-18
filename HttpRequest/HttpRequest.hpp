@@ -1,6 +1,6 @@
+
 #ifndef HTTP_REQUEST_HPP
 # define HTTP_REQUEST_HPP
-
 # include "RequestLine.hpp"
 # include "HttpHeaders.hpp"
 # include "RequestParams.hpp"

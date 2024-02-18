@@ -1,10 +1,18 @@
 #include"FrontController.hpp"
-#include"../server/ServerConfiguration.hpp"
+
 
 FrontController::FrontController(ServerConfiguration *serverConfig, Event *event)
 {
 	this->serverConfig = serverConfig;
 	this->event = event;
+}
+
+FrontController::FrontController(int socketfd, int fd)
+{
+	this->socketfd = socketfd;
+	int	tmp;
+
+	tmp = fd;
 }
 
 void    FrontController::run(HttpRequest tmp)
@@ -32,8 +40,6 @@ void    FrontController::run(HttpRequest tmp)
 		std::cout << request->at(i).getBody() << "\n";
 		
 		// ServerConfiguration	serverConfig;
-		Controller			*controller;
-		
 		controller = ControllerMapping::getController(serverConfig->getPort(), ControllerMapping::getLocationUri(request->at(i).getPath()));
 		// path = serverConfig.getResourcePath(request->at(i).getPath());
 		// if (path != "")

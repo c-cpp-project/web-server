@@ -11,6 +11,7 @@ class Server {
   int keepAliveTimeout;
   std::string serverName;
   std::string root;
+  std::string cgiPath;
   std::map<std::vector<int>, std::string> errorPage;
   std::map<int, std::string> errorCodePage;
   std::map<std::string, int> redirection;
@@ -31,6 +32,7 @@ class Server {
   void setUploadPath(std::string& input);
   void setKeepAliveTimeout(std::string& input);
   void setClientHeaderSize(std::string& input);
+  void setCgiPath(std::string& input);
 
  public:
   Server();
@@ -49,5 +51,6 @@ class Server {
   std::map<std::string, Location> getLocations() const;
   std::string getServerName() const;
   std::string getUploadPath() const;
+  std::string getCgiPath() const;
   int getKeepAliveTimeout() const;
 };

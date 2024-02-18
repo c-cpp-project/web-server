@@ -31,8 +31,6 @@ ServerConfiguration::ServerConfiguration(Server& server) : server(&server) {
   this->defaultAllowedMethods.insert("GET");
 }
 
-ServerConfiguration::~ServerConfiguration() {}
-
 int ServerConfiguration::getPort() const { 
   std::cout << server->getListen() << std::endl;
   return server->getListen(); 
@@ -45,6 +43,10 @@ int ServerConfiguration::getKeepAliveTimeout() {
 const std::string ServerConfiguration::getServerName() const {
   return server->getServerName();
 }
+
+const std::string ServerConfiguration::getCgiPath() const {
+  return server->getCgiPath();
+};
 
 const std::string ServerConfiguration::getResourcePath(std::string uri) const {
   Location location = server->getLocations()[uri];
@@ -62,8 +64,14 @@ const std::string ServerConfiguration::getPathByRootAndValue(std::string root, s
   if (value == "/") {
     return root;
   }
+  if (root[root.length() - 1] == '/' && value[0] == '/') {
+    return root + value.substr(1);
+  }
   if (root[root.length() - 1] == '/') {
       return root + value;
+  }
+  if (value[0] == '/') {
+    return root + value;
   }
   return root + '/' + value;
 }

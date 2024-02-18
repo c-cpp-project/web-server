@@ -8,6 +8,7 @@ Server::Server()
     : listen(80),
       serverName(""),
       root("/"),
+      cgiPath("./"),
       uploadedPath(""),
       autoIndex(false),
       clientHeaderSize(10000),
@@ -24,9 +25,11 @@ std::map<std::string, Location> Server::getLocations(void) const {
   return this->locations;
 }
 
-std::string Server::getServerName(void) const { return this->serverName; }
+std::string Server::getServerName() const { return this->serverName; }
 
-std::string Server::getRoot(void) const { return this->root; }
+std::string Server::getRoot() const { return this->root; }
+
+std::string Server::getCgiPath() const { return this-> cgiPath; }
 
 std::map<std::vector<int>, std::string> Server::getErrorPage(void) const {
   return this->errorPage;
@@ -74,6 +77,8 @@ bool Server::fillServer(std::map<std::string, Location>& mapLocations,
       this->setUploadPath(it->second);
     else if (it->first == "keepalive_timeout")
       this->setKeepAliveTimeout(it->second);
+    else if (it->first == "cgi_path")
+      this->setCgiPath(it->second);
     else
       return true;
     it++;
@@ -99,6 +104,7 @@ void Server::setKeepAliveTimeout(std::string& input) {
 void Server::setServerName(std::string& input) { this->serverName = input; }
 
 void Server::setRoot(std::string& input) { this->root = input; }
+void Server::setCgiPath(std::string& input) { this->cgiPath = input; }
 
 std::map<int, std::string> Server::getErrorCodePage() {
   return this->errorCodePage;

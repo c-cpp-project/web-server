@@ -11,5 +11,4 @@ c++ -Werror main.cpp ./setting/ConfigFunctions.cpp ./setting/ConfigParser.cpp ./
 	 ../HttpRequest/HttpRequestHandler.cpp \
 	 ../controllers/*.cpp \
 	 ../ResponseHandler/*.cpp \
-	 ../HttpConfig.cpp
 	#  ./mock/Handler.cpp 

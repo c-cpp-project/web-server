@@ -34,6 +34,7 @@ public:
 	virtual ~Controller();
 	Controller();
 	Controller(int masking);
+	Controller(int masking, ServerConfiguration	*serverConfig);
 
 	// 모듈화
 	void			classifyEvent(std::string data, std::string filename, const char *cgi_python, HttpResponse &response);

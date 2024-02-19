@@ -85,6 +85,8 @@ void BeanTest(int socketfd, ServerConfiguration* serverConfig, Event* event) {
   // beanFactory.runBeanByName("RECV", handler, event);
   std::cout << "BeanTest===================\n";
 
+  // RECV: 이벤트 등록 -> 
+  // HttpHandler, event
   event = 0;
   beanFactory.runBeanByName("RECV", new HttpHandler(socketfd, serverConfig),
                             event);
@@ -198,5 +200,5 @@ int main(int argc, char** argv) {
   ResponseConfig responseConfig;  // response에서 사용하는 메서드 설정
   ControllerMapping controllerMapping(serverConfigs);  // Controller
   //  설정
-  //     endpointTest(serverConfigs[80], event);
+  endpointTest(serverConfigs[80], event);
 }

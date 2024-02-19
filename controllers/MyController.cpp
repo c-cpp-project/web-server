@@ -33,7 +33,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
         }
         else
         {
-            staticPath = serverConfig->getResourcePath(request.getPath()); // 4. 없으면 무엇을 반환하는가?
+            staticPath = serverConfig->getResourcePath(request.getPath()); // 4. 없으면 무엇을 반환하는가? -> error를 던진다.
             request.setPath(staticPath);
             response.forward(request);
         } 
@@ -50,3 +50,5 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
             doDelete(request, response);
     }
 }
+
+// Controller를 Server 개수만큼만 만들자.

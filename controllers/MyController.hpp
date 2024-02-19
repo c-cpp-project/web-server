@@ -14,7 +14,6 @@ public:
 	void	service(HttpRequest &request, HttpResponse &response);
 	MyController();
 	MyController(int masking);
-	MyController(int masking, ServerConfiguration* serverConfig, Event *event);
 	~MyController();
 };
 #endif

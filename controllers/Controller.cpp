@@ -64,10 +64,8 @@ void			Controller::writeEventRegister(int writefd[2], int readfd[2], HttpRespons
 // response
 void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response)
 {
-	ServerConfiguration *serverConfig;
 	Event				*event;
 
-	serverConfig = response.getServerConfiguration();
 	event = response.getEvent();
 	close(readfd[1]);
 	fcntl(readfd[0], F_SETFL, O_NONBLOCK);

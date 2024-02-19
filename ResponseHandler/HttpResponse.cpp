@@ -82,7 +82,7 @@ void	HttpResponse::redirect(std::string redirectUri)
 	putHeader("Content-Length", "0");
 	sendBody("");
 	// BeanFactory::registerEvent("SEND", new HttpHandler(getSockfd(), *this), event);H
-	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), *this)); // EVFILT_READ, EVFILT_WRITE
+	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), *this)); // SEND
 }
 
 void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한다.
@@ -102,7 +102,7 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 		throw "404";
 	}
 	// BeanFactory::registerEvent("READ", new HttpHandler(fd, request, *this), event);
-	event->saveEvent(getSockfd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), *this)); // EVFILT_READ, EVFILT_WRITE
+	event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), *this)); // READ
 }
 
 std::string	HttpResponse::readFile(int fd)

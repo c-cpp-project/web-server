@@ -167,10 +167,12 @@ void WebServer::processWriteEvent(struct kevent& currEvent) {
   BeanFactory beanFactory;
   if (isClient(currEvent.ident)) {
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+    ServerConfiguration* serverConfig = handler->getServerConfiguration();
     beanFactory.runBeanByName("SEND", handler, &eventHandler);
   } else {
     // CGI
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+    ServerConfiguration* serverConfig = handler->getServerConfiguration();
     beanFactory.runBeanByName("WRITE", handler, &eventHandler);
   }
 }
@@ -193,8 +195,7 @@ int WebServer::acceptClient(int serverSocket) {
   fcntl(clientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
   ServerConfiguration* serverConfig = serverConfigs[serverPort];
   addClient(clientSocket, serverConfig, &eventHandler);
-  eventHandler.registerEnabledReadEvent(
-      clientSocket, new HttpHandler(clientSocket, serverConfigs[serverPort]));
+  eventHandler.registerEnabledReadEvent(clientSocket, handlerMap[clientSocket]);
   return clientSocket;
 }
 
@@ -219,7 +220,8 @@ void WebServer::disconnectClient(int clientFd) {
 void WebServer::clearClients() {
   std::set<int>::iterator it = candidatesForDisconnection.begin();
   for (; it != candidatesForDisconnection.end(); it++) {
-    std::map<int, Handler*>::iterator handlerIterator = handlerMap.find(*it);
+    std::map<int, HttpHandler*>::iterator handlerIterator =
+        handlerMap.find(*it);
     // handlerIterator->second
     // TODO: close 로직 세우기 협의 필요
     disconnectClient(*it);
@@ -233,7 +235,7 @@ void WebServer::addCandidatesForDisconnection(int clientFd) {
 
 int WebServer::addClient(int clientFd, ServerConfiguration* serverConfig,
                          Event* eventHandler) {
-  handlerMap[clientFd] = new Handler(
-      clientFd, serverConfig, eventHandler);  // TODO: 메모리 delete 확인해주기
+  handlerMap[clientFd] = new HttpHandler(
+      clientFd, serverConfig);  // TODO: 메모리 delete 확인해주기
   return clientFd;
 };

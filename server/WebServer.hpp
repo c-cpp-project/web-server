@@ -19,7 +19,7 @@ class WebServer {
   Event eventHandler;
   std::map<int, ServerConfiguration*> serverConfigs;
   std::map<int, int> serverSocketPortMap;
-  std::map<int, Handler*>
+  std::map<int, HttpHandler*>
       handlerMap;  // TODO: 요청 관련해서 이벤트, fd 관리 일괄적으로
   std::set<int> candidatesForDisconnection;
   WebServer(const WebServer&);

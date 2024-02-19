@@ -27,7 +27,7 @@ int ConfigParser::checkServerBlock(struct s_info& parse_info,
   std::string& input = parse_info.inputToken;
   std::vector<std::string>& vecInput = parse_info.vecInput;
   std::map<std::string, std::string>& mapSentence = parse_info.mapSentence;
-  std::map<std::string, Location>& locations = parse_info.locations;
+  std::map<std::string, Location*>& locations = parse_info.locations;
   Server server;
 
   if (input == "}") {
@@ -124,16 +124,19 @@ int ConfigParser::checkLocationKeyAndValue(struct s_info& parse_info,
   std::vector<std::string>& vecInput = parse_info.vecInput;
   std::map<std::string, std::string>& mapSentence = parse_info.mapSentence;
   std::string& locationDir = parse_info.locationDir;
-  std::map<std::string, Location>& locations = parse_info.locations;
-  Location locationBlock;
+  std::map<std::string, Location*>& locations = parse_info.locations;
+  Location* locationBlock = new Location();
 
   static_cast<void>(servers);
   if (input == "}") {
     if (vecInput.size() != 0) return CONFIG_ERROR;
-    if (locationBlock.fillLocationBlock(mapSentence)) return CONFIG_ERROR;
+    if (locationBlock->fillLocationBlock(mapSentence)) {
+      delete locationBlock;
+      return CONFIG_ERROR;
+    }
     mapSentence.clear();
     locations.insert(
-        std::pair<std::string, Location>(locationDir, locationBlock));
+        std::pair<std::string, Location*>(locationDir, locationBlock));
     return 2;
   } else if (input == ";" || input == "{")
     return CONFIG_ERROR;

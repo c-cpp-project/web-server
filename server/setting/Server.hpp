@@ -18,9 +18,8 @@ class Server {
   bool autoIndex;
   long clientBodySize;
   long clientHeaderSize;
-  std::map<std::string, Location> locations;
+  std::map<std::string, Location*> locations;
   std::string uploadedPath;
-  
 
   void setListen(std::string& input);
   void setServerName(std::string& input);
@@ -37,7 +36,7 @@ class Server {
  public:
   Server();
   ~Server();
-  bool fillServer(std::map<std::string, Location>& mapLocations,
+  bool fillServer(std::map<std::string, Location*>& mapLocations,
                   std::map<std::string, std::string>& mapSentence);
 
   int getListen() const;
@@ -48,7 +47,7 @@ class Server {
   bool getAutoIndex() const;
   long getClientBodySize() const;
   long getClientHeaderSize() const;
-  std::map<std::string, Location> getLocations() const;
+  std::map<std::string, Location*>& getLocations();
   std::string getServerName() const;
   std::string getUploadPath() const;
   std::string getCgiPath() const;

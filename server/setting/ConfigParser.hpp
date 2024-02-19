@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef CONFIG_PARSER_HPP
-# define CONFIG_PARSER_HPP
+#define CONFIG_PARSER_HPP
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -28,7 +28,7 @@ class ConfigParser {
 
  private:
   typedef std::map<int, Server> mapPortServer;
-  typedef std::map<std::string, Location> mapStrLocation;
+  typedef std::map<std::string, Location*> mapStrLocation;
   typedef std::vector<std::string> vecStr;
   typedef std::map<std::string, std::string> mapStrStr;
 
@@ -37,7 +37,7 @@ class ConfigParser {
 
   struct s_info {
     std::string inputToken;
-    std::map<std::string, Location> locations;
+    std::map<std::string, Location*> locations;
     std::string locationDir;
     std::vector<std::string> vecInput;
     std::map<std::string, std::string> mapSentence;

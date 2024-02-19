@@ -21,7 +21,7 @@ int Server::getListen() const { return this->listen; }
 
 int Server::getKeepAliveTimeout() const { return this->keepAliveTimeout; }
 
-std::map<std::string, Location> Server::getLocations(void) const {
+std::map<std::string, Location*>& Server::getLocations(void) {
   return this->locations;
 }
 
@@ -29,7 +29,7 @@ std::string Server::getServerName() const { return this->serverName; }
 
 std::string Server::getRoot() const { return this->root; }
 
-std::string Server::getCgiPath() const { return this-> cgiPath; }
+std::string Server::getCgiPath() const { return this->cgiPath; }
 
 std::map<std::vector<int>, std::string> Server::getErrorPage(void) const {
   return this->errorPage;
@@ -41,17 +41,13 @@ std::map<std::string, int> Server::getRedirection(void) const {
 
 bool Server::getAutoIndex(void) const { return this->autoIndex; }
 
-long Server::getClientBodySize() const {
-  return this->clientBodySize;
-}
+long Server::getClientBodySize() const { return this->clientBodySize; }
 
-long Server::getClientHeaderSize() const {
-  return this->clientHeaderSize;
-};
+long Server::getClientHeaderSize() const { return this->clientHeaderSize; };
 
 std::string Server::getUploadPath() const { return this->uploadedPath; }
 
-bool Server::fillServer(std::map<std::string, Location>& mapLocations,
+bool Server::fillServer(std::map<std::string, Location*>& mapLocations,
                         std::map<std::string, std::string>& mapSentence) {
   std::map<std::string, std::string>::iterator it = mapSentence.begin();
 

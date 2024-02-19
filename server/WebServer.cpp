@@ -148,6 +148,7 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
   if (hasServerFd(currEvent)) {
     acceptClient(currEvent.ident);
   } else if (isClient(currEvent.ident)) {
+    std::cout << currEvent.ident << " = RECV currEvent.ident\n";
     if (currEvent.flags & EV_EOF) {
       addCandidatesForDisconnection(currEvent.ident);
     }
@@ -155,6 +156,7 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     beanFactory.runBeanByName("RECV", handler, &eventHandler);
   } else {
+    std::cout << currEvent.ident << " = READ currEvent.ident\n";
     BeanFactory beanFactory;
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     beanFactory.runBeanByName("READ", handler, &eventHandler);

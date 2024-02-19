@@ -36,5 +36,5 @@ void    BeanFactory::runBeanByName(std::string beanName, HttpHandler *eventProce
 
     bean = getBeanByName(beanName);
     bean->runBeanEvent(eventProcess, event); // event 처리 -> event 등록
-    delete eventProcess; // event 제거
+    // delete eventProcess; // event 제거
 }

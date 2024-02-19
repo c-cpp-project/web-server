@@ -2,7 +2,7 @@
 #define WEBSERVER_HPP
 #include <map>
 
-#include "../Bean/BeanFactory.cpp"
+#include "../Bean/BeanFactory.hpp"
 // #include "../Bean/HttpHandler.hpp"
 #include "ServerConfiguration.hpp"
 #include "SocketUtils.hpp"

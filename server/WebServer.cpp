@@ -151,40 +151,25 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
     if (currEvent.flags & EV_EOF) {
       addCandidatesForDisconnection(currEvent.ident);
     }
-    Handler* handler = reinterpret_cast<Handler*>(currEvent.udata);
-    int status = handler->readRequest();
-    std::cout << "status " << status << std::endl;
-    if (status == -1) {
-      std::cout << "statust: " << currEvent << std::endl;
-      handler->removeBuffer(currEvent.ident);
-      handler->removeAndDeleteChunkedRequest(currEvent.ident);
-      handler->errorHandling(
-          "400");  // 수정 필요하다. try catch  구문으로 해야할 듯
-      addCandidatesForDisconnection(currEvent.ident);
-      // handler 관련해서 처리할 부분 처리
-      // error response write event 등록. - 하는 게 맞을까?
-      // error Handling 분리할 필요가 있음
-      // Handler 상태를 설정해주면 write 작업 무리 없이 진행할 수도 있다.
-    } else {
-      int status = handler->createHttpRequest();
-      // CHUNKED 관련 이벤트 처리
-    }
-    // TODO: 병합 필요 - request 쪽 읽어들일 필요 있음
-    // read 작업 분리
-    // request http message 파싱 작업 필요
+    BeanFactory beanFactory;
+    HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+    beanFactory.runBeanByName("RECV", handler, &eventHandler);
   } else {
-    // CGI process 어떻게 돌아가는지 읽을 필요가 있다.
-    // dynamic
-    // 암튼 두개의 분기점으로 나뉨
+    BeanFactory beanFactory;
+    HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+    beanFactory.runBeanByName("READ", handler, &eventHandler);
   }
 }
 
 void WebServer::processWriteEvent(struct kevent& currEvent) {
+  BeanFactory beanFactory;
   if (isClient(currEvent.ident)) {
-    Handler* handler = reinterpret_cast<Handler*>(currEvent.udata);
-    // TODO: 병합 필요
+    HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+    beanFactory.runBeanByName("SEND", handler, &eventHandler);
   } else {
     // CGI
+    HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+    beanFactory.runBeanByName("WRITE", handler, &eventHandler);
   }
 }
 
@@ -204,10 +189,10 @@ int WebServer::acceptClient(int serverSocket) {
     return -1;
   }
   fcntl(clientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-  addClient(clientSocket, serverConfigs[serverPort], &eventHandler);
-  eventHandler.registerEnabledReadEvent(clientSocket, handlerMap[clientSocket]);
-  eventHandler.registerDisabledWriteEvent(clientSocket,
-                                          handlerMap[clientSocket]);
+  ServerConfiguration* serverConfig = serverConfigs[serverPort];
+  addClient(clientSocket, serverConfig, &eventHandler);
+  eventHandler.registerEnabledReadEvent(
+      clientSocket, new HttpHandler(clientSocket, serverConfigs[serverPort]));
   return clientSocket;
 }
 

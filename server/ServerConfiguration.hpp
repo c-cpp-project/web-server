@@ -3,7 +3,6 @@
 #include <map>
 #include <set>
 
-#include "IServerConfiguration.hpp"
 #include "setting/Server.hpp"
 class ServerConfiguration {
  private:
@@ -40,7 +39,7 @@ class ServerConfiguration {
   const std::pair<std::string, std::string> getRedirectionPath(
       const std::string& uri) const;
   //"application/json"과 같이 Content-Type을 std::string으로 넣으면 해당
-  //contentType이 지원되는지 반환
+  // contentType이 지원되는지 반환
   bool hasContentType(const std::string& contentType);
   // Server 객체에 직접 접근 가능
   Server* getServer();

@@ -15,7 +15,7 @@ void    ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event)
         return ;
     body = response->readFile(readFd);
     if (body == "")
-        throw "500";
+        throw "500"; // try-catch로 잡아야 한다.
     response200(body, httpHandler, event);
     delete httpHandler;
 }

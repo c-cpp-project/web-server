@@ -38,12 +38,9 @@ void    FrontController::run(HttpRequest tmp)
 
 		std::cout << "=============== [Request Body] ===============\n";
 		std::cout << request->at(i).getBody() << "\n";
-		
-		// ServerConfiguration	serverConfig;
+		std::cout << "===============================================\n";
+
 		controller = ControllerMapping::getController(serverConfig->getPort(), ControllerMapping::getLocationUri(request->at(i).getPath()));
-		// path = serverConfig.getResourcePath(request->at(i).getPath());
-		// if (path != "")
-		// 	request->at(i).setPath(path);
 		controller->service(request->at(i), (*response)); // CGI에서 대한 I/O 작업: READ, WRITE
 		controller = nullptr;
 	}

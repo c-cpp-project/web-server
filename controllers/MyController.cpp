@@ -13,8 +13,10 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
 {
     std::string redirectPath;
     std::string staticPath;
+    std::string cgiPath;
     ServerConfiguration *serverConfig = response.getServerConfiguration();
 
+    std::cout << "MyController::service\n";
     if (isAcceptableMethod(request.getMethod()) == false)
         throw "405";
     // ============================ 애매한 부분 ============================ //
@@ -34,6 +36,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
         else
         {
             staticPath = serverConfig->getResourcePath(request.getPath()); // 4. 없으면 무엇을 반환하는가? -> error를 던진다.
+            std::cout << staticPath << " = staticPath\n";
             request.setPath(staticPath);
             response.forward(request);
         } 
@@ -42,6 +45,8 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
     {
         // CGI 파일 경로 설정을 따로 해야 할 것으로 보임.. 아마도요?
         // request.setPath("CGI PATH");
+        cgiPath = serverConfig->getResourcePath(request.getPath());
+        request.setPath(cgiPath);
         if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded") // get, post
             doGet(request, response);
         else if (request.getMethod() == "POST") // file upload

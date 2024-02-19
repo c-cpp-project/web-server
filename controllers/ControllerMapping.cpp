@@ -24,6 +24,8 @@ std::string ControllerMapping::getLocationUri(std::string uri) {
   std::string location;
 
   idx = uri.substr(1).find('/');
+  if (idx == std::string::npos)
+    return ("/");
   location = uri.substr(idx);
   return (location);
 }

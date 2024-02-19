@@ -81,7 +81,8 @@ void    Controller::doGet(HttpRequest &request, HttpResponse &response)
 	std::string	tmp[2];
 	std::string	data;
 
-	cgiFile = "cgi-bin/DoGet.py";
+	// cgiFile = "cgi-bin/DoGet.py";
+	cgiFile = request.getPath();
 	tmp[0] = request.getParameter("username") == "" ? "" : "username=" + request.getParameter("username");
 	tmp[1] = request.getParameter("password") == "" ? "" : "password=" + request.getParameter("password");
 	data = tmp[0] + tmp[1];
@@ -98,7 +99,8 @@ void	Controller::doPost(HttpRequest &request, HttpResponse &response)
 	std::string	contentType;
 	std::string	body;
 
-	cgiFile = "cgi-bin/DoUpload.py";
+	// cgiFile = "cgi-bin/DoUpload.py";
+	cgiFile = request.getPath();
 	data = request.getBody();
 	contentType = request.getHeader("content-type");
 	classifyEvent(data, contentType, cgiFile.c_str(), response);
@@ -111,7 +113,8 @@ void	Controller::doDelete(HttpRequest &request, HttpResponse &response)
 	std::string	body;
 	std::string	uri;
 
-	cgiFile = "cgi-bin/DoDelete.py";
+	// cgiFile = "cgi-bin/DoDelete.py";
+	cgiFile = request.getPath();
 	uri = request.getPath();
 	fileName = uri.substr(uri.find('/', 1) + 1);
 	if (access(fileName.c_str(), F_OK) == -1) // 존재하지 않는다.

@@ -15,6 +15,7 @@ BeanFactory::~BeanFactory()
 
     for (iter = beanRepository.begin(); iter != beanRepository.end(); iter++)
         delete (iter->second);
+    beanRepository.clear();
 }
 
 Bean    *BeanFactory::getBeanByName(std::string beanName)

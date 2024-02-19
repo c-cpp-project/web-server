@@ -94,6 +94,8 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 	if (getStatusCode()[0] == '4' || getStatusCode()[0] == '5') // fail.page
 		uri = serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str()));
 	fd = open(uri.c_str(), O_RDONLY);
+	if (access(uri.c_str(), F_OK) == 0)
+		std::cout << uri << ": access\n";
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 	if ((fd < 0 || request.getMethod() != "GET") && \
 	serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str())) != "") 
@@ -117,7 +119,11 @@ std::string	HttpResponse::readFile(int fd)
 	body[size] = 0;
 	close(fd);
 	if (ret < 0)
+	{
+		std::cout << size << " -> ";
+		std::cout << "ret is minus\n";
 		return ("");
+	}
 	return (body);
 }
 

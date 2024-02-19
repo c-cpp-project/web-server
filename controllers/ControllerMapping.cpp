@@ -2,9 +2,9 @@
 
 std::map<std::pair<int, std::string>, Controller *> ControllerMapping::controllers;
 
-ControllerMapping::ControllerMapping(std::map<int, ServerConfiguration*> &serverConfigs, Event *event)
+ControllerMapping::ControllerMapping(std::map<int, ServerConfiguration*> serverConfigs)
 {
-	ControllerMapping::mapController(serverConfigs, event); // Contorller 설정
+	ControllerMapping::mapController(serverConfigs); // Contorller 설정
 	ControllerMapping::putController(0, DEFAULT, new DefaultController()); // defualt
 }
 
@@ -42,24 +42,24 @@ Controller *ControllerMapping::getController(int port, std::string uri)
 	return (controllers[key]);
 }
 
-void		ControllerMapping::mapController(std::map<int, ServerConfiguration*> &serverConfigs, Event *event)
+void		ControllerMapping::mapController(std::map<int, ServerConfiguration*> &serverConfigs)
 {
 	std::map<std::string, Location>::iterator		configIter;
-	std::map<int, ServerConfiguration*>::iterator	portIter;			
-	Server				server;
+	std::map<int, ServerConfiguration*>::iterator	portIter;
 	std::stringstream 	ss;
 
+	std::cout << "size: " << serverConfigs.size() << "\n";
 	for (portIter = serverConfigs.begin(); portIter != serverConfigs.end(); portIter++)
 	{
-		int					port;
-
-		port = portIter->first;
-		server = portIter->second->getServer();
+		int				port = portIter->first;
+		const Server	&server = portIter->second->getServer();
+		
+		std::cout << "port: " << port << "\n";
 		for (configIter = server.getLocations().begin(); configIter != server.getLocations().end(); configIter++)
 		{
-			std::string				locationUri = configIter->first;
-			std::set<std::string>	allowMethod = configIter->second.getAllowMethod();
-			unsigned int			method;
+			std::string					locationUri = configIter->first;
+			const std::set<std::string>	allowMethod = configIter->second.getAllowMethod();
+			unsigned int				method;
 
 			method = 0;
 			if (allowMethod.find("GET") != allowMethod.end())

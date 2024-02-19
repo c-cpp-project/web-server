@@ -1,4 +1,5 @@
-
+#ifndef SERVER_CONFIGURATION__HPP
+# define SERVER_CONFIGURATION__HPP
 #include <map>
 #include <set>
 
@@ -50,4 +51,4 @@ class ServerConfiguration {
   const std::set<std::string> getAllowedMethod(const std::string& uri) const;
   const std::string getCgiPath() const;
 };
-
+#endif

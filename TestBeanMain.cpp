@@ -74,6 +74,8 @@ int tcp_connection(int& clientSocket, int& server_socket) {
 	return (clientSocket);
 }
 
+
+
 // 주의사항: 메모리 릭
 // 합의사항: Event 처리할 때, Error가 발생하면 어디서 처리할까?
 // 사용법: beanFactory.runBeanByName("처리해야할 이벤트명", *uData, event);
@@ -81,6 +83,10 @@ void    BeanTest(int socketfd, ServerConfiguration* serverConfig, Event *event)
 {
 		int         fd;
 		BeanFactory beanFactory;
+
+		// HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+		// beanFactory.runBeanByName("RECV", handler, event);
+		std::cout << "BeanTest===================\n";
 
 		event = 0;
 		beanFactory.runBeanByName("RECV", new HttpHandler(socketfd, serverConfig), event);
@@ -152,10 +158,11 @@ int main(int argc, char** argv)
 	// ======================================================================================= //
 	//											Response 설정	  								//
 	// ======================================================================================= //
+	std::cout << "======================================\n";
 	Event   *event;
 
 	event = 0; // Event 등록을 제외한 Test
 	ResponseConfig responseConfig; // response에서 사용하는 메서드 설정
-	ControllerMapping controllerMapping(serverConfigs, event); // Controller 설정
+	ControllerMapping controllerMapping(serverConfigs); // Controller 설정
 	endpointTest(serverConfigs[80], event);
 }

@@ -1,4 +1,4 @@
-c++ -Werror TestBeanMain.cpp server/setting/ConfigFunctions.cpp server/setting/ConfigParser.cpp server/setting/Location.cpp server/setting/Server.cpp server/ServerConfiguration.cpp server/WebServer.cpp \
+c++ -Werror -fsanitize=address -g3 TestBeanMain.cpp server/setting/ConfigFunctions.cpp server/setting/ConfigParser.cpp server/setting/Location.cpp server/setting/Server.cpp server/ServerConfiguration.cpp server/WebServer.cpp \
 	 server/Event.cpp server/StringUtils.cpp server/SocketUtils.cpp \
 	 server/mock/Handler.cpp \
 	 HttpRequest/HttpRequestFactory.cpp \

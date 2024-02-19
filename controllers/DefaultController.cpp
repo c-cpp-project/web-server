@@ -15,6 +15,7 @@ void    DefaultController::service(HttpRequest &request, HttpResponse &response)
     // 메서드 허용 여부 검사
     if (isAcceptableMethod(request.getMethod()) == false)
         throw "405";
+    std::cout << "DefaultController::service" << "\n";
     redirectPath = serverConfig->getRedirectionPath(request.getPath()).second;
     if (redirectPath != "")
     {
@@ -24,7 +25,8 @@ void    DefaultController::service(HttpRequest &request, HttpResponse &response)
     }
     else
     {
-        staticPath = serverConfig->getResourcePath(request.getPath()); // 4. 없으면 무엇을 반환하는가?
+        staticPath = serverConfig->getResourcePath(request.getPath()); // 4. 없으면 무엇을 반환하는가? -> error를 던진다.
+        std::cout << staticPath << " = staticPath\n";
         request.setPath(staticPath);
         response.forward(request);
     }

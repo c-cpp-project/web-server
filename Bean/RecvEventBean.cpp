@@ -13,5 +13,6 @@ void    RecvEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event)
 {
     HttpRequestHandler httpRequestHandler(httpHandler->getFd(), httpHandler->getServerConfiguration());
     httpRequestHandler.handle(event);
+    event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
     delete httpHandler;
 }

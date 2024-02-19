@@ -1,8 +1,9 @@
 #include"FrontController.hpp"
 
 
-FrontController::FrontController(ServerConfiguration *serverConfig, Event *event)
+FrontController::FrontController(int socketfd, ServerConfiguration *serverConfig, Event *event)
 {
+	this->socketfd = socketfd;
 	this->serverConfig = serverConfig;
 	this->event = event;
 }
@@ -11,7 +12,6 @@ FrontController::FrontController(int socketfd, int fd)
 {
 	this->socketfd = socketfd;
 	int	tmp;
-
 	tmp = fd;
 }
 
@@ -21,7 +21,6 @@ void    FrontController::run(HttpRequest tmp)
 	MultiRequest                multiRequest(tmp.getHeader("content-type"));
 	HttpResponse    			*response;
 
-	response = new HttpResponse(this->socketfd, serverConfig, event);
 	request = multiRequest.makeRequest(tmp);
 	for (int i = 0; i < static_cast<int>(request->size()); i++)
 	{
@@ -41,6 +40,8 @@ void    FrontController::run(HttpRequest tmp)
 		std::cout << "===============================================\n";
 
 		controller = ControllerMapping::getController(serverConfig->getPort(), ControllerMapping::getLocationUri(request->at(i).getPath()));
+		std::cout << this->socketfd << ": this->socketfd\n";
+		response = new HttpResponse(this->socketfd, serverConfig, event);
 		controller->service(request->at(i), (*response)); // CGI에서 대한 I/O 작업: READ, WRITE
 		controller = nullptr;
 	}

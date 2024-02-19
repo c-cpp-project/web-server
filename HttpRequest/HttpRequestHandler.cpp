@@ -22,14 +22,12 @@ HttpRequestHandler::HttpRequestHandler(int _socket_fd,
 
 void HttpRequestHandler::handle(Event *event) {
   try {
-    std::cout << "HttpRequestHandler::handle\n";
     int read_status = readRequest();
     std::cout
         << "-------------------------------------------------------------------"
         << read_status << '\n';
     if (read_status == FAILURE)  // 클라이언트와 연결이 끊긴 경우
       return;
-    std::cout << "[" << buffers[socket_fd] << "]: buffers[socket_fd]\n";
     while (buffers[socket_fd] != "") {
       // std::cout << "\n\n********************* loop
       // ***********************\n"; std::cout << "buffer:\n" <<
@@ -44,7 +42,7 @@ void HttpRequestHandler::handle(Event *event) {
           continue;  // 아직 끝나지 않은 chunked 요청
 
         int kqueue_fd = 0;
-        FrontController front_controller(server_config, event);
+        FrontController front_controller(socket_fd, server_config, event);
         front_controller.run(*request);
         delete request;
       } catch (const char *e) {
@@ -107,6 +105,8 @@ int HttpRequestHandler::ChunkedRequestHandling(HttpRequest *request) {
 void HttpRequestHandler::errorHandling(const char *erorr_code, ServerConfiguration *serverConfig, Event *event) {
   HttpRequest empty;
   HttpResponse response(socket_fd, serverConfig, event);
+
+  std::cout << "HttpRequestHandler::errorHandling\n";
   response.setStatusCode(erorr_code);
   response.forward(empty);
   // response.flush();

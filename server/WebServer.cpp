@@ -144,7 +144,7 @@ void WebServer::processErrorEvent(struct kevent& currEvent) {
 
 void WebServer::processReadEvent(struct kevent& currEvent) {
   // TODO: 고치기
-  std::cout << "currEvent: " << currEvent << std::endl;
+  std::cout << "processReadEvent currEvent: " << currEvent << std::endl;
   if (hasServerFd(currEvent)) {
     acceptClient(currEvent.ident);
   } else if (isClient(currEvent.ident)) {
@@ -165,6 +165,7 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
 
 void WebServer::processWriteEvent(struct kevent& currEvent) {
   BeanFactory beanFactory;
+  std::cout << "processWriteEvent currEvent" << currEvent << "\n";
   if (isClient(currEvent.ident)) {
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     ServerConfiguration* serverConfig = handler->getServerConfiguration();

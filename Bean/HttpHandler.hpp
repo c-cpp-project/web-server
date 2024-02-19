@@ -20,6 +20,7 @@ private:
 	HttpHandler();
 public:
 	HttpHandler(int fd, HttpRequest req, HttpResponse res);
+	HttpHandler(int fd, HttpRequest req, HttpResponse res, ServerConfiguration *serverConfig);
 	HttpHandler(int fd, HttpResponse res);
 	HttpHandler(int fd, std::string data, ServerConfiguration *serverConfig);
 	HttpHandler(int fd, ServerConfiguration *serverConfig);

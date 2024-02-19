@@ -27,7 +27,7 @@ private:
 public:
 	FrontController(int socketfd);
 	FrontController(int socketfd, int fd);
-	FrontController(ServerConfiguration *serverConfig, Event *event);
+	FrontController(int socketfd, ServerConfiguration *serverConfig, Event *event);
 	FrontController();
 	~FrontController();
 

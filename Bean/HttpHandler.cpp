@@ -35,6 +35,15 @@ HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res)
     this->data = "";
 }
 
+HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, ServerConfiguration *serverConfig)
+{
+    this->fd = fd;
+    this->request = req;
+    this->response = res;
+    this->serverConfig = serverConfig;
+    this->data = "";
+}
+
 HttpHandler::~HttpHandler()
 {}
 

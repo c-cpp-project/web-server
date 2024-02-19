@@ -28,7 +28,7 @@ void	    ReadEventBean::response200(std::string body, HttpHandler *httpHandler, 
     HttpResponse        &response = httpHandler->getHttpResponse();
     HttpRequest         &request = httpHandler->getHttpRequest();
 
-	response.putHeader("Server", httpHandler->getServerConfiguration()->getServerName());
+	response.putHeader("Server", response.getServerConfiguration()->getServerName());
 	response.putHeader("Date", ResponseConfig::getCurrentDate());
 	response.putHeader("Content-Type", "text/html;charset=utf-8");
     if (request.getParameter("Range") != "" && request.getMethod() == "GET")
@@ -37,8 +37,7 @@ void	    ReadEventBean::response200(std::string body, HttpHandler *httpHandler, 
 	bodyLength = ss.str();
 	response.putHeader("Content-Length", bodyLength);
     response.sendBody(body); // this->buffer에 string으로 모두 담긴다.
-    // BeanFactory::registerEvent("SEND", new HttpHandler(response.getSockfd(), response), event);
+    std::cout << "ReadEventBean::response200 -> saveEvent\n";
+    event->saveEvent(response.getSockfd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
     event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(response.getSockfd(), response)); // EVFILT_READ, EVFILT_WRITE
-    // event->registerEnabledReadEvent(response.getSockfd(), new HttpHandler(response.getSockfd(), response));
-    // Event 등록; flush()
 }

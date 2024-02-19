@@ -76,6 +76,7 @@ void	HttpResponse::removeHeader(std::string key)
 
 void	HttpResponse::redirect(std::string redirectUri)
 {
+	std::cout << "HttpResponse::redirect\n";
 	setStatusCode("302");
 	putHeader("Content-Type", "text/html");
 	putHeader("Location", redirectUri);
@@ -94,8 +95,6 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 	if (getStatusCode()[0] == '4' || getStatusCode()[0] == '5') // fail.page
 		uri = serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str()));
 	fd = open(uri.c_str(), O_RDONLY);
-	if (access(uri.c_str(), F_OK) == 0)
-		std::cout << uri << ": access\n";
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 	if ((fd < 0 || request.getMethod() != "GET") && \
 	serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str())) != "") 
@@ -104,7 +103,7 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 		throw "404";
 	}
 	// BeanFactory::registerEvent("READ", new HttpHandler(fd, request, *this), event);
-	event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), *this)); // READ
+	event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, request, *this)); // READ
 }
 
 std::string	HttpResponse::readFile(int fd)

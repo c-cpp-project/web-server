@@ -16,7 +16,6 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
     std::string cgiPath;
     ServerConfiguration *serverConfig = response.getServerConfiguration();
 
-    std::cout << "MyController::service\n";
     if (isAcceptableMethod(request.getMethod()) == false)
         throw "405";
     // ============================ 애매한 부분 ============================ //
@@ -24,6 +23,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
     // 2. CGI 파열 경로는 어떻게 설정하는가? -> 42번 줄 확인 바람!
     // 3. getResourcePath는 어떻게 설정되고 무엇을 반환하는가?
     // ================================================================== //
+    std::cout << "MyController::service" << "\n";
     if (request.getMethod() == "GET" && request.getQueryString() == "")
     {
         redirectPath = serverConfig->getRedirectionPath(request.getPath()).second;

@@ -17,6 +17,7 @@ void    ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event)
     if (body == "")
         throw "500"; // try-catch로 잡아야 한다.
     response200(body, httpHandler, event);
+    event->saveEvent(readFd, EVFILT_READ, EV_DISABLE, 0, 0, 0);
     delete httpHandler;
 }
 
@@ -38,6 +39,5 @@ void	    ReadEventBean::response200(std::string body, HttpHandler *httpHandler, 
 	response.putHeader("Content-Length", bodyLength);
     response.sendBody(body); // this->buffer에 string으로 모두 담긴다.
     std::cout << "ReadEventBean::response200 -> saveEvent\n";
-    event->saveEvent(response.getSockfd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
     event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(response.getSockfd(), response)); // EVFILT_READ, EVFILT_WRITE
 }

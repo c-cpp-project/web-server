@@ -23,6 +23,7 @@ void			Controller::classifyEvent(std::string data, std::string contentType, cons
 		path[2] = data.c_str();
 		path[3] = NULL;
 	}
+	std::cout << "[" << contentType << " : contentType]\n";
 	ret = fork();
 	if (ret == 0)
 	{
@@ -41,6 +42,7 @@ void			Controller::classifyEvent(std::string data, std::string contentType, cons
 			writeEventRegister(pipefd1, pipefd2, response, data);
 		else
 			readEventRegsiter(pipefd2, response);
+		// wait(NULL);
 	}
 }
 
@@ -48,15 +50,15 @@ void			Controller::writeEventRegister(int writefd[2], int readfd[2], HttpRespons
 {
 	ServerConfiguration *serverConfig;
 	Event				*event;
+	HttpHandler			*handler;
 
 	serverConfig = response.getServerConfiguration();
 	event = response.getEvent();
+	handler = new HttpHandler(writefd[1], data, serverConfig);
 	close(writefd[0]);
 	fcntl(writefd[1], F_SETFL, O_NONBLOCK);
-	// BeanFactory::registerEvent("WRITE", new HttpHandler(writefd[1], data, serverConfig), event);
-	event->saveEvent(writefd[1], EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(writefd[1], data, serverConfig));
+	event->saveEvent(writefd[1], EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, handler);
 	// event->saveEvent(response.getSockfd(), EVFILT_READ, 0, 0, 0, new HttpHandler(response.getSockfd(), response)); // EVFILT_READ, EVFILT_WRITE
-	
 	readEventRegsiter(readfd, response);
 }
 
@@ -81,8 +83,8 @@ void    Controller::doGet(HttpRequest &request, HttpResponse &response)
 	std::string	tmp[2];
 	std::string	data;
 
-	// cgiFile = "cgi-bin/DoGet.py";
-	cgiFile = request.getPath();
+	cgiFile = "cgi-bin/DoGet.py";
+	// cgiFile = response.getServerConfiguration()->getGetCgiPath();
 	tmp[0] = request.getParameter("username") == "" ? "" : "username=" + request.getParameter("username");
 	tmp[1] = request.getParameter("password") == "" ? "" : "password=" + request.getParameter("password");
 	data = tmp[0] + tmp[1];
@@ -99,10 +101,11 @@ void	Controller::doPost(HttpRequest &request, HttpResponse &response)
 	std::string	contentType;
 	std::string	body;
 
-	// cgiFile = "cgi-bin/DoUpload.py";
-	cgiFile = request.getPath();
+	std::cout << "Controller::doPost\n";
+	cgiFile = "cgi-bin/DoUpload.py";
+	// cgiFile = response.getServerConfiguration()->getPostCgiPath();
 	data = request.getBody();
-	contentType = request.getHeader("content-type");
+	contentType = request.getHeader("Content-Type");
 	classifyEvent(data, contentType, cgiFile.c_str(), response);
 }
 
@@ -113,10 +116,9 @@ void	Controller::doDelete(HttpRequest &request, HttpResponse &response)
 	std::string	body;
 	std::string	uri;
 
-	// cgiFile = "cgi-bin/DoDelete.py";
-	cgiFile = request.getPath();
-	uri = request.getPath();
-	fileName = uri.substr(uri.find('/', 1) + 1);
+	cgiFile = "cgi-bin/DoDelete.py";
+	// cgiFile = response.getServerConfiguration()->getDeleteCgiPath();
+	fileName = request.getPath();
 	if (access(fileName.c_str(), F_OK) == -1) // 존재하지 않는다.
 		throw "404";
 	classifyEvent(fileName, "", cgiFile.c_str(), response);
@@ -132,11 +134,18 @@ Controller::Controller(int masking)
 	this->masking = masking;
 }
 
+Controller::Controller(int masking, std::string mLocation)
+{
+	this->masking = masking;
+	this->mLocation = mLocation;
+}
+
 Controller::~Controller()
 {}
 
 bool    Controller::isAcceptableMethod(std::string method)
 {
+	std::cout << "this->masking : " << this->masking << ", " << method << "\n";
 	if (method == "GET" && (1 & this->masking))
 		return (true);
 	else if (method == "POST" && (2 & this->masking))

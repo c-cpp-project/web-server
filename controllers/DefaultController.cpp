@@ -12,10 +12,11 @@ void    DefaultController::service(HttpRequest &request, HttpResponse &response)
     std::string         staticPath;
     std::string         path;
     ServerConfiguration *serverConfig = response.getServerConfiguration();
+
+    std::cout << "DefaultController::service" << "\n";
     // 메서드 허용 여부 검사
     if (isAcceptableMethod(request.getMethod()) == false)
         throw "405";
-    std::cout << "DefaultController::service" << "\n";
     redirectPath = serverConfig->getRedirectionPath(request.getPath()).second;
     if (redirectPath != "")
     {

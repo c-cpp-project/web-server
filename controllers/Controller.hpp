@@ -24,6 +24,8 @@ class Controller
 {
 private:
 	int 				masking; // 허용 메서드 7 -> 모두 허용
+protected:
+	std::string			mLocation;
 public:
 	virtual void    service(HttpRequest &request, HttpResponse &response) = 0;
 	void    doGet(HttpRequest &request, HttpResponse &response);
@@ -34,7 +36,8 @@ public:
 	virtual ~Controller();
 	Controller();
 	Controller(int masking);
-	Controller(int masking, ServerConfiguration	*serverConfig);
+	Controller(int masking, std::string mLocation);
+	Controller(int masking, ServerConfiguration	*serverConfig, std::string mLocation);
 
 	// 모듈화
 	void			classifyEvent(std::string data, std::string filename, const char *cgi_python, HttpResponse &response);

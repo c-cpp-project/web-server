@@ -165,15 +165,16 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
 
 void WebServer::processWriteEvent(struct kevent& currEvent) {
   BeanFactory beanFactory;
-  std::cout << "processWriteEvent currEvent" << currEvent << "\n";
+  std::cout << "processWriteEvent currEvent" << currEvent << std::endl;
   if (isClient(currEvent.ident)) {
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
-    ServerConfiguration* serverConfig = handler->getServerConfiguration();
+    // ServerConfiguration* serverConfig = handler->getServerConfiguration();
     beanFactory.runBeanByName("SEND", handler, &eventHandler);
   } else {
     // CGI
+    std::cout << "WRITE currEvent " << currEvent << std::endl;
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
-    ServerConfiguration* serverConfig = handler->getServerConfiguration();
+    // ServerConfiguration* serverConfig = handler->getServerConfiguration();
     beanFactory.runBeanByName("WRITE", handler, &eventHandler);
   }
 }

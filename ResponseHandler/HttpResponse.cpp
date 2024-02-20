@@ -120,9 +120,9 @@ std::string	HttpResponse::readFile(int fd)
 		size += ret;
 		body.append(std::string(binaryData, binaryData + ret));
 	}
-	if (ret < 0)
+	if (size <= 0 && ret < 0)
 	{
-		std::cout << size << " -> ";
+		std::cout << size << ", " << ret << " = ";
 		std::cout << "ret is minus\n";
 		return ("");
 	}

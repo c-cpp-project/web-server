@@ -6,9 +6,12 @@ MyController::MyController() : Controller()
 MyController::MyController(int masking) : Controller(masking)
 {}
 
-MyController::~MyController()
+MyController::MyController(int masking, std::string mLocation) : Controller(masking, mLocation)
 {}
 
+MyController::~MyController()
+{}
+ 
 void    MyController::service(HttpRequest &request, HttpResponse &response)
 {
     std::string redirectPath;
@@ -16,6 +19,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
     std::string cgiPath;
     ServerConfiguration *serverConfig = response.getServerConfiguration();
 
+    std::cout << "MyController::service" << "\n";
     if (isAcceptableMethod(request.getMethod()) == false)
         throw "405";
     // ============================ 애매한 부분 ============================ //
@@ -23,7 +27,6 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
     // 2. CGI 파열 경로는 어떻게 설정하는가? -> 42번 줄 확인 바람!
     // 3. getResourcePath는 어떻게 설정되고 무엇을 반환하는가?
     // ================================================================== //
-    std::cout << "MyController::service" << "\n";
     if (request.getMethod() == "GET" && request.getQueryString() == "")
     {
         redirectPath = serverConfig->getRedirectionPath(request.getPath()).second;
@@ -35,10 +38,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
         }
         else
         {
-            if (request.getPath() == "/favicon.ico")
-                staticPath = "static/favicon.ico";
-            else
-                staticPath = serverConfig->getResourcePath(request.getPath()); // 4. 없으면 무엇을 반환하는가? -> error를 던진다.
+            staticPath = serverConfig->getResourcePath(request.getPath());
             std::cout << staticPath << " = staticPath\n";
             request.setPath(staticPath);
             response.forward(request);
@@ -48,14 +48,19 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
     {
         // CGI 파일 경로 설정을 따로 해야 할 것으로 보임.. 아마도요?
         // request.setPath("CGI PATH");
-        cgiPath = serverConfig->getResourcePath(request.getPath());
-        request.setPath(cgiPath);
+        // std::cout << cgiPath << " = cgiPath\n";s
+        std::cout << "getDeleteCgiPath : [" << serverConfig->getDeleteCgiPath() << "]\n";
         if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded") // get, post
             doGet(request, response);
         else if (request.getMethod() == "POST") // file upload
             doPost(request, response);
         else
+        {
+            this->mLocation = "./repository/" + this->mLocation.substr(this->mLocation.find('/', 1) + 1);
+            request.setPath(this->mLocation);
+            std::cout << request.getPath() << "\n";
             doDelete(request, response);
+        }
     }
 }
 

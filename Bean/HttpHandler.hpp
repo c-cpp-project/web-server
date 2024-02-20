@@ -26,6 +26,7 @@ public:
 	HttpHandler(int fd, ServerConfiguration *serverConfig);
 	~HttpHandler();
 	HttpHandler&	operator=(const HttpHandler& ref);
+	HttpHandler(const HttpHandler& ref);
 	int				getFd(void);
 	HttpRequest		&getHttpRequest(void);
 	HttpResponse	&getHttpResponse(void);

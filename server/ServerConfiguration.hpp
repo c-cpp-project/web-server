@@ -51,5 +51,8 @@ class ServerConfiguration {
   // 반환 그게 아니면 GET 메소드 집합만 반환
   const std::set<std::string> getAllowedMethod(const std::string& uri) const;
   const std::string getCgiPath() const;
+  const std::string getPostCgiPath() const;
+  const std::string getGetCgiPath() const;
+  const std::string getDeleteCgiPath() const;
 };
 #endif

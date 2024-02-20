@@ -12,6 +12,9 @@ class Server {
   std::string serverName;
   std::string root;
   std::string cgiPath;
+  std::string _getCgiPath;
+  std::string postCgiPath;
+  std::string deleteCgiPath;
   std::map<std::vector<int>, std::string> errorPage;
   std::map<int, std::string> errorCodePage;
   std::map<std::string, int> redirection;
@@ -52,4 +55,10 @@ class Server {
   std::string getUploadPath() const;
   std::string getCgiPath() const;
   int getKeepAliveTimeout() const;
+  std::string getGetCgiPath() const;
+  std::string getPostCgiPath() const;
+  std::string getDeleteCgiPath() const;
+  void setGetCgiPath(std::string& input);
+  void setPostCgiPath(std::string& input);
+  void setDeleteCgiPath(std::string& input);
 };

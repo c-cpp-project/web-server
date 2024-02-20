@@ -9,6 +9,9 @@ Server::Server()
       serverName(""),
       root("/"),
       cgiPath("./"),
+      _getCgiPath(""),
+      postCgiPath(""),
+      deleteCgiPath(""),
       uploadedPath(""),
       autoIndex(false),
       clientHeaderSize(10000),
@@ -47,6 +50,10 @@ long Server::getClientHeaderSize() const { return this->clientHeaderSize; };
 
 std::string Server::getUploadPath() const { return this->uploadedPath; }
 
+std::string Server::getGetCgiPath() const { return this->_getCgiPath; }
+std::string Server::getPostCgiPath() const { return this->postCgiPath; }
+std::string Server::getDeleteCgiPath() const { return this->deleteCgiPath; }
+
 bool Server::fillServer(std::map<std::string, Location*>& mapLocations,
                         std::map<std::string, std::string>& mapSentence) {
   std::map<std::string, std::string>::iterator it = mapSentence.begin();
@@ -75,8 +82,16 @@ bool Server::fillServer(std::map<std::string, Location*>& mapLocations,
       this->setKeepAliveTimeout(it->second);
     else if (it->first == "cgi_path")
       this->setCgiPath(it->second);
-    else
+    else if (it->first == "get-cgi-path")
+      this->setGetCgiPath(it->second);
+    else if (it->first == "post-cgi-path")
+      this->setPostCgiPath(it->second);
+    else if (it->first == "delete-cgi-path")
+      this->setDeleteCgiPath(it->second);
+    else {
+      std::cout << it->second << " " << it->first;
       return true;
+    }
     it++;
   }
   return false;
@@ -163,3 +178,8 @@ void Server::setClientHeaderSize(std::string& input) {
 }
 
 void Server::setUploadPath(std::string& input) { this->uploadedPath = input; }
+void Server::setGetCgiPath(std::string& input) { this->_getCgiPath = input; }
+void Server::setPostCgiPath(std::string& input) { this->postCgiPath = input; }
+void Server::setDeleteCgiPath(std::string& input) {
+  this->deleteCgiPath = input;
+}

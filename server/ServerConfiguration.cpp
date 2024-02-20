@@ -140,7 +140,18 @@ const std::set<std::string> ServerConfiguration::getAllowedMethod(
 
   // 'uri' 키가 존재하지 않는 경우, 기본 허용 메소드 세트를 반환합니다.
   return defaultAllowedMethods;
-}
+};
+
+const std::string ServerConfiguration::getPostCgiPath() const {
+  return server->getPostCgiPath();
+};
+
+const std::string ServerConfiguration::getGetCgiPath() const {
+  return server->getGetCgiPath();
+};
+const std::string ServerConfiguration::getDeleteCgiPath() const {
+  return server->getDeleteCgiPath();
+};
 
 ServerConfiguration::~ServerConfiguration(){
 

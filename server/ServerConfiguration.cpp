@@ -51,11 +51,12 @@ const std::string ServerConfiguration::getCgiPath() const {
 
 const std::string ServerConfiguration::getResourcePath(std::string uri) const {
   Location* location = server->getLocations()[uri];
-  std::vector<std::string> indexVectors = location->getIndex();
-  if (server->getLocations().find(uri) == server->getLocations().end() ||
+  if (location == NULL ||
+      server->getLocations().find(uri) == server->getLocations().end() ||
       location->getIndex().size() == 0) {
     return getPathByRootAndValue(server->getRoot(), uri);
   }
+  std::vector<std::string> indexVectors = location->getIndex();
   if (location->getRoot() == "") {
     return getPathByRootAndValue(server->getRoot(), indexVectors[0]);
   }

@@ -35,7 +35,10 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
         }
         else
         {
-            staticPath = serverConfig->getResourcePath(request.getPath()); // 4. 없으면 무엇을 반환하는가? -> error를 던진다.
+            if (request.getPath() == "/favicon.ico")
+                staticPath = "static/favicon.ico";
+            else
+                staticPath = serverConfig->getResourcePath(request.getPath()); // 4. 없으면 무엇을 반환하는가? -> error를 던진다.
             std::cout << staticPath << " = staticPath\n";
             request.setPath(staticPath);
             response.forward(request);

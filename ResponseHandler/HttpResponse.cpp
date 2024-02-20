@@ -102,6 +102,7 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 		std::cout << fd << ", " << request.getMethod() << ", " << uri <<"\n";
 		throw "404";
 	}
+	std::cout << uri << ", " << fd << "\n";
 	// BeanFactory::registerEvent("READ", new HttpHandler(fd, request, *this), event);
 	event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, request, *this)); // READ
 }
@@ -110,19 +111,22 @@ std::string	HttpResponse::readFile(int fd)
 {
 	int			ret;
 	int			size;
-	char		body[64 * K];
+	char		binaryData[K];
+	std::string	body;
 
 	size = 0;
-	while ((ret = read(fd, &body[size], K)) > 0)
+	while ((ret = read(fd, &binaryData, K)) > 0)
+	{
 		size += ret;
-	body[size] = 0;
-	close(fd);
+		body.append(std::string(binaryData, binaryData + ret));
+	}
 	if (ret < 0)
 	{
 		std::cout << size << " -> ";
 		std::cout << "ret is minus\n";
 		return ("");
 	}
+	close(fd);
 	return (body);
 }
 
@@ -160,17 +164,17 @@ void    HttpResponse::sendBody(std::string body) // api 요청에 대한 응답
 	ResponseStatusLine();
 	processHeader();
 	HttpResponseBody(body);
-	unsigned long	clientBodySize = 0;
-	int				i;
+	// unsigned long	clientBodySize = 0;
+	// int				i;
 
-	i = 0;
-	while (i < static_cast<int>(this->buffer.size()))
-	{
-		clientBodySize += this->buffer[i].length();
-		if (clientBodySize > this->max_size)
-			throw "413";
-		i++;
-	}
+	// i = 0;
+	// while (i < static_cast<int>(this->buffer.size()))
+	// {
+	// 	clientBodySize += this->buffer[i].length();
+	// 	if (clientBodySize > serverConfig->getClientBodySize())
+	// 		throw "413";
+	// 	i++;
+	// }
 }
 
 void    HttpResponse::ResponseStatusLine()
@@ -218,7 +222,7 @@ void	HttpResponse::flush() // 마지막에 호출
 		i++;
 	}
 	std::cout << "==========================================================\n";
-	std::cout << httpMsg << "\n";
+	// std::cout << httpMsg << "\n";
 	// fcntl(this->sockfd, F_SETFD, O_NONBLOCK); -> 어차피 O_NONBLOCK
 	send(this->sockfd, httpMsg.c_str(), httpMsg.length(), 0);
 	this->buffer.clear();

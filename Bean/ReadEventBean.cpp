@@ -31,7 +31,6 @@ void	    ReadEventBean::response200(std::string body, HttpHandler *httpHandler, 
 
 	response.putHeader("Server", response.getServerConfiguration()->getServerName());
 	response.putHeader("Date", ResponseConfig::getCurrentDate());
-	response.putHeader("Content-Type", "text/html;charset=utf-8");
     if (request.getParameter("Range") != "" && request.getMethod() == "GET")
 		body = response.readRangeQuery(request.getParameter("Range"), body);
 	ss << body.length();

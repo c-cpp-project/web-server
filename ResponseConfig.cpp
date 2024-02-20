@@ -7,6 +7,7 @@ std::set<std::string>				ResponseConfig::supportedTypesRepo;
 ResponseConfig::ResponseConfig()
 {
 	setHttpStatusCode(); // StatusCode 초기화 설정
+	setHttpContentType();
 }
 
 ResponseConfig::~ResponseConfig()
@@ -74,6 +75,7 @@ void	ResponseConfig::setHttpContentType(void)
 	supportedTypesRepo.insert("image/png");
 	supportedTypesRepo.insert("image/gif");
 	supportedTypesRepo.insert("image/webp");
+	supportedTypesRepo.insert("image/x-icon");
 
 	// 오디오/비디오 타입
 	supportedTypesRepo.insert("audio/mpeg");
@@ -92,6 +94,7 @@ std::string	ResponseConfig::getContentType(std::string filename)
 	extension = filename.substr(filename.find(".") + 1);
 	for (iter = supportedTypesRepo.begin(); iter != supportedTypesRepo.end(); iter++)
 	{
+		std::cout << *iter << "\n";
 		if ((*iter).find(extension) != std::string::npos)
 		{
 			contentType = *iter;

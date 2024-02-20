@@ -3,31 +3,23 @@
 import os
 import sys
 
-data = sys.stdin.read()
+data = sys.stdin.buffer.read()
 targetDir = sys.argv[1]
 kind = sys.argv[2]
 
-# print(len(data))
-while (data.find("\r\n") != -1):
-    data = data.replace("\r\n", "")
+data = data.replace(b'\r\n', b'')
 
 def fileUpload(data, targetDir, kind):
     try:
         if not os.path.exists(targetDir):
             os.makedirs(targetDir)
         name = len(os.listdir(targetDir))
-        if "html" in kind:
-            extension = ".html"
-        elif "css"  in kind:
-            extension = ".css"
-        elif "txt" in kind:
-            extension = ".txt"
-        else:
-            extension = ""
-        filename = targetDir + "/" + str(name) + extension
-        with open(filename, 'w') as file:
+        extension = os.path.basename(kind)
+        filename = targetDir + "/" + str(name) + "." + extension
+        with open(filename, 'wb') as file:
             file.write(data)
     except Exception as e:
+        print(e)
         return (False)
     return (True)
 

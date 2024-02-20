@@ -39,6 +39,7 @@ std::pair<int, std::string> ControllerMapping::getControllerKey(int port, std::s
     }
   }
   if (controllers[key] == 0) {
+    key.first = 0;
     key.second = DEFAULT;
   }
   return (key);

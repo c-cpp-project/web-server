@@ -83,8 +83,9 @@ void    Controller::doGet(HttpRequest &request, HttpResponse &response)
 	std::string	tmp[2];
 	std::string	data;
 
-	cgiFile = "cgi-bin/DoGet.py";
-	// cgiFile = response.getServerConfiguration()->getGetCgiPath();
+	std::cout << "Controller::doGet\n";
+	// cgiFile = "cgi-bin/DoGet.py";
+	cgiFile = response.getServerConfiguration()->getGetCgiPath();
 	tmp[0] = request.getParameter("username") == "" ? "" : "username=" + request.getParameter("username");
 	tmp[1] = request.getParameter("password") == "" ? "" : "password=" + request.getParameter("password");
 	data = tmp[0] + tmp[1];
@@ -102,8 +103,8 @@ void	Controller::doPost(HttpRequest &request, HttpResponse &response)
 	std::string	body;
 
 	std::cout << "Controller::doPost\n";
-	cgiFile = "cgi-bin/DoUpload.py";
-	// cgiFile = response.getServerConfiguration()->getPostCgiPath();
+	// cgiFile = "cgi-bin/DoUpload.py";
+	cgiFile = response.getServerConfiguration()->getPostCgiPath();
 	data = request.getBody();
 	contentType = request.getHeader("Content-Type");
 	classifyEvent(data, contentType, cgiFile.c_str(), response);
@@ -116,8 +117,8 @@ void	Controller::doDelete(HttpRequest &request, HttpResponse &response)
 	std::string	body;
 	std::string	uri;
 
-	cgiFile = "cgi-bin/DoDelete.py";
-	// cgiFile = response.getServerConfiguration()->getDeleteCgiPath();
+	// cgiFile = "cgi-bin/DoDelete.py";
+	cgiFile = response.getServerConfiguration()->getDeleteCgiPath();
 	fileName = request.getPath();
 	if (access(fileName.c_str(), F_OK) == -1) // 존재하지 않는다.
 		throw "404";

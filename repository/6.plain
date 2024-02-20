@@ -1,0 +1,5 @@
+total 8
+drwx------  4 sangwoki  2022_seoul  128 Feb 20 18:02 .
+drwxrwxrwt  3 root      wheel        96 Feb 20 17:59 ..
+-rw-r--r--  1 sangwoki  2022_seoul  171 Feb 20 18:02 a
+-rw-r--r--  1 sangwoki  2022_seoul    0 Feb 20 18:02 data.txt

@@ -48,8 +48,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
     {
         // CGI 파일 경로 설정을 따로 해야 할 것으로 보임.. 아마도요?
         // request.setPath("CGI PATH");
-        // std::cout << cgiPath << " = cgiPath\n";s
-        std::cout << "getDeleteCgiPath : [" << serverConfig->getDeleteCgiPath() << "]\n";
+        // std::cout << cgiPath << " = cgiPath\n";
         if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded") // get, post
             doGet(request, response);
         else if (request.getMethod() == "POST") // file upload

@@ -15,7 +15,6 @@ HttpHandler::HttpHandler(int fd, std::string data, ServerConfiguration *serverCo
     this->fd = fd;
     this->data = data;
     this->serverConfig = serverConfig;
-    this->data = "";
 }
 
 HttpHandler::HttpHandler(int fd, HttpResponse res)
@@ -32,7 +31,6 @@ HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res)
     this->request = req;
     this->response = res;
     this->serverConfig = NULL;
-    this->data = "";
 }
 
 HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, ServerConfiguration *serverConfig)
@@ -47,6 +45,15 @@ HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, ServerConfig
 HttpHandler::~HttpHandler()
 {}
 
+HttpHandler::HttpHandler(const HttpHandler& ref)
+{
+    fd = ref.fd;
+    request = ref.request;
+    response = ref.response;
+    serverConfig = ref.serverConfig;
+    data = ref.data;
+}
+
 HttpHandler&	HttpHandler::operator=(const HttpHandler& ref)
 {
     if (this == &ref)
@@ -55,6 +62,7 @@ HttpHandler&	HttpHandler::operator=(const HttpHandler& ref)
     request = ref.request;
     response = ref.response;
     serverConfig = ref.serverConfig;
+    data = ref.data;
     return (*this);
 }
 

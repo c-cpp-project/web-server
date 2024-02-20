@@ -28,5 +28,5 @@ if (removeFile(file_path)):
 
     print ('</body>')
     print ('</html>')
-else
+else:
     print("500")

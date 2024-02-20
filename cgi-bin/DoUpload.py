@@ -7,6 +7,7 @@ data = sys.stdin.read()
 targetDir = sys.argv[1]
 kind = sys.argv[2]
 
+# print(len(data))
 while (data.find("\r\n") != -1):
     data = data.replace("\r\n", "")
 

@@ -19,26 +19,35 @@ void ControllerMapping::putController(int port, std::string uri,
   controllers.insert(std::make_pair(std::make_pair(port, uri), controller));
 }
 
-std::string ControllerMapping::getLocationUri(std::string uri) {
-  size_t idx;
+std::pair<int, std::string> ControllerMapping::getControllerKey(int port, std::string uri)
+{
+  std::pair<int, std::string> key;
   std::string location;
 
-  idx = uri.substr(1).find('/');
-  if (idx == std::string::npos)
-    return ("/");
-  location = uri.substr(idx);
-  return (location);
+  key.first = port;
+  key.second = "";
+  std::map<std::pair<int, std::string>, Controller *>::iterator iter;
+  for (iter = controllers.begin(); iter != controllers.end(); iter++)
+  {
+    location = iter->first.second;
+    if (iter->first.first != port || location.length() > uri.length())
+      continue;
+    if (location == uri.substr(0, location.length()) && (location.length() == uri.length() || uri[location.length()] == '/'))
+    {
+      if (key.second.length() < location.length())
+        key.second = location;
+    }
+  }
+  if (controllers[key] == 0) {
+    key.second = DEFAULT;
+  }
+  return (key);
 }
 
 Controller *ControllerMapping::getController(int port, std::string uri) {
   std::pair<int, std::string> key;
-
-  key.first = port;
-  key.second = getLocationUri(uri);
-  if (controllers[key] == 0) {
-    key.first = 0;
-    key.second = DEFAULT;
-  }
+  key = getControllerKey(port, uri);
+  std::cout << key.first << ", " << key.second << " = getController\n";
   return (controllers[key]);
 }
 
@@ -64,7 +73,8 @@ void ControllerMapping::mapController(
       if (allowMethod.find("GET") != allowMethod.end()) method += 1;
       if (allowMethod.find("POST") != allowMethod.end()) method += 2;
       if (allowMethod.find("DELETE") != allowMethod.end()) method += 8;
-      putController(port, locationUri, new MyController(method));
+
+      putController(port, locationUri, new MyController(method, locationUri));
     }
   }
 }

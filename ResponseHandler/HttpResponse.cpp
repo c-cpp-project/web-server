@@ -90,23 +90,25 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 {
 	int			fd;
 	std::string	uri;
+	HttpHandler	*httpHandler;
 
 	uri = request.getPath();
 	if (getStatusCode()[0] == '4' || getStatusCode()[0] == '5') // fail.page
 		uri = serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str()));
-	std::cout << getStatusCode() << ": getStatusCode()\n";
-	std::cout << serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str())) << ": error page\n";
 	fd = open(uri.c_str(), O_RDONLY);
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 	if ((fd < 0 || request.getMethod() != "GET") && \
-	serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str())) != "") 
+	serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str())) == "") 
 	{
 		std::cout << fd << ", " << request.getMethod() << ", " << uri <<"\n";
+		close(fd);
 		throw "404";
 	}
-	std::cout << "[" << uri << ", " << fd << "]\n";
-	// BeanFactory::registerEvent("READ", new HttpHandler(fd, request, *this), event);
-	event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, request, *this)); // READ
+	std::cout << fd << ", " << uri  << "\n";
+	if (getStatusCode()[0] == '4' || getStatusCode()[0] == '5')
+		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, *this));
+	else
+		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, request, *this));
 }
 
 std::string	HttpResponse::readFile(int fd)

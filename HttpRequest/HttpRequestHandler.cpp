@@ -104,13 +104,13 @@ int HttpRequestHandler::ChunkedRequestHandling(HttpRequest *request) {
   return (LAST_CHUNKED_REQUEST);
 }
 
-void HttpRequestHandler::errorHandling(const char *erorr_code, ServerConfiguration *serverConfig, Event *event) {
+void HttpRequestHandler::errorHandling(const char *erorr_code, ServerConfiguration *server_config, Event *event) {
   HttpRequest empty;
-  HttpResponse response(socket_fd, serverConfig, event);
+  HttpResponse response(socket_fd, server_config, event);
 
-  std::cout << "HttpRequestHandler::errorHandling\n";
   response.setStatusCode(erorr_code);
   response.forward(empty);
+  std::cout << "errorHandling done\n";
   // response.flush();
 }
 

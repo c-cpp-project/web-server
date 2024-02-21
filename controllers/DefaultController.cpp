@@ -15,6 +15,10 @@ void    DefaultController::service(HttpRequest &request, HttpResponse &response)
 
     std::cout << "DefaultController::service" << "\n";
     // 메서드 허용 여부 검사
+    std::cout << "============ 1 serverConfig->getPort() ========\n";
+    std::cout << request.getPath() << "\n";
+    std::cout << "[" << serverConfig->getRedirectionPath(request.getPath()).second << "]\n";
+    std::cout << "============ 2 serverConfig->getPort() ========\n";
     if (isAcceptableMethod(request.getMethod()) == false)
         throw "405";
     redirectPath = serverConfig->getRedirectionPath(request.getPath()).second;
@@ -27,8 +31,12 @@ void    DefaultController::service(HttpRequest &request, HttpResponse &response)
     else
     {
         staticPath = request.getPath(); // 4. 없으면 무엇을 반환하는가? -> error를 던진다.
+        if (staticPath == "/favicon.ico")
+            staticPath = serverConfig->getResourcePath(staticPath);
+        else
+            staticPath = staticPath.substr(staticPath.find("/") + 1);
         std::cout << staticPath << " = staticPath\n";
-        request.setPath(staticPath.substr(1));
+        request.setPath(staticPath);
         response.forward(request);
     }
 }

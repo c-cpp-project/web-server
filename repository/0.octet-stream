@@ -1,0 +1,12 @@
+#include"BitcoinExchange.hpp"
+
+int main(int argc, char *argv[])
+{
+    BitcoinExchange bitcoinExchange;
+    std::string     file;
+
+    file = "";
+    if (argc >= 2)
+        file = argv[1];
+    bitcoinExchange.readFile(file.c_str());
+}

@@ -6,6 +6,7 @@ HttpRequest::HttpRequest()
 	request_line = NULL;
 	request_headers = NULL;
 	request_params = NULL;
+	request_body = "";
 }
 
 HttpRequest::HttpRequest(const HttpRequest& ref)

@@ -100,7 +100,7 @@ void WebServer::execute() {
 
 void WebServer::handleEvent() {
   int newEventCount;
-  
+
   BeanFactory baneFactory;
   while (true) {
     newEventCount = eventHandler.create();
@@ -119,6 +119,9 @@ void WebServer::handleEvent() {
 void WebServer::processEvent(struct kevent& currEvent) {
   if (currEvent.flags & EV_ERROR) {
     processErrorEvent(currEvent);
+    return;
+  }
+  if (currEvent.udata == NULL) {
     return;
   }
   switch (currEvent.filter) {

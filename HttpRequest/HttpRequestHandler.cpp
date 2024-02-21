@@ -22,7 +22,9 @@ HttpRequestHandler::HttpRequestHandler(int _socket_fd,
 
 void HttpRequestHandler::handle(Event *event) {
   try {
+    std::cout << "=====readRequest 시작======\n";
     int read_status = readRequest();
+    std::cout << "======readRequest 종료=====\n";
     std::cout
         << "-------------------------------------------------------------------"
         << read_status << '\n';

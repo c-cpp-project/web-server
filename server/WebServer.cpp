@@ -100,6 +100,8 @@ void WebServer::execute() {
 
 void WebServer::handleEvent() {
   int newEventCount;
+  
+  BeanFactory baneFactory;
   while (true) {
     newEventCount = eventHandler.create();
     if (newEventCount == -1) {
@@ -152,30 +154,30 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
     if (currEvent.flags & EV_EOF) {
       addCandidatesForDisconnection(currEvent.ident);
     }
-    BeanFactory beanFactory;
+    // BeanFactory beanFactory;
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
-    beanFactory.runBeanByName("RECV", handler, &eventHandler);
+    BeanFactory::runBeanByName("RECV", handler, &eventHandler);
   } else {
     std::cout << currEvent.ident << " = READ currEvent.ident\n";
-    BeanFactory beanFactory;
+    // BeanFactory beanFactory;
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
-    beanFactory.runBeanByName("READ", handler, &eventHandler);
+    BeanFactory::runBeanByName("READ", handler, &eventHandler);
   }
 }
 
 void WebServer::processWriteEvent(struct kevent& currEvent) {
-  BeanFactory beanFactory;
+  // BeanFactory beanFactory;
   std::cout << "processWriteEvent currEvent" << currEvent << std::endl;
   if (isClient(currEvent.ident)) {
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     // ServerConfiguration* serverConfig = handler->getServerConfiguration();
-    beanFactory.runBeanByName("SEND", handler, &eventHandler);
+    BeanFactory::runBeanByName("SEND", handler, &eventHandler);
   } else {
     // CGI
     std::cout << "WRITE currEvent " << currEvent << std::endl;
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     // ServerConfiguration* serverConfig = handler->getServerConfiguration();
-    beanFactory.runBeanByName("WRITE", handler, &eventHandler);
+    BeanFactory::runBeanByName("WRITE", handler, &eventHandler);
   }
 }
 

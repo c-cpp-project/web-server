@@ -107,6 +107,9 @@ void	Controller::doPost(HttpRequest &request, HttpResponse &response)
 	cgiFile = response.getServerConfiguration()->getPostCgiPath();
 	data = request.getBody();
 	contentType = request.getHeader("Content-Type");
+	std::cout << "doPost contentType: ["<< contentType << "]\n";
+	if (contentType == "")
+		contentType = "text/plain";
 	classifyEvent(data, contentType, cgiFile.c_str(), response);
 }
 

@@ -94,6 +94,8 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 	uri = request.getPath();
 	if (getStatusCode()[0] == '4' || getStatusCode()[0] == '5') // fail.page
 		uri = serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str()));
+	std::cout << getStatusCode() << ": getStatusCode()\n";
+	std::cout << serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str())) << ": error page\n";
 	fd = open(uri.c_str(), O_RDONLY);
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 	if ((fd < 0 || request.getMethod() != "GET") && \
@@ -102,7 +104,7 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 		std::cout << fd << ", " << request.getMethod() << ", " << uri <<"\n";
 		throw "404";
 	}
-	std::cout << uri << ", " << fd << "\n";
+	std::cout << "[" << uri << ", " << fd << "]\n";
 	// BeanFactory::registerEvent("READ", new HttpHandler(fd, request, *this), event);
 	event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, request, *this)); // READ
 }
@@ -126,6 +128,7 @@ std::string	HttpResponse::readFile(int fd)
 		std::cout << "ret is minus\n";
 		return ("");
 	}
+	std::cout << "[" << size << ", " << ret << "] = readFile\n";
 	close(fd);
 	return (body);
 }

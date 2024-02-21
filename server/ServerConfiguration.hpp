@@ -37,7 +37,7 @@ class ServerConfiguration {
   // 해당 uri를 넣으면 std::string 상태코드, std::string 리다이렉션 경로 반환
   // 만약 리다이렉션 경로 없으면 pair "400", "" 반환
   const std::pair<std::string, std::string> getRedirectionPath(
-      const std::string& uri) const;
+      const std::string uri) const;
   //"application/json"과 같이 Content-Type을 std::string으로 넣으면 해당
   // contentType이 지원되는지 반환
   bool hasContentType(const std::string& contentType);

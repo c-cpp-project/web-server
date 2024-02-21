@@ -90,9 +90,9 @@ const std::string ServerConfiguration::getErrorpageResourcePath(
 }
 
 const std::pair<std::string, std::string>
-ServerConfiguration::getRedirectionPath(const std::string& uri) const {
-  if (!server ||
-      server->getLocations().find(uri) == server->getLocations().end()) {
+ServerConfiguration::getRedirectionPath(const std::string uri) const {
+  Location* location = server->getLocations()[uri];
+  if (!server || location == NULL) {
     return std::pair<std::string, std::string>("400", "");  // 존재하지 않음
   }
   return server->getLocations()[uri]->getRedirectionInfo();

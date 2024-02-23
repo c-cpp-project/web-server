@@ -43,11 +43,6 @@ public:
 	void			classifyEvent(std::string data, std::string filename, const char *cgi_python, HttpResponse &response);
 	void			readEventRegsiter(int readfd[2], HttpResponse &response);
 	void			writeEventRegister(int writefd[2], int readfd[2], HttpResponse &response, std::string data);
-	// test용도
-	std::string     doExecuteWrite(std::string &data,  std::string filename, const char *cgi_python);
-    std::string     doExecuteRead(std::string &data, const char *cgi_python);
-	// ================================================ //
-	std::string		doExecuteDelete(HttpRequest &request, std::string data, const char *cgi_python);
 };
 
 #endif

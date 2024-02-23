@@ -26,8 +26,8 @@ void RequestLine::parseMethod(std::string method_string)
 			throw "400"; // 메서드에 영어 대문자 이외의 문자가 포함된 경우
 	}
 	// 유효하지 않거나 지원하지 않은 메서드인 경우 -> 버퍼 비우기
-	if (method_string != "GET" && method_string != "POST" && method_string != "DELETE")
-		throw "400";
+	// if (method_string != "GET" && method_string != "POST" && method_string != "DELETE")
+	// 	throw "400";
 	method = method_string;
 }
 

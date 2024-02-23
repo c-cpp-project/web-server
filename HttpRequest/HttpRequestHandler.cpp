@@ -108,6 +108,7 @@ void HttpRequestHandler::errorHandling(const char *erorr_code, ServerConfigurati
   HttpRequest empty;
   HttpResponse response(socket_fd, server_config, event);
 
+  std::cout << "erorr_code : " << erorr_code << "\n";
   response.setStatusCode(erorr_code);
   response.forward(empty);
   std::cout << "errorHandling done\n";

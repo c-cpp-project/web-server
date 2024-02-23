@@ -27,7 +27,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
     // 2. CGI 파열 경로는 어떻게 설정하는가? -> 42번 줄 확인 바람!
     // 3. getResourcePath는 어떻게 설정되고 무엇을 반환하는가?
     // ================================================================== //
-    if (request.getMethod() == "GET" && request.getQueryString() == "")
+    if (request.getMethod() == "HEAD" || request.getMethod() == "GET" && request.getQueryString() == "")
     {
         redirectPath = serverConfig->getRedirectionPath(request.getPath()).second;
         if (redirectPath != "")
@@ -53,7 +53,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
             doGet(request, response);
         else if (request.getMethod() == "POST") // file upload
             doPost(request, response);
-        else
+        else if (request.getMethod() == "DELETE")
         {
             this->mLocation = "./repository/" + this->mLocation.substr(this->mLocation.find('/', 1) + 1);
             request.setPath(this->mLocation);

@@ -13,6 +13,9 @@ void    DefaultController::service(HttpRequest &request, HttpResponse &response)
     std::string         path;
     ServerConfiguration *serverConfig = response.getServerConfiguration();
 
+    std::cout << "MyController::service" << "\n";
+    if (isAcceptableMethod(request.getMethod()) == false)
+        throw "405";
     std::cout << "DefaultController::service" << "\n";
     // 메서드 허용 여부 검사
     std::cout << "============ 1 serverConfig->getPort() ========\n";

@@ -97,8 +97,7 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 		uri = serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str()));
 	fd = open(uri.c_str(), O_RDONLY);
 	fcntl(fd, F_SETFL, O_NONBLOCK);
-	if ((fd < 0 || request.getMethod() != "GET") && \
-	serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str())) == "") 
+	if ((fd < 0) && serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str())) == "") 
 	{
 		std::cout << fd << ", " << request.getMethod() << ", " << uri <<"\n";
 		close(fd);

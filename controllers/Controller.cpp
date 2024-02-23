@@ -150,7 +150,7 @@ Controller::~Controller()
 bool    Controller::isAcceptableMethod(std::string method)
 {
 	std::cout << "this->masking : " << this->masking << ", " << method << "\n";
-	if (method == "GET" && (1 & this->masking))
+	if ((method == "GET" || method == "HEAD")&& (1 & this->masking))
 		return (true);
 	else if (method == "POST" && (2 & this->masking))
 		return (true);

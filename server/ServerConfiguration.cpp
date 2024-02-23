@@ -185,6 +185,9 @@ const std::string ServerConfiguration::findLocationUri(std::string uri) const {
   if (matchesPattern) {
     return foundUri;
   }
+  if (uri[0] == '/') {
+    return "/";
+  }
   return "";
 }
 

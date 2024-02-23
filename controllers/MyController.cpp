@@ -18,6 +18,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
     std::string staticPath;
     std::string cgiPath;
     ServerConfiguration *serverConfig = response.getServerConfiguration();
+    Location    *location;
 
     std::cout << "MyController::service" << "\n";
     if (isAcceptableMethod(request.getMethod()) == false)
@@ -30,7 +31,10 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
     if (request.getMethod() == "HEAD" || request.getMethod() == "GET" && request.getQueryString() == "")
     {
         redirectPath = serverConfig->getRedirectionPath(request.getPath()).second;
-        if (redirectPath != "")
+        location = serverConfig->getLocation(request.getPath());
+        if (location != NULL && location->getAutoIndex() && request.getPath() == serverConfig->findLocationUri(request.getPath()))
+            response.listDirectory(location->getRoot());
+        else if (redirectPath != "")
         {
             response.setStatusCode(serverConfig->getRedirectionPath(request.getPath()).first);
             request.setPath(redirectPath);
@@ -55,7 +59,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
             doPost(request, response);
         else if (request.getMethod() == "DELETE")
         {
-            this->mLocation = "./repository/" + this->mLocation.substr(this->mLocation.find('/', 1) + 1);
+            this->mLocation = serverConfig->getUploadPath();
             request.setPath(this->mLocation);
             std::cout << request.getPath() << "\n";
             doDelete(request, response);

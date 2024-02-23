@@ -14,9 +14,9 @@ def fileUpload(data, targetDir, kind):
         if not os.path.exists(targetDir):
             os.makedirs(targetDir)
         name = len(os.listdir(targetDir))
-        # extension = os.path.basename(kind)
-        # filename = targetDir + "/" + str(name) + "." + extension
-        filename = targetDir + "/" + str(name)
+        extension = os.path.basename(kind)
+        filename = targetDir + "/" + str(name) + "." + extension
+        # filename = targetDir + "/" + str(name)
         with open(filename, 'wb') as file:
             file.write(data)
     except Exception as e:

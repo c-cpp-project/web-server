@@ -74,6 +74,31 @@ void	HttpResponse::removeHeader(std::string key)
 	std::cout << "[remove header: " << key << "]\n";
 }
 
+void	HttpResponse::listDirectory(std::string directory)
+{
+	DIR 			*dir;
+	std::string		body;
+	struct dirent	*entry;
+	std::stringstream 	ss;
+
+	dir = opendir(directory.c_str());
+    if (dir == NULL) {
+        std::cout << "Error opening directory\n";
+        throw "404";
+    }
+	body = "";
+    while ((entry = readdir(dir)) != NULL) {
+        std::cout << entry->d_name << "\n";
+		body += std::string("File name : ") + entry->d_name + std::string("\n");
+    }
+    closedir(dir);
+	ss << body.length();
+	putHeader("Content-Type", "text/html");
+	putHeader("Content-Length", ss.str());
+	sendBody(body);
+	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), *this)); // SEND
+}
+
 void	HttpResponse::redirect(std::string redirectUri)
 {
 	std::cout << "HttpResponse::redirect\n";
@@ -168,17 +193,6 @@ void    HttpResponse::sendBody(std::string body) // api 요청에 대한 응답
 	ResponseStatusLine();
 	processHeader();
 	HttpResponseBody(body);
-	// unsigned long	clientBodySize = 0;
-	// int				i;
-
-	// i = 0;
-	// while (i < static_cast<int>(this->buffer.size()))
-	// {
-	// 	clientBodySize += this->buffer[i].length();
-	// 	if (clientBodySize > serverConfig->getClientBodySize())
-	// 		throw "413";
-	// 	i++;
-	// }
 }
 
 void    HttpResponse::ResponseStatusLine()
@@ -225,12 +239,8 @@ void	HttpResponse::flush() // 마지막에 호출
 		size += this->buffer[i].length();
 		i++;
 	}
-	std::cout << "==========================================================\n";
-	// std::cout << httpMsg << "\n";
-	// fcntl(this->sockfd, F_SETFD, O_NONBLOCK); -> 어차피 O_NONBLOCK
 	send(this->sockfd, httpMsg.c_str(), httpMsg.length(), 0);
 	this->buffer.clear();
-	std::cout << "==========================================================\n";
 }
 
 void	HttpResponse::setStatusCode(std::string code)

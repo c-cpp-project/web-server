@@ -1,28 +1,8 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
-
 #include <cstring>
-
-// #include"ResponseHandler/HttpResponse.hpp"
-// #include "HttpRequest/HttpHeaders.hpp"
-// #include "HttpRequest/HttpRequest.hpp"
-// #include "HttpRequest/HttpRequestHandler.hpp"
-// #include "HttpRequest/HttpRequestParser.hpp"
-// #include "HttpRequest/RequestLine.hpp"
-// #include "HttpRequest/RequestParams.hpp"
-// #include "HttpRequest/RequestUtility.hpp"
-// #include "HttpRequest/SocketCloseException.hpp"
-// #include "ResponseConfig.hpp"
-// #include "ResponseHandler/FrontController.hpp"
-// #include "ResponseHandler/MultiRequest.hpp"
-// #include "controllers/Controller.hpp"
-// #include "controllers/ControllerMapping.hpp"
-// #include "controllers/MyController.hpp"
-// #include "server/ServerConfiguration.hpp"
 #include "server/WebServer.hpp"
-// #include "server/setting/ConfigParser.hpp"
-// #include "server/setting/Server.hpp"
 
 int main(int argc, char** argv) {
   std::string configFileName;
@@ -48,12 +28,6 @@ int main(int argc, char** argv) {
         serverConfig->getPort(), serverConfig));
     it++;
   }
-  // =======================================================================================
-  // //
-  //											Response
-  // 설정 //
-  // =======================================================================================
-  // //
   std::cout << "======================================\n";
   Event* event;
 

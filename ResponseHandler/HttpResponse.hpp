@@ -6,6 +6,7 @@
 #include"sys/fcntl.h"
 #include"../server/Event.hpp"
 #include"../server/ServerConfiguration.hpp"
+#include <dirent.h>
 #include<map>
 #include<sys/socket.h>
 #include<unistd.h>
@@ -47,6 +48,7 @@ public:
 	void	HttpResponseBody(std::string body);
 	std::string	readFile(int fd);
 
+	void	listDirectory(std::string directory);
 	void	redirect(std::string redirectUri);
 	void    forward(HttpRequest &Httprequest);
 	void    sendBody(std::string body);

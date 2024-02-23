@@ -50,9 +50,12 @@ class ServerConfiguration {
   // 해당 uri 넣으면 Location 존재할 때는 허용 메소드를 std::string 집합으로
   // 반환 그게 아니면 GET 메소드 집합만 반환
   const std::set<std::string> getAllowedMethod(const std::string& uri) const;
+  const std::string findUriPattern(std::string uri) const;
   const std::string getCgiPath() const;
   const std::string getPostCgiPath() const;
   const std::string getGetCgiPath() const;
   const std::string getDeleteCgiPath() const;
+  const std::string findLocationUri(std::string uri) const;
+  Location* getLocation(const std::string uri) const;
 };
 #endif

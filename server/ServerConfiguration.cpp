@@ -50,17 +50,7 @@ const std::string ServerConfiguration::getCgiPath() const {
 };
 
 const std::string ServerConfiguration::getResourcePath(std::string uri) const {
-  Location* location = server->getLocations()[uri];
-  if (location == NULL ||
-      server->getLocations().find(uri) == server->getLocations().end() ||
-      location->getIndex().size() == 0) {
-    return getPathByRootAndValue(server->getRoot(), uri);
-  }
-  std::vector<std::string> indexVectors = location->getIndex();
-  if (location->getRoot() == "") {
-    return getPathByRootAndValue(server->getRoot(), indexVectors[0]);
-  }
-  return getPathByRootAndValue(location->getRoot(), indexVectors[0]);
+  return findUriPattern(uri);
 }
 
 const std::string ServerConfiguration::getPathByRootAndValue(
@@ -89,13 +79,20 @@ const std::string ServerConfiguration::getErrorpageResourcePath(
   return server->getErrorCodePage()[statusCode];
 }
 
+Location* ServerConfiguration::getLocation(const std::string uri) const {
+  const std::string locationUri = findLocationUri(uri);
+  return server->getLocations()[locationUri];
+}
+
 const std::pair<std::string, std::string>
 ServerConfiguration::getRedirectionPath(const std::string uri) const {
-  Location* location = server->getLocations()[uri];
+  const std::string locationUri = findLocationUri(uri);
+  std::cout << locationUri << std::endl;
+  Location* location = server->getLocations()[locationUri];
   if (!server || location == NULL) {
     return std::pair<std::string, std::string>("400", "");  // 존재하지 않음
   }
-  return server->getLocations()[uri]->getRedirectionInfo();
+  return location->getRedirectionInfo();
 }
 
 bool ServerConfiguration::hasContentType(const std::string& contentType) {
@@ -156,3 +153,90 @@ const std::string ServerConfiguration::getDeleteCgiPath() const {
 ServerConfiguration::~ServerConfiguration(){
 
 };
+
+const std::string ServerConfiguration::findLocationUri(std::string uri) const {
+  std::string uriPattern;
+  std::map<std::string, Location*> locations = server->getLocations();
+  std::map<std::string, Location*>::iterator location;
+  Location* targetLocation = NULL;
+  bool matchesPattern;
+  long slashIdx;
+  std::string foundUri;
+  if (uri[uri.size() - 1] != '/') uri += "/";
+  uriPattern = uri;
+  while (uriPattern != "/") {
+    if (matchesPattern) break;
+    slashIdx = uriPattern.find_last_of('/');
+    if (slashIdx == std::string::npos) break;
+    if (slashIdx == 0)
+      uriPattern = "/";
+    else
+      uriPattern = uriPattern.substr(0, slashIdx);
+    for (location = locations.begin(); location != locations.end();
+         ++location) {
+      if (uriPattern == location->first) {
+        foundUri = location->first;
+        matchesPattern = true;
+        targetLocation = location->second;
+        break;
+      }
+    }
+  }
+  if (matchesPattern) {
+    return foundUri;
+  }
+  return "";
+}
+
+const std::string ServerConfiguration::findUriPattern(std::string uri) const {
+  std::string uriPattern;
+  std::map<std::string, Location*> locations = server->getLocations();
+  std::map<std::string, Location*>::iterator location;
+  Location* targetLocation = NULL;
+  bool matchesPattern;
+  long slashIdx;
+  std::string foundUri;
+  if (uri[uri.size() - 1] != '/') uri += "/";
+  uriPattern = uri;
+  while (uriPattern != "/") {
+    if (matchesPattern) break;
+    slashIdx = uriPattern.find_last_of('/');
+    if (slashIdx == std::string::npos) break;
+    if (slashIdx == 0)
+      uriPattern = "/";
+    else
+      uriPattern = uriPattern.substr(0, slashIdx);
+    for (location = locations.begin(); location != locations.end();
+         ++location) {
+      if (uriPattern == location->first) {
+        foundUri = location->first;
+        matchesPattern = true;
+        targetLocation = location->second;
+        break;
+      }
+    }
+  }
+  std::cout << matchesPattern << std::endl;
+  if (matchesPattern) {
+    std::string partial = uri.substr(slashIdx);
+    partial.erase(partial.size() - 1);
+    if (targetLocation->getRoot() == "") {
+      return getPathByRootAndValue(
+          getPathByRootAndValue(server->getRoot(), partial),
+          targetLocation->getIndex()[0]);
+    }
+    return getPathByRootAndValue(
+        getPathByRootAndValue(targetLocation->getRoot(), partial),
+        targetLocation->getIndex()[0]);
+  }
+  if (uri == "/") {
+    targetLocation = locations["/"];
+    if (targetLocation->getRoot() == "") {
+      return getPathByRootAndValue(server->getRoot(),
+                                   targetLocation->getIndex()[0]);
+    }
+    return getPathByRootAndValue(targetLocation->getRoot(),
+                                 targetLocation->getIndex()[0]);
+  }
+  return uri.erase(uri.size() - 1);
+}

@@ -70,7 +70,7 @@ int WebServer::openPort(ServerConfiguration* serverConfig) {
   hint.ai_socktype = SOCK_STREAM;
   std::string portStr = StringUtils::toString(port);
   int res = getaddrinfo(serverName.c_str(), portStr.c_str(), &hint, &info);
-  freeaddrinfo(info);
+  // freeaddrinfo(info);
   if (res == -1)
     SocketUtils::exitWithPerror("[Error] getaddrinfo() error\n" +
                                 std::string(strerror(errno)));

@@ -1,11 +1,12 @@
 #ifndef EVENT_HPP
-# define EVENT_HPP
+#define EVENT_HPP
 #include <sys/event.h>
 
 #include <ostream>
 #include <sstream>
 #include <vector>
 #define EVENTLIST_SIZE 1000
+#define MAX_CPU_TIME_USED 3
 
 class Event {
  private:

@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "StringUtils.hpp"
-#define MAX_CPU_TIME_USED 3
 
 WebServer& WebServer::getInstance(
     std::map<int, ServerConfiguration*> serverConfig) {
@@ -102,7 +101,7 @@ void WebServer::execute() {
 void WebServer::handleEvent() {
   int newEventCount;
 
-  ChildProcess  childprocee(MAX_CPU_TIME_USED);
+  ChildProcess childprocee(MAX_CPU_TIME_USED);
   BeanFactory baneFactory;
   while (true) {
     std::cout << "=========== BEFORE eventHandler.create(); ===========\n";

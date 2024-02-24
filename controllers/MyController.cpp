@@ -11,7 +11,39 @@ MyController::MyController(int masking, std::string mLocation) : Controller(mask
 
 MyController::~MyController()
 {}
- 
+
+std::string	MyController::findDirectory(std::string directory, std::string file)
+{
+    DIR             *dir;
+    struct dirent	*entry;
+    size_t          idx;
+    std::string     d_name;
+    char            fullpath[1024];
+
+    if (access(std::string(directory +  "/" + file).c_str(), F_OK))
+        return (directory + "/" + file);
+    getcwd(fullpath, 1023);
+    directory = std::string(fullpath) + "/" + directory.substr(0, directory.length() - 1);
+    std::cout << "MyController::findDirectory: "<< directory << "\n";
+    dir = opendir(directory.c_str());
+    if (dir == NULL || file.find(".") != std::string::npos)
+    {
+        std::cout << "Error opening directory\n";
+        throw "404";
+    }
+    // file에 확장자 없을 경우: 가장 처음으로 만나는 동일한 이름의 파일에 대응된다.
+    while ((entry = readdir(dir)) != NULL)
+    {
+        d_name = std::string(entry->d_name);
+        d_name = d_name.substr(0, d_name.find(".") + 1);
+        if (d_name == file)
+            break ;
+    }
+    if (entry == NULL)
+        throw "404";
+    return (directory + "/" + std::string(entry->d_name));
+}
+
 void    MyController::service(HttpRequest &request, HttpResponse &response)
 {
     std::string redirectPath;
@@ -42,11 +74,15 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
         }
         else
         {
-            staticPath = serverConfig->getResourcePath(request.getPath());
+            if (request.getPath() == serverConfig->findLocationUri(request.getPath())) // /root/index_file
+                staticPath = serverConfig->getResourcePath(request.getPath());
+            else // /root/file_name
+                staticPath = findDirectory(location->getRoot(), request.getPath().substr(location->getRoot().length() + 1));
             std::cout << staticPath << " = staticPath\n";
             request.setPath(staticPath);
+            response.putHeader("Content-Type", ResponseConfig::getContentType(staticPath));
             response.forward(request);
-        } 
+        }
     }
     else
     {

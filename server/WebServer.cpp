@@ -104,9 +104,7 @@ void WebServer::handleEvent() {
   ChildProcess childprocee(MAX_CPU_TIME_USED);
   BeanFactory baneFactory;
   while (true) {
-    std::cout << "=========== BEFORE eventHandler.create(); ===========\n";
     newEventCount = eventHandler.create();
-    std::cout << "=========== AFTER eventHandler.create(); ===========\n";
     if (newEventCount == -1) {
       SocketUtils::exitWithPerror("[ERROR] kevent() error\n" +
                                   std::string(strerror(errno)));

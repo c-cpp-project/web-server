@@ -5,26 +5,25 @@ import sys
 
 data = sys.stdin.buffer.read()
 targetDir = sys.argv[1]
-kind = sys.argv[2]
+filename = sys.argv[2]
 
 data = data.replace(b'\r\n', b'')
 
-def fileUpload(data, targetDir, kind):
+def fileUpload(data, targetDir, filename):
     try:
         if not os.path.exists(targetDir):
             os.makedirs(targetDir)
         name = len(os.listdir(targetDir))
-        extension = os.path.basename(kind)
-        filename = targetDir + "/" + str(name) + "." + extension
+        path = targetDir + "/" + filename
         # filename = targetDir + "/" + str(name)
-        with open(filename, 'wb') as file:
+        with open(path, 'wb') as file:
             file.write(data)
     except Exception as e:
         print(e)
         return (False)
     return (True)
 
-if (fileUpload(data, targetDir, kind)):
+if (fileUpload(data, targetDir, filename)):
     print ("<html>")
     print ('<head>')
     print ("<link rel='icon' href='data:,'>")

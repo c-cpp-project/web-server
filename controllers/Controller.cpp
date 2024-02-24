@@ -98,18 +98,43 @@ void	Controller::doPost(HttpRequest &request, HttpResponse &response)
 {
 	std::string	data;
 	std::string	cgiFile;
+	std::string	filename = "";
+	std::string	disposition;
 	std::string	contentType;
-	std::string	body;
+	size_t		s, e;
 
 	std::cout << "Controller::doPost\n";
 	// cgiFile = "cgi-bin/DoUpload.py";
 	cgiFile = response.getServerConfiguration()->getPostCgiPath();
 	data = request.getBody();
-	contentType = request.getHeader("Content-Type");
-	std::cout << "doPost contentType: ["<< contentType << "]\n";
-	if (contentType == "")
-		contentType = "text/plain";
-	classifyEvent(data, contentType, cgiFile.c_str(), response);
+	disposition = request.getHeader("CONTENT-DISPOSITION");
+	if (disposition != "")
+	{
+		filename = disposition.substr(disposition.find("filename="));
+		s = filename.find('\"');
+		e = filename.find('\"', s + 1);
+		filename = filename.substr(s + 1, e - s - 1);
+	}
+	if (filename == "")
+	{
+		DIR				*dir;
+		struct dirent	*entry;
+		int				count;
+		std::stringstream 	ss;
+
+		count = 0;
+		dir = opendir(response.getServerConfiguration()->getUploadPath().c_str());
+		while ((entry = readdir(dir)) != NULL)
+			count++;
+		ss << (count - 2);
+		filename = ss.str();
+		closedir(dir);
+	}
+	contentType = request.getHeader("content-Type");
+	if (filename.find(".") == std::string::npos)
+		filename = filename + "." + contentType.substr(contentType.find("/") + 1);
+	std::cout << "doPost file_name: ["<< filename << "]\n";
+	classifyEvent(data, filename, cgiFile.c_str(), response);
 }
 
 void	Controller::doDelete(HttpRequest &request, HttpResponse &response)

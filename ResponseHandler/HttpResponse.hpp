@@ -14,6 +14,7 @@
 #include<vector>
 #include<string>
 #include <cstdlib>
+#include <unistd.h>
 
 # define K 1000
 

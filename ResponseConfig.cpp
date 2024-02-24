@@ -89,18 +89,25 @@ std::string	ResponseConfig::getContentType(std::string filename)
 	std::set<std::string>::iterator	iter;
 	std::string	extension;
 	std::string	contentType;
+	int i;
 
 	contentType = "text/plain";
-	extension = filename.substr(filename.find(".") + 1);
+	for (i = filename.length() - 1; i >= 0; i--)
+	{
+		if (filename[i] == '.')
+			break ;
+	}
+	extension = filename.substr(i + 1);
+	std::cout << "extension: " << extension << "\n";
 	for (iter = supportedTypesRepo.begin(); iter != supportedTypesRepo.end(); iter++)
 	{
-		std::cout << *iter << "\n";
 		if ((*iter).find(extension) != std::string::npos)
 		{
 			contentType = *iter;
 			break ;
 		}
 	}
+	std::cout << "ResponseConfig::getContentType: " << contentType << "\n";
 	return (contentType);
 }
 

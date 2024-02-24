@@ -8,12 +8,12 @@ form = cgi.FieldStorage()
 # first_name = form.getvalue('first_name')
 # last_name = form.getvalue('last_name')
 
-value = 1
-while True:
-    if value == 1:
-        value = 0
-    else:
-        value = 1
+# value = 1
+# while True:
+#     if value == 1:
+#         value = 0
+#     else:
+#         value = 1
 
 print ("<html>")
 print ('<head>')

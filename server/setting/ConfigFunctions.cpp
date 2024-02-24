@@ -138,10 +138,12 @@ int ConfigParser::checkLocationKeyAndValue(struct s_info& parse_info,
     locations.insert(
         std::pair<std::string, Location*>(locationDir, locationBlock));
     return 2;
-  } else if (input == ";" || input == "{")
+  } else if (input == ";" || input == "{") {
+    delete locationBlock;
     return CONFIG_ERROR;
-  else {
+  } else {
     vecInput.push_back(input);
+    delete locationBlock;
     return 7;
   }
 }

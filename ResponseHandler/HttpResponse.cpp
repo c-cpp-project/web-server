@@ -138,17 +138,19 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 std::string	HttpResponse::readFile(int fd)
 {
 	int			ret;
-	int			size;
-	char		binaryData[K];
+	size_t		size;
+	char		binaryData[K + 1];
 	std::string	body;
 
 	size = 0;
-	while ((ret = read(fd, &binaryData, K)) > 0)
+	body = "";
+	while ((ret = read(fd, &binaryData[0], K)) > 0)
 	{
 		size += ret;
-		body.append(std::string(binaryData, binaryData + ret));
+		body += std::string(&binaryData[0], ret);
+		// std::cout << std::string(&binaryData[0], ret).length() << ", " << ret << "\n";
 	}
-	std::cout << "[" << size << ", " << ret << "] = readFile\n";
+	std::cout << "[" << size << ", " << ret << "] = readFile : " << body.length() <<"\n";
 	if (size <= 0 && ret <= 0)
 	{
 		std::cout << "READ OPERATION FAIL\n";

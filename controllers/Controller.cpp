@@ -107,6 +107,7 @@ void	Controller::doPost(HttpRequest &request, HttpResponse &response)
 	// cgiFile = "cgi-bin/DoUpload.py";
 	cgiFile = response.getServerConfiguration()->getPostCgiPath();
 	data = request.getBody();
+	std::cout << "[data.length: " << data.length() << ", content-length" << request.getHeader("CONTENT-LENGTH") << "]\n";
 	disposition = request.getHeader("CONTENT-DISPOSITION");
 	if (disposition != "")
 	{

@@ -20,11 +20,11 @@ std::string	MyController::findDirectory(std::string directory, std::string file)
     std::string     d_name;
     char            fullpath[1024];
 
-    if (access(std::string(directory +  "/" + file).c_str(), F_OK))
+    std::cout << "MyController::findDirectory: "<< directory << ", " << file  << "\n";
+    if (access(std::string(directory +  "/" + file).c_str(), F_OK) == 0)
         return (directory + "/" + file);
-    getcwd(fullpath, 1023);
-    directory = std::string(fullpath) + "/" + directory.substr(0, directory.length() - 1);
-    std::cout << "MyController::findDirectory: "<< directory << "\n";
+    // getcwd(fullpath, 1023);
+    // directory = std::string(fullpath) + "/" + directory.substr(0, directory.length() - 1);
     dir = opendir(directory.c_str());
     if (dir == NULL || file.find(".") != std::string::npos)
     {
@@ -35,7 +35,8 @@ std::string	MyController::findDirectory(std::string directory, std::string file)
     while ((entry = readdir(dir)) != NULL)
     {
         d_name = std::string(entry->d_name);
-        d_name = d_name.substr(0, d_name.find(".") + 1);
+        d_name = d_name.substr(0, d_name.find("."));
+        std::cout << d_name << " = repository file\n";
         if (d_name == file)
             break ;
     }
@@ -77,7 +78,16 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
             if (request.getPath() == serverConfig->findLocationUri(request.getPath())) // /root/index_file
                 staticPath = serverConfig->getResourcePath(request.getPath());
             else // /root/file_name
-                staticPath = findDirectory(location->getRoot(), request.getPath().substr(location->getRoot().length() + 1));
+            {
+                long    idx;
+
+                for (idx = request.getPath().length() - 1; idx >= 0; idx--)
+                {
+                    if (request.getPath()[idx] == '/')
+                        break ;
+                }
+                staticPath = findDirectory(location->getRoot().substr(0, location->getRoot().length() - 1), request.getPath().substr(idx + 1));
+            }
             std::cout << staticPath << " = staticPath\n";
             request.setPath(staticPath);
             response.putHeader("Content-Type", ResponseConfig::getContentType(staticPath));

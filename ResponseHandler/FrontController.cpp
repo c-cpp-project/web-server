@@ -36,6 +36,8 @@ void    FrontController::run(HttpRequest tmp)
 
 		std::cout << "=============== [Request Body] ===============\n";
 		std::cout << request->at(i).getBody() << "\n";
+		std::cout << "=============== [Request Body Length] ===============\n";
+		std::cout << request->at(i).getBody().length() << "\n";
 		std::cout << "===============================================\n";
 		std::cout << this->socketfd << ": this->socketfd\n";
 		response = new HttpResponse(this->socketfd, serverConfig, event);

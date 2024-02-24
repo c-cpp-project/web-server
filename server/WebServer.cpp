@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "StringUtils.hpp"
+#define MAX_CPU_TIME_USED 3
 
 WebServer& WebServer::getInstance(
     std::map<int, ServerConfiguration*> serverConfig) {
@@ -101,9 +102,12 @@ void WebServer::execute() {
 void WebServer::handleEvent() {
   int newEventCount;
 
+  ChildProcess  childprocee(MAX_CPU_TIME_USED);
   BeanFactory baneFactory;
   while (true) {
+    std::cout << "=========== BEFORE eventHandler.create(); ===========\n";
     newEventCount = eventHandler.create();
+    std::cout << "=========== AFTER eventHandler.create(); ===========\n";
     if (newEventCount == -1) {
       SocketUtils::exitWithPerror("[ERROR] kevent() error\n" +
                                   std::string(strerror(errno)));
@@ -112,6 +116,7 @@ void WebServer::handleEvent() {
     for (int i = 0; i < newEventCount; i++) {
       processEvent(eventHandler[i]);
     }
+    ChildProcess::waitChildProcess();
     clearClients();
   }
 }

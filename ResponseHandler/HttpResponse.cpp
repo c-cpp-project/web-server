@@ -118,18 +118,18 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 	HttpHandler	*httpHandler;
 
 	uri = request.getPath();
-	if (getStatusCode()[0] == '4' || getStatusCode()[0] == '5') // fail.page
+	if ("400" <= getStatusCode() && getStatusCode() <= "500") // fail.page
 		uri = serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str()));
 	fd = open(uri.c_str(), O_RDONLY);
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 	if ((fd < 0) && serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str())) == "") 
 	{
-		std::cout << fd << ", " << request.getMethod() << ", " << uri <<"\n";
+		std::cout << fd << ", " << request.getMethod() << ", " << uri << ", " << getStatusCode() << "\n";
 		close(fd);
 		throw "404";
 	}
 	std::cout << fd << ", " << uri  << "\n";
-	if (getStatusCode()[0] == '4' || getStatusCode()[0] == '5')
+	if ("400" <= getStatusCode() && getStatusCode() <= "500")
 		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, *this));
 	else
 		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, request, *this));
@@ -148,13 +148,12 @@ std::string	HttpResponse::readFile(int fd)
 		size += ret;
 		body.append(std::string(binaryData, binaryData + ret));
 	}
-	if (size <= 0 && ret < 0)
+	std::cout << "[" << size << ", " << ret << "] = readFile\n";
+	if (size <= 0 && ret <= 0)
 	{
-		std::cout << size << ", " << ret << " = ";
-		std::cout << "ret is minus\n";
+		std::cout << "READ OPERATION FAIL\n";
 		return ("");
 	}
-	std::cout << "[" << size << ", " << ret << "] = readFile\n";
 	close(fd);
 	return (body);
 }

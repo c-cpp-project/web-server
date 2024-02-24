@@ -9,10 +9,11 @@ class Bean;
 class ReadEventBean : public Bean
 {
 private:
+    void	responseSaveEvent(std::string body, HttpHandler *httpHandler, Event *event);
+    void    errorSaveEvent(HttpHandler *httpHandler, Event *event);
 public:
     ReadEventBean();
     ~ReadEventBean();
     void    runBeanEvent(HttpHandler *httpHandler, Event *event);
-    void	response200(std::string body, HttpHandler *httpHandler, Event *event);
 };
 #endif

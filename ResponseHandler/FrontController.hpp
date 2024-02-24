@@ -35,6 +35,8 @@ public:
 };
 #endif
 
+void	sigchldHandler(int signo);
+void	alarmHandler(int signo);
 
 // Http의 url을 보고 Location에 포함된다면 등록된 Location에 대응되는 경로를 얻어서 허용된 메서드를 실행한다.
 // 만약에 Location에 포함되지 않는다면 해당 경로를 그대로 사용한다.

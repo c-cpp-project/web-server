@@ -35,7 +35,6 @@ int main(int argc, char** argv) {
   ResponseConfig responseConfig;  // response에서 사용하는 메서드 설정
   ControllerMapping controllerMapping(serverConfigs);  // Controller
   WebServer& webServer = WebServer::getInstance(serverConfigs);
+  
   webServer.execute();
-  //  설정
-  //     endpointTest(serverConfigs[80], event);
 }

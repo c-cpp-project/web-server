@@ -26,6 +26,7 @@ SRCS = TestBeanMain.cpp server/setting/ConfigFunctions.cpp server/setting/Config
 	 controllers/ControllerMapping.cpp \
 	 Controllers/DefaultController.cpp \
 	 Controllers/MyController.cpp \
+	 Controllers/ChildProcess.cpp \
 	 ResponseHandler/FrontController.cpp \
 	 ResponseHandler/HttpResponse.cpp \
 	 ResponseHandler/MultiRequest.cpp \

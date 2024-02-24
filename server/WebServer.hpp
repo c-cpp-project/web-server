@@ -3,7 +3,6 @@
 #include <map>
 
 #include "../Bean/BeanFactory.hpp"
-// #include "../Bean/HttpHandler.hpp"
 #include "ServerConfiguration.hpp"
 #include "SocketUtils.hpp"
 #include "mock/Handler.hpp"

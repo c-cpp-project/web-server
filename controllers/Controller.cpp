@@ -38,6 +38,7 @@ void			Controller::classifyEvent(std::string data, std::string contentType, cons
 	}
 	else
 	{
+		ChildProcess::insertChildProcess(ret);
 		if (contentType != "")
 			writeEventRegister(pipefd1, pipefd2, response, data);
 		else
@@ -58,7 +59,6 @@ void			Controller::writeEventRegister(int writefd[2], int readfd[2], HttpRespons
 	close(writefd[0]);
 	fcntl(writefd[1], F_SETFL, O_NONBLOCK);
 	event->saveEvent(writefd[1], EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, handler);
-	// event->saveEvent(response.getSockfd(), EVFILT_READ, 0, 0, 0, new HttpHandler(response.getSockfd(), response)); // EVFILT_READ, EVFILT_WRITE
 	readEventRegsiter(readfd, response);
 }
 
@@ -72,7 +72,6 @@ void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response)
 	close(readfd[1]);
 	fcntl(readfd[0], F_SETFL, O_NONBLOCK);
 	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(readfd[0], response)); // EVFILT_READ, EVFILT_WRITE
-	// BeanFactory::registerEvent("READ", new HttpHandler(readfd[0], response), event);
 }
 
 // parameter

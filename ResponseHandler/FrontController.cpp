@@ -1,6 +1,5 @@
 #include"FrontController.hpp"
 
-
 FrontController::FrontController(int socketfd, ServerConfiguration *serverConfig, Event *event)
 {
 	this->socketfd = socketfd;
@@ -15,31 +14,12 @@ FrontController::FrontController(int socketfd, int fd)
 	tmp = fd;
 }
 
-void	sigchldHandler(int signo)
-{
-	(void)signo;
-
-    int status;
-    pid_t child_pid = waitpid(-1, &status, WNOHANG);
-    
-    if (child_pid > 0) {
-        if (WIFEXITED(status)) {
-            printf("Child process %d exited with status %d\n", child_pid, WEXITSTATUS(status));
-        } else if (WIFSIGNALED(status)) {
-            printf("Child process %d terminated by signal %d\n", child_pid, WTERMSIG(status));
-        } else {
-            printf("Child process %d terminated unexpectedly\n", child_pid);
-        }
-    }
-}
-
 void    FrontController::run(HttpRequest tmp)
 {
 	std::vector<HttpRequest> 	*request;
 	MultiRequest                multiRequest(tmp.getHeader("content-type"));
 	HttpResponse    			*response;
 
-	// signal(SIGCHLD, sigchldHandler);
 	request = multiRequest.makeRequest(tmp);
 	for (int i = 0; i < static_cast<int>(request->size()); i++)
 	{

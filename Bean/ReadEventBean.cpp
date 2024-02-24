@@ -13,13 +13,25 @@ void ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   if (response == 0)  // flush -> delete.
     return;
   body = response->readFile(readFd);
-  if (body == "") throw "500";  // try-catch로 잡아야 한다.
-  response200(body, httpHandler, event);
   event->saveEvent(readFd, EVFILT_READ, EV_DISABLE, 0, 0, 0);
+  if (body == "")
+    errorSaveEvent(httpHandler, event);
+  else
+    responseSaveEvent(body, httpHandler, event);
   delete httpHandler;
 }
 
-void ReadEventBean::response200(std::string body, HttpHandler *httpHandler,
+void ReadEventBean::errorSaveEvent(HttpHandler *httpHandler, Event *event)
+{
+  HttpResponse &response = httpHandler->getHttpResponse();
+  HttpRequest empty;
+
+  std::cout << "ReadEventBean::errorSaveEvent\n";
+  response.setStatusCode("500");
+  response.forward(empty);
+}
+
+void ReadEventBean::responseSaveEvent(std::string body, HttpHandler *httpHandler,
                                 Event *event) {
   std::stringstream ss;
   std::string bodyLength;
@@ -27,8 +39,8 @@ void ReadEventBean::response200(std::string body, HttpHandler *httpHandler,
   HttpResponse &response = httpHandler->getHttpResponse();
   HttpRequest &request = httpHandler->getHttpRequest();
 
-  response.putHeader("Server",
-                     response.getServerConfiguration()->getServerName());
+  serverConfig = response.getServerConfiguration();
+  response.putHeader("Server", serverConfig->getServerName());
   response.putHeader("Date", ResponseConfig::getCurrentDate());
   if (request.getParameter("Range") != "" && request.getMethod() == "GET")
     body = response.readRangeQuery(request.getParameter("Range"), body);
@@ -39,7 +51,7 @@ void ReadEventBean::response200(std::string body, HttpHandler *httpHandler,
   if (request.getMethod() == "HEAD")
     body = "";
   response.sendBody(body);  // this->buffer에 string으로 모두 담긴다.
-  std::cout << "ReadEventBean::response200 -> saveEvent\n";
+  std::cout << "ReadEventBean::response -> saveEvent\n";
   event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0,
                    new HttpHandler(response.getSockfd(),
                                    response));  // EVFILT_READ, EVFILT_WRITE

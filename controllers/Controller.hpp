@@ -5,6 +5,7 @@
 #include"../HttpRequest/HttpRequest.hpp"
 #include"../server/setting/ConfigParser.hpp"
 #include"../server/ServerConfiguration.hpp"
+#include "ChildProcess.hpp"
 #include"../Bean/HttpHandler.hpp"
 #include <string>
 #include <unistd.h>

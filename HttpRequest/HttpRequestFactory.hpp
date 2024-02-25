@@ -6,7 +6,8 @@
 class HttpRequestFactory
 {
 	private:
-		static void parseChunkedRequest(int socket_fd, HttpRequest*& request, ServerConfiguration *server_config);
+		static long readChunkedRequest(int socket_fd, HttpRequest* request, ServerConfiguration *server_config);
+		static void parseChunkedRequest(int socket_fd, HttpRequest* request, ServerConfiguration *server_config);
 		static void removeRequestInBuffer(int socket_fd, HttpRequest* request);
 		static void SpecialExceptionHandling(const int& e, int socket_fd, HttpRequest*& request);
 

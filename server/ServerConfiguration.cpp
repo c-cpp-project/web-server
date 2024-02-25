@@ -109,14 +109,18 @@ const std::string ServerConfiguration::getUploadPath() const {
   return server->getUploadPath();
 }
 
-long ServerConfiguration::getClientBodySize() const {
-  return server->getClientBodySize();
+long ServerConfiguration::getClientBodySize(const std::string &uri) const {
+  Location *location = getLocation(uri);
+  if (location == NULL || location->getClientBodySize() == 0)
+    return server->getClientBodySize();
+  else
+    return location->getClientBodySize();
 };
 long ServerConfiguration::getClientHeaderSize() const {
   return server->getClientHeaderSize();
 };
-long ServerConfiguration::getClientRequestSize() const {
-  return getClientBodySize() + getClientHeaderSize();
+long ServerConfiguration::getClientRequestSize(const std::string &uri) const {
+  return getClientBodySize(uri) + getClientHeaderSize();
 };
 
 const std::set<std::string> ServerConfiguration::getAllowedMethod(

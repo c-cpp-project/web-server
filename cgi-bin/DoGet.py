@@ -35,6 +35,7 @@ print ("<title>Hello - GET CGI Program</title>")
 print ('</head>')
 print ('<body>')
 
+print("<h1> file path name is {0}".format(path))
 for key in field_storage.keys():
     print ("<h2>key is {0}, value is {1} </h2>".format(key, field_storage.getvalue(key)))
 

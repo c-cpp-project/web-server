@@ -8,7 +8,7 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 	int			pipefd2[2];
 	const char	*path[5];
 	std::string uploadPath = response.getServerConfiguration()->getUploadPath();
-	std::string	queryString = request.getQueryString();
+	std::string	queryString = request.getMethod() == "GET" ? request.getQueryString() : request.getBody();
 
 	path[0] = "/usr/bin/python3";
 	path[1] = cgi_python;
@@ -17,16 +17,19 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 	{
 		path[2] = uploadPath.c_str();
 		path[3] = queryString.c_str();
+		std::cout << "ARGV: [" << path[2] << ", " << path[3] << "]\n";
 	}
 	else if (request.getMethod() == "POST") // post
 	{
 		path[2] = uploadPath.c_str();
 		path[3] = mime.c_str(); // filename
 		pipe(pipefd1);
+		std::cout << "ARGV: [" << path[2] << ", " << path[3] << "]\n";
 	}
 	else
 	{
 		path[2] = mime.c_str(); // target
+		std::cout << "ARGV: [" << path[2] << "]\n";
 		path[3] = NULL;
 	}
 	path[4] = NULL;
@@ -85,8 +88,6 @@ void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response)
 void    Controller::doGet(HttpRequest &request, HttpResponse &response)
 {
 	std::string	cgiFile;
-
-	std::cout << "Controller::doGet\n";
 	// cgiFile = "cgi-bin/DoGet.py";
 	cgiFile = response.getServerConfiguration()->getGetCgiPath();
 	classifyEvent(request, response, cgiFile.c_str(), "");

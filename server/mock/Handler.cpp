@@ -24,7 +24,7 @@ bool Handler::readMessage() {
 };
 
 int Handler::readRequest() {
-  int remainingSize = serverConfig->getClientRequestSize() - buffers[fd].size();
+  int remainingSize = serverConfig->getClientRequestSize("") - buffers[fd].size();
   char* temp_buffer =
       new char[remainingSize];  // 여유 크기만큼 버퍼 메모리 할당
 
@@ -75,7 +75,7 @@ void Handler::errorHandling(const char* erorr_code) {
 int Handler::createHttpRequest() {
   HttpRequest* request = HttpRequestFactory::create(fd, serverConfig);
   if (request == NULL &&
-      buffers[fd].size() == (size_t)serverConfig->getClientRequestSize())
+      buffers[fd].size() == (size_t)serverConfig->getClientRequestSize(""))
     return FAILURE;  // TODO: 우선은 상수로 반환하고 나중에 try catch 하는
                      // 방식으로 바꾸기
   // throw SocketCloseException400();  // 제한된 크기를 초과하는 요청

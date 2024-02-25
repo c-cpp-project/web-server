@@ -1,5 +1,3 @@
-#pragma once
-
 #ifndef CONFIG_PARSER_HPP
 #define CONFIG_PARSER_HPP
 #include <iostream>
@@ -9,13 +7,6 @@
 
 #include "Server.hpp"
 #define CONFIG_ERROR -1
-enum METHOD {
-  GET = 1,
-  POST = 2,
-  PUT = 4,
-  DELETE = 8,
-  HEAD = 16,
-};
 
 class Location;
 class Server;

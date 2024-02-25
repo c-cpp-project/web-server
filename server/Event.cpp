@@ -24,7 +24,7 @@ void Event::saveEvent(int fd, int16_t filter, uint16_t flags, uint32_t fflags,
   changedList.push_back(event);
 }
 
-bool Event::initKqueue(void) {
+bool Event::initKqueue() {
   if (kq != 0) {
     std::cout << "[WARN] kqueue already initialized" << std::endl;
     return true;
@@ -34,10 +34,10 @@ bool Event::initKqueue(void) {
   return false;
 }
 
-int Event::create(void) {
+int Event::create() {
   int res;
   struct timespec timeout;
-  timeout.tv_sec = MAX_CPU_TIME_USED;  // 5초
+  timeout.tv_sec = MAX_CPU_TIME_USED;  // 3초
   timeout.tv_nsec = 0;
 
   res = kevent(kq, &changedList[0], changedList.size(), eventList,

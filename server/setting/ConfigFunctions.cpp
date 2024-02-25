@@ -71,8 +71,7 @@ int ConfigParser::checkServerKeyAndValue(struct s_info& parse_info,
           std::pair<std::string, std::string>(vecInput[0], vecInput[1]));
       vecInput.clear();
       return 2;
-    } else  // vecInput.size() > 2
-    {
+    } else {
       if (vecInput[0] != "error_page" && vecInput[0] != "return" &&
           vecInput[0] != "allow_method" && vecInput[0] != "index")
         return CONFIG_ERROR;
@@ -167,8 +166,7 @@ int ConfigParser::checkLocationElement(struct s_info& parse_info,
           std::pair<std::string, std::string>(vecInput[0], vecInput[1]));
       vecInput.clear();
       return 6;
-    } else  // vecInput.size() > 2
-    {
+    } else {
       if (vecInput[0] != "error_page" && vecInput[0] != "return" &&
           vecInput[0] != "allow_method" && vecInput[0] != "index")
         return CONFIG_ERROR;

@@ -12,6 +12,6 @@ private:
 public:
     SendEventBean();
     ~SendEventBean();
-    void    runBeanEvent(HttpHandler *httpHandler, Event *event);
+    int    runBeanEvent(HttpHandler *httpHandler, Event *event);
 };
 #endif

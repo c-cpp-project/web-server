@@ -3,7 +3,7 @@
 ReadEventBean::ReadEventBean() {}
 ReadEventBean::~ReadEventBean() {}
 
-void ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
+int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   HttpResponse *response;
   std::string body;
   int readFd;
@@ -11,7 +11,7 @@ void ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   readFd = httpHandler->getFd();
   response = &httpHandler->getHttpResponse();
   if (response == 0)  // flush -> delete.
-    return;
+    return 0;
   body = response->readFile(readFd);
   event->saveEvent(readFd, EVFILT_READ, EV_DISABLE, 0, 0, 0);
   if (body == "")
@@ -19,10 +19,10 @@ void ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   else
     responseSaveEvent(body, httpHandler, event);
   delete httpHandler;
+  return 0;
 }
 
-void ReadEventBean::errorSaveEvent(HttpHandler *httpHandler, Event *event)
-{
+void ReadEventBean::errorSaveEvent(HttpHandler *httpHandler, Event *event) {
   HttpResponse &response = httpHandler->getHttpResponse();
   HttpRequest empty;
 
@@ -31,8 +31,8 @@ void ReadEventBean::errorSaveEvent(HttpHandler *httpHandler, Event *event)
   response.forward(empty);
 }
 
-void ReadEventBean::responseSaveEvent(std::string body, HttpHandler *httpHandler,
-                                Event *event) {
+void ReadEventBean::responseSaveEvent(std::string body,
+                                      HttpHandler *httpHandler, Event *event) {
   std::stringstream ss;
   std::string bodyLength;
   ServerConfiguration *serverConfig;
@@ -48,8 +48,7 @@ void ReadEventBean::responseSaveEvent(std::string body, HttpHandler *httpHandler
   bodyLength = ss.str();
   response.putHeader("Content-Length", bodyLength);
   // response.putHeader("Content-Type", "image/png");
-  if (request.getMethod() == "HEAD")
-    body = "";
+  if (request.getMethod() == "HEAD") body = "";
   response.sendBody(body);  // this->buffer에 string으로 모두 담긴다.
   std::cout << "ReadEventBean::response -> saveEvent\n";
   event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0,

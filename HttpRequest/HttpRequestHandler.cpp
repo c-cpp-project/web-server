@@ -20,7 +20,7 @@ HttpRequestHandler::HttpRequestHandler(int _socket_fd,
                                        ServerConfiguration *_server_config)
     : socket_fd(_socket_fd), server_config(_server_config) {}
 
-void HttpRequestHandler::handle(Event *event) {
+int HttpRequestHandler::handle(Event *event) {
   try {
     std::cout << "=====readRequest 시작======\n";
     int read_status = readRequest();
@@ -58,14 +58,12 @@ void HttpRequestHandler::handle(Event *event) {
     removeAndDeleteChunkedRequest(socket_fd);
     std::cout << "socket 닫기: " << e.what() << "\n";
     errorHandling(e.what(), server_config, event);
-    // throw;
-    close(socket_fd);
+    throw;
   }
+  return 0;
 }
 
 int HttpRequestHandler::readRequest() {
-  // if (fcntl(socket_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC) == -1) // 소켓을
-  // 논블로킹 모드로 설정 	throw SocketCloseException500();
 
   int remaining_size =
       server_config->getClientRequestSize() -

@@ -20,7 +20,7 @@ class HttpRequestHandler {
  public:
   HttpRequestHandler(int socket_fd, ServerConfiguration *server_config);
 
-  void handle(Event *event);
+  int handle(Event *event);
   int ChunkedRequestHandling(HttpRequest *request);
   void errorHandling(const char *erorr_code, ServerConfiguration *serverConfig, Event *event);
 

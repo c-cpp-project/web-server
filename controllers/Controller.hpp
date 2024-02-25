@@ -41,7 +41,7 @@ public:
 	Controller(int masking, ServerConfiguration	*serverConfig, std::string mLocation);
 
 	// 모듈화
-	void			classifyEvent(std::string data, std::string filename, const char *cgi_python, HttpResponse &response);
+	void			classifyEvent(HttpRequest &request, HttpResponse &response, const char *cgi_python, std::string contentType);
 	void			readEventRegsiter(int readfd[2], HttpResponse &response);
 	void			writeEventRegister(int writefd[2], int readfd[2], HttpResponse &response, std::string data);
 };

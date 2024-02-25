@@ -12,6 +12,8 @@ class MyController : public Controller
 {
 public:
 	void	service(HttpRequest &request, HttpResponse &response);
+	void	runCgiScript(HttpRequest &request, HttpResponse &response);
+	void	runService(HttpRequest &request, HttpResponse &response);
 	std::string	findDirectory(std::string root, std::string file);
 	MyController();
 	MyController(int masking);

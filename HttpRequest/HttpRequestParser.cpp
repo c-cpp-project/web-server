@@ -89,25 +89,30 @@ bool HttpRequestParser::isExistBody(HttpRequest *request)
 	return (true);
 }
 
-long HttpRequestParser::readBody(int socket_fd, HttpRequest *request, ServerConfiguration *server_config)
+long HttpRequestParser::readBody(int socket_fd, HttpRequest *request, ServerConfiguration *server_config, int start)
 {
-	long client_body_size = server_config->getClientBodySize(request->getPath());
 	long content_length = RequestUtility::strToPositiveLong(request->getHeader("Content-Length"));
 	if (content_length == FAILURE)
 		throw "400";
+	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
+	if ((long)buffer.size() >= start + content_length)
+		return (content_length); // bufffer에 이미 content-length 만큼 있으면 더 읽을 필요 없음
+
+	long client_body_size = server_config->getClientBodySize(request->getPath());
 	if (content_length > client_body_size)
 		throw SocketCloseException400();
+
 	HttpRequestHandler::readRequest(socket_fd, client_body_size);
 	return (content_length);
 }
 
 void HttpRequestParser::parseRequestBody(int socket_fd, HttpRequest *request, ServerConfiguration *server_config, int start)
 {
-	long content_length = readBody(socket_fd, request, server_config);
+	long content_length = readBody(socket_fd, request, server_config, start);
 	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
 
 	// content-length 만큼 본문이 없는 경우 -> 불완전한 요청
-	if ((long)buffer.size() <= start + content_length)
+	if ((long)buffer.size() < start + content_length)
 		throw INCOMPLETE_REQUEST;
 
 	// TODO : Content-Type이 없는 경우, 강제로 쿼리스트링으로 인식해도 될까?

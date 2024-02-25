@@ -42,7 +42,6 @@ void HttpRequestHandler::handle(Event *event) {
         if (request == NULL) return;  // 버퍼에 완전한 요청이 없거나 연결이 끊김
         if (ChunkedRequestHandling(request) == IN_PROGRESS_CHUNKED_REQUEST)
           continue;  // 아직 끝나지 않은 chunked 요청
-
         int kqueue_fd = 0;
         FrontController front_controller(socket_fd, server_config, event);
         front_controller.run(*request);

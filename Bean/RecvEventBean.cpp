@@ -22,10 +22,13 @@ int RecvEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     // return value 받아와야 함
     ret = httpRequestHandler.handle(event);
   } catch (const std::exception &e) {
+    std::cout << "[ERROR] SOCKET " << e.what() << std::endl;
     ret = 0;
   }
   std::cout << "[RET] " << ret << std::endl;
-  event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
-  delete httpHandler;
+  if (ret == 0) {
+    event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
+    delete httpHandler;
+  }
   return ret;
 }

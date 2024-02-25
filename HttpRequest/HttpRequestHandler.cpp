@@ -69,12 +69,14 @@ int HttpRequestHandler::RequestAndResponse(Event *event)
 // 버퍼가 size만큼 차도록 읽는 함수
 void HttpRequestHandler::readRequest(int socket_fd, long size)
 {
+	if (buffers.find(socket_fd) == buffers.end())
+		buffers.insert(std::pair<int, std::string>(socket_fd, ""));
 	long read_size = size - buffers[socket_fd].size();
+	std::cout << "read size: " << read_size << '\n';
 	if (read_size <= 0)
 		return;
-	char *temp_buffer = new char[size];
-
-	int read_byte = recv(socket_fd, temp_buffer, size, 0);
+	char *temp_buffer = new char[read_size];
+	int read_byte = recv(socket_fd, temp_buffer, read_size, 0);
 	if (read_byte == -1) { // recv 시스템 콜 오류
 		delete[] temp_buffer;
 		throw SocketCloseException500();
@@ -83,6 +85,7 @@ void HttpRequestHandler::readRequest(int socket_fd, long size)
 		throw ClientSocketCloseException();
 	}
 	buffers[socket_fd] += std::string(temp_buffer, read_byte);
+	std::cout << "buffer: " << buffers[socket_fd] << "!end\n";
 	delete[] temp_buffer;
 }
 

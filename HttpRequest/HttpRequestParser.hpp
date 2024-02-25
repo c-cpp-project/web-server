@@ -16,7 +16,7 @@ class HttpRequestParser
 		static void parseRequestLine(HttpRequest *request, const std::string& buffer, int& start);
 		static void parseRequestHeaders(HttpRequest *request, const std::string& buffer, int& start);
 		static bool isExistBody(HttpRequest *request);
-		static long readBody(int socket_fd, HttpRequest *request, ServerConfiguration *server_config);
+		static long readBody(int socket_fd, HttpRequest *request, ServerConfiguration *server_config, int start);
 		static void parseRequestBody(int socket_fd, HttpRequest *request, ServerConfiguration *server_config, int start);
 
 	public:

@@ -17,7 +17,13 @@ int RecvEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   std::cout << httpHandler->getFd() << ", "
             << httpHandler->getServerConfiguration()
             << " = RecvEventBean::runBeanEvent\n";
-  httpRequestHandler.handle(event);
+  int ret = -2;
+  try {
+    // return value 받아와야 함
+    httpRequestHandler.handle(event);
+  } catch (const std::exception &e) {
+    return RECV_ERROR;
+  }
   event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
   delete httpHandler;
   return 0;

@@ -21,4 +21,13 @@ class SocketCloseException500 : public std::exception
 		}
 };
 
+class ClientSocketCloseException : public std::exception
+{
+	public:
+		const char *what() const throw()
+		{
+			return "client close socket.";
+		}
+}
+
 #endif

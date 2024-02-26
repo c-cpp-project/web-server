@@ -18,7 +18,6 @@ HttpRequest *HttpRequestFactory::create(int socket_fd, ServerConfiguration *serv
 		request = HttpRequestHandler::getChunkedRequest(socket_fd);
 		if (request != NULL) // chunked 전송 요청인 경우
 		{
-			readChunkedRequest(socket_fd, request, server_config);
 			parseChunkedRequest(socket_fd, request, server_config);
 		}
 		else // 일반 요청인 경우
@@ -43,11 +42,20 @@ HttpRequest *HttpRequestFactory::create(int socket_fd, ServerConfiguration *serv
 // TODO : 청크 크기랑 데이터 읽는 부분 나누면 좋겠다.
 long HttpRequestFactory::readChunkedRequest(int socket_fd, HttpRequest* request, ServerConfiguration *server_config)
 {
+	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
+
+	// 이미 두 개의 CRLF가 있다면 더 읽을 필요 없다?
+	size_t first_crlf = buffer.find("\r\n");
+    if (first_crlf != std::string::npos) {
+		size_t second_crlf = buffer.find("\r\n", first_crlf + 2);
+		if (second_crlf != std::string::npos)
+			return (first_crlf);
+    }
+
 	// "청크크기\r\n청크데이터\r\n" 형식에서
 	// 청크데이터를 제외한 부분을 고려하기 위해 23(long 최대 자릿 수 + 두 개의 CRLF) 추가
 	long client_body_size = server_config->getClientBodySize(request->getPath()) + 23;
 	HttpRequestHandler::readRequest(socket_fd, client_body_size);
-	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
 
 	size_t end_of_chunk_size = buffer.find("\r\n");
 	if (end_of_chunk_size == std::string::npos)

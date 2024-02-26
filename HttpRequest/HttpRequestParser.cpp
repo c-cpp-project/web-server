@@ -9,17 +9,17 @@ void HttpRequestParser::parse(int socket_fd, HttpRequest*& request, ServerConfig
 	int start = 0;
 	request = new HttpRequest();
 	parseRequestLine(request, server_config, buffer, start);
-	std::cout << "after parse request line\n";
+	std::cout << "[INFO] after parse request line\n";
 	parseRequestHeaders(request, server_config, buffer, start);
-	std::cout << "after parse headers\n";
+	std::cout << "[INFO] after parse headers\n";
 
 	if (isExistBody(request))
 	{
 		parseRequestBody(socket_fd, request, server_config, start);
-		std::cout << "after parse body\n";
+		std::cout << "[INFO] after parse body\n";
 	}
 	parseRequestParams(request);
-	std::cout << "after parse params\n";
+	std::cout << "[INFO] after parse params\n";
 }
 
 void HttpRequestParser::readRequestHeader(int socket_fd, ServerConfiguration *server_config)

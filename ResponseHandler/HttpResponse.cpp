@@ -151,12 +151,12 @@ std::string	HttpResponse::readFile(int fd)
 		// std::cout << std::string(&binaryData[0], ret).length() << ", " << ret << "\n";
 	}
 	std::cout << "[" << size << ", " << ret << "] = readFile : " << body.length() <<"\n";
-	if (size <= 0 && ret <= 0)
+	close(fd);
+	if (ret < 0)
 	{
 		std::cout << "READ OPERATION FAIL\n";
 		return ("");
 	}
-	close(fd);
 	return (body);
 }
 
@@ -241,6 +241,7 @@ void	HttpResponse::flush() // 마지막에 호출
 		i++;
 	}
 	send(this->sockfd, httpMsg.c_str(), httpMsg.length(), 0);
+	std::cout << "flush(): [" << httpMsg << "]\n";
 	this->buffer.clear();
 }
 

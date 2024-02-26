@@ -3,14 +3,14 @@
 
 void HttpRequestParser::parse(int socket_fd, HttpRequest*& request, ServerConfiguration *server_config)
 {
-	readHeader(socket_fd, server_config);
+	readRequestHeader(socket_fd, server_config);
 	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
 
 	int start = 0;
 	request = new HttpRequest();
-	parseRequestLine(request, buffer, start);
+	parseRequestLine(request, server_config, buffer, start);
 	std::cout << "after parse request line\n";
-	parseRequestHeaders(request, buffer, start);
+	parseRequestHeaders(request, server_config, buffer, start);
 	std::cout << "after parse headers\n";
 
 	if (isExistBody(request))
@@ -22,12 +22,35 @@ void HttpRequestParser::parse(int socket_fd, HttpRequest*& request, ServerConfig
 	std::cout << "after parse params\n";
 }
 
-void HttpRequestParser::readHeader(int socket_fd, ServerConfiguration *server_config)
+void HttpRequestParser::readRequestHeader(int socket_fd, ServerConfiguration *server_config)
 {
+	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
+	if (buffer.find("\r\n\r\n") != std::string::npos)
+		return; // 버퍼에 연속된 CRLF가 있다면 더 읽을 필요 없음
 	long client_header_size = server_config->getClientHeaderSize();
 	HttpRequestHandler::readRequest(socket_fd, client_header_size);
-	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
+}
 
+void HttpRequestParser::parseRequestLine(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, int& start)
+{
+	// 요청 라인 전에 들어오는 CRLF는 무시하고 정상적으로 처리한다.
+	while (buffer.substr(start, 2) == "\r\n")
+		start += 2;
+
+	size_t end_of_line = buffer.find("\r\n");
+	if (end_of_line == std::string::npos)
+	{
+		if (buffer.size() >= server_config->getClientHeaderSize())
+			throw SocketCloseException400();
+		throw INCOMPLETE_REQUEST;
+	}
+	std::string line = buffer.substr(0, end_of_line);
+	request->setRequestLine(new RequestLine(line));
+	start = end_of_line + 2;
+}
+
+void HttpRequestParser::parseRequestHeaders(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, int& start)
+{
 	size_t end_of_headers = buffer.find("\r\n\r\n");
 	if (end_of_headers == std::string::npos)
 	{
@@ -35,24 +58,7 @@ void HttpRequestParser::readHeader(int socket_fd, ServerConfiguration *server_co
 			throw SocketCloseException400();
 		throw INCOMPLETE_REQUEST;
 	}
-}
 
-void HttpRequestParser::parseRequestLine(HttpRequest *request, const std::string& buffer, int& start)
-{
-	// 요청 라인 전에 들어오는 CRLF는 무시하고 정상적으로 처리한다.
-	while (buffer.substr(start, 2) == "\r\n")
-		start += 2;
-
-	size_t nl_pos = buffer.find("\r\n");
-	if (nl_pos == std::string::npos)
-		throw "400"; // 요청 라인을 식별할 수 없는 경우 -> 요청 거부
-	std::string line = buffer.substr(0, nl_pos);
-	request->setRequestLine(new RequestLine(line));
-	start = nl_pos + 2;
-}
-
-void HttpRequestParser::parseRequestHeaders(HttpRequest *request, const std::string& buffer, int& start)
-{
 	request->setRequestHeaders(new HttpHeaders());
 
 	while (true)
@@ -89,7 +95,7 @@ bool HttpRequestParser::isExistBody(HttpRequest *request)
 	return (true);
 }
 
-long HttpRequestParser::readBody(int socket_fd, HttpRequest *request, ServerConfiguration *server_config, int start)
+long HttpRequestParser::readRequestBody(int socket_fd, HttpRequest *request, ServerConfiguration *server_config, int start)
 {
 	long content_length = RequestUtility::strToPositiveLong(request->getHeader("Content-Length"));
 	if (content_length == FAILURE)
@@ -108,7 +114,7 @@ long HttpRequestParser::readBody(int socket_fd, HttpRequest *request, ServerConf
 
 void HttpRequestParser::parseRequestBody(int socket_fd, HttpRequest *request, ServerConfiguration *server_config, int start)
 {
-	long content_length = readBody(socket_fd, request, server_config, start);
+	long content_length = readRequestBody(socket_fd, request, server_config, start);
 	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
 
 	// content-length 만큼 본문이 없는 경우 -> 불완전한 요청

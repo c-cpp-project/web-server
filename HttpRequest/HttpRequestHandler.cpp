@@ -27,7 +27,11 @@ int HttpRequestHandler::handle(Event *event)
 		if (RequestAndResponse(event) == FAILURE)
 			return (FAILURE);
 		if (buffers[socket_fd] == "")
+		{
+			if (chunkeds.find(socket_fd) != chunkeds.end())
+				return (FAILURE); // 버퍼의 내용은  다 처리했지만, chunked 요청 중인 경우 아직 요청을 더 받아야 함!
 			break;
+		}
 	}
 	return (SUCCESS);
 }

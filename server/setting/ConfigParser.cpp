@@ -40,7 +40,7 @@ void ConfigParser::parseConfig(std::string const& configFileName) {
     prev_state = state;
     state = action[state](parse_info, this->server);
     if (state == CONFIG_ERROR) {
-      std::cout << "error in token : " << prev_token << std::endl;
+      std::cout << "[ERROR] error in token : " << prev_token << std::endl;
       break;
     }
     if (prev_state == 2 && state == 4) {

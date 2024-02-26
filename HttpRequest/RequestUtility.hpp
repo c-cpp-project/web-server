@@ -17,9 +17,9 @@ class RequestUtility
 		static std::string toUpperString(const std::string& input);
 		static bool containWhiteSpace(const std::string& input);
 		static bool isExist(const std::map<std::string, std::string>& map, const std::string& key);
-		static int strToPositiveInt(const std::string& input);
-		static std::string positiveIntToStr(int input);
-		static int hexToDecimal(const std::string &hex_string);
+		static long strToPositiveLong(const std::string& input);
+		static std::string positiveLongToStr(long input);
+		static long hexToDecimal(const std::string &hex_string);
 };
 
 #endif

@@ -1,8 +1,8 @@
 #pragma once
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
 class Location {
  private:
@@ -31,11 +31,11 @@ class Location {
   std::pair<std::string, std::string> getRedirectionInfo() const;
   // getter
   std::string getRoot(void) const;
-  std::map<std::vector<int>, std::string> getErrorPage(void) const;
-  std::map<int, std::string> getErrorCodePage(void) const;
-  std::map<std::string, int> getRedirection(void) const;
+  std::map<std::vector<int>, std::string> getErrorPage() const;
+  std::map<int, std::string> getErrorCodePage() const;
+  std::map<std::string, int> getRedirection() const;
   const std::set<std::string> getAllowMethod() const;
-  std::vector<std::string> getIndex(void) const;
-  bool getAutoIndex(void) const;
-  size_t getClientBodySize(void) const;
+  std::vector<std::string> getIndex() const;
+  bool getAutoIndex() const;
+  size_t getClientBodySize() const;
 };

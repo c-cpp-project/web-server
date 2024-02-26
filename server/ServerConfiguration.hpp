@@ -22,11 +22,11 @@ class ServerConfiguration {
   // keep-alive 옵션의 TCP 연결 지속시간
   int getKeepAliveTimeout();
   // max client body size 설정파일에서 설정안하면 10000
-  long getClientBodySize() const;
+  long getClientBodySize(const std::string &uri) const;
   // max client header size 설정파일에서 설정안하면 10000
   long getClientHeaderSize() const;
   // max client body size + max client header size
-  long getClientRequestSize() const;
+  long getClientRequestSize(const std::string &uri) const;
   // 서버 이름 설정 파일에서 설정안하면 default 값""
   const std::string getServerName() const;
   // 해당 uri를 넣으면 접근해야할 정적 리소스 경로 반환

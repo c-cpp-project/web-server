@@ -24,7 +24,7 @@ int Server::getListen() const { return this->listen; }
 
 int Server::getKeepAliveTimeout() const { return this->keepAliveTimeout; }
 
-std::map<std::string, Location*>& Server::getLocations(void) {
+std::map<std::string, Location*>& Server::getLocations() {
   return this->locations;
 }
 
@@ -34,15 +34,15 @@ std::string Server::getRoot() const { return this->root; }
 
 std::string Server::getCgiPath() const { return this->cgiPath; }
 
-std::map<std::vector<int>, std::string> Server::getErrorPage(void) const {
+std::map<std::vector<int>, std::string> Server::getErrorPage() const {
   return this->errorPage;
 }
 
-std::map<std::string, int> Server::getRedirection(void) const {
+std::map<std::string, int> Server::getRedirection() const {
   return this->redirection;
 }
 
-bool Server::getAutoIndex(void) const { return this->autoIndex; }
+bool Server::getAutoIndex() const { return this->autoIndex; }
 
 long Server::getClientBodySize() const { return this->clientBodySize; }
 

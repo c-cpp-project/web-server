@@ -14,16 +14,17 @@ class HttpRequestHandler {
   static std::map<int, HttpRequest *>
       chunkeds;  // chunked 수신 중인 소켓, request 객체
 
-  int readRequest();
   static void removeBuffer(int socket_fd);
 
  public:
   HttpRequestHandler(int socket_fd, ServerConfiguration *server_config);
 
   int handle(Event *event);
+  int RequestAndResponse(Event *event);
   int ChunkedRequestHandling(HttpRequest *request);
   void errorHandling(const char *erorr_code, ServerConfiguration *serverConfig, Event *event);
 
+  static void readRequest(int socket_fd, long size);
   static HttpRequest *removeChunkedRequest(int socket_fd);
   static void removeAndDeleteChunkedRequest(int socket_fd);
   static HttpRequest *getChunkedRequest(int socket_fd);

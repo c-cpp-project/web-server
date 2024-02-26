@@ -76,19 +76,19 @@ bool RequestUtility::isExist(const std::map<std::string, std::string>& map, cons
 	return (true);
 }
 
-int RequestUtility::strToPositiveInt(const std::string& input)
+long RequestUtility::strToPositiveLong(const std::string& input)
 {
-	int result = 0;
+	long result = 0;
 	for(size_t i = 0; i < input.size(); i++)
 	{
 		if (input[i] < '0' || '9' < input[i])
-			return (-1);
+			return (FAILURE);
 		result = result * 10 + input[i] -'0';
 	}
 	return (result);
 }
 
-std::string RequestUtility::positiveIntToStr(int input)
+std::string RequestUtility::positiveLongToStr(long input)
 {
 	std::string result;
 	while (input > 0)
@@ -99,9 +99,9 @@ std::string RequestUtility::positiveIntToStr(int input)
 	return (result);
 }
 
-int RequestUtility::hexToDecimal(const std::string &hex_string)
+long RequestUtility::hexToDecimal(const std::string &hex_string)
 {
-	int result = 0;
+	long result = 0;
 	for(size_t i = 0; i < hex_string.size(); i++)
 	{
 		int char_to_decimal;

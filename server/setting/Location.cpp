@@ -7,22 +7,25 @@
 
 // constructors
 Location::Location()
-    : root("/"), autoIndex(false), clientBodySize(0), redirectionInfo(std::pair<std::string, std::string>("400", "")) {}
+    : root("/"),
+      autoIndex(false),
+      clientBodySize(0),
+      redirectionInfo(std::pair<std::string, std::string>("400", "")) {}
 // destructor
 Location::~Location() {}
 // copy constructors
 
-std::string Location::getRoot(void) const { return this->root; }
+std::string Location::getRoot() const { return this->root; }
 
-std::map<std::vector<int>, std::string> Location::getErrorPage(void) const {
+std::map<std::vector<int>, std::string> Location::getErrorPage() const {
   return this->errorPage;
 }
 
-std::map<int, std::string> Location::getErrorCodePage(void) const {
+std::map<int, std::string> Location::getErrorCodePage() const {
   return this->errorCodePage;
 }
 
-std::map<std::string, int> Location::getRedirection(void) const {
+std::map<std::string, int> Location::getRedirection() const {
   return this->redirection;
 }
 
@@ -30,13 +33,15 @@ std::pair<std::string, std::string> Location::getRedirectionInfo() const {
   return this->redirectionInfo;
 }
 
-const std::set<std::string> Location::getAllowMethod() const { return this->allowedMethods; }
+const std::set<std::string> Location::getAllowMethod() const {
+  return this->allowedMethods;
+}
 
-std::vector<std::string> Location::getIndex(void) const { return this->index; }
+std::vector<std::string> Location::getIndex() const { return this->index; }
 
-bool Location::getAutoIndex(void) const { return this->autoIndex; }
+bool Location::getAutoIndex() const { return this->autoIndex; }
 
-size_t Location::getClientBodySize(void) const { return this->clientBodySize; }
+size_t Location::getClientBodySize() const { return this->clientBodySize; }
 
 // setter
 void Location::setRoot(std::string& input) { this->root = input; }

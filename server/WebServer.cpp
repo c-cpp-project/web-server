@@ -156,15 +156,26 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
     acceptClient(currEvent.ident);
   } else if (isClient(currEvent.ident)) {
     std::cout << currEvent.ident << " = RECV currEvent.ident\n";
+    std::cout << "[RECV] DONE " << (currEvent.flags & EV_EOF) << std::endl;
+    // 소켓 정보 다 읽어들였을 때 소켓 fd close하는 후보에 추가
+    // handler 메모리 할당된거 삭제
     if (currEvent.flags & EV_EOF) {
       addCandidatesForDisconnection(currEvent.ident);
+      HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+      delete handler;
+    } else {
+      HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+      int ret = BeanFactory::runBeanByName("RECV", handler, &eventHandler);
+      std::cout << "[INFO] RET" << ret << std::endl;
+      if (ret == SOCKET_CLOSE) {
+        // 소켓을 재사용할지 아니면 끊어내야 할지
+        // 사실 소켓까지 끊을 필요가 있을까?
+        // addCandidatesForDisconnection(currEvent.ident);
+        // 계속 하나의 소켓만 연결됨
+      }
     }
-    // BeanFactory beanFactory;
-    HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
-    BeanFactory::runBeanByName("RECV", handler, &eventHandler);
   } else {
     std::cout << currEvent.ident << " = READ currEvent.ident\n";
-    // BeanFactory beanFactory;
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     BeanFactory::runBeanByName("READ", handler, &eventHandler);
   }

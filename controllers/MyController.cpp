@@ -12,19 +12,25 @@ MyController::MyController(int masking, std::string mLocation) : Controller(mask
 MyController::~MyController()
 {}
 
-std::string	MyController::findDirectory(std::string directory, std::string file)
+std::string	MyController::findDirectory(std::string fullpath, std::string page)
 {
 	DIR             *dir;
 	struct dirent	*entry;
 	size_t          idx;
 	std::string     d_name;
-	// char			fullpath[1024];
 	struct stat 	buf;
 
+	if (fullpath[fullpath.length() - 1] == '/')
+		fullpath = fullpath.substr(0, fullpath.length() - 1);
+	int	i;
+	for (i = fullpath.length() - 1; i >= 0; i--)
+	{
+		if (fullpath[i] == '/')
+			break ;
+	}
+	std::string		directory = fullpath.substr(0, i);
+	std::string		file = fullpath.substr(i + 1);
 	std::cout << "MyController::findDirectory: ["<< directory << "], [" << file  << "]\n";
-	// getcwd(fullpath, 1023);
-	// std::cout << fullpath << " = fullpath\n";
-	// directory = std::string(fullpath) + "/" + directory.substr(0, directory.length() - 1);
 	dir = opendir(directory.c_str());
 	if (dir == NULL)
 	{
@@ -36,16 +42,18 @@ std::string	MyController::findDirectory(std::string directory, std::string file)
 	{
 		d_name = std::string(entry->d_name);
 		stat(std::string(directory + "/" + d_name).c_str(), &buf);
-		if (S_ISDIR(buf.st_mode))
-			continue ;
-		if (file.find(".") == std::string::npos && d_name.substr(0, d_name.find(".")) == file)
+		if (S_ISDIR(buf.st_mode) && d_name == file)
+		{
+			directory = fullpath;
+			d_name = page;
 			break ;
-		if (file == d_name)
+		}
+		else if ((file.find(".") == std::string::npos && d_name.substr(0, d_name.find(".")) == file) || file == d_name)
 			break ;
 	}
 	if (entry == NULL)
-		throw "403";
-	return (directory + "/" + std::string(entry->d_name));
+		throw "404";
+	return (directory + "/" + d_name);
 }
 
 void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
@@ -68,7 +76,7 @@ void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
 			if (request.getPath()[idx] == '/')
 				break ;
 		}
-		removePath = findDirectory(serverConfig->getUploadPath(), request.getPath().substr(idx + 1));
+		removePath = findDirectory(std::string(serverConfig->getUploadPath() + "/" + request.getPath().substr(idx + 1)), "");
 		request.setPath(removePath);
 		doDelete(request, response);
 	}
@@ -93,25 +101,23 @@ void	MyController::runService(HttpRequest &request, HttpResponse &response)
 	}
 	else
 	{
+		std::string index = location->getIndex()[0];
 		std::string	root = location->getRoot();
 		size_t		extension_idx = root.find("/");
 		if (extension_idx != std::string::npos)
 			root = root.substr(0, extension_idx);
 		if (request.getPath() == serverConfig->findLocationUri(request.getPath())) // /root/index_file
 		{
-			staticPath = findDirectory(root, location->getIndex()[0]);
+			staticPath = findDirectory(std::string(root + "/" + location->getIndex()[0]), index);
 			std::cout << "staticPath: " << staticPath << "\n";
 		}
 		else // /root/file_name
 		{
-			long    idx;
+			std::string	mainChain;
 
-			for (idx = request.getPath().length() - 1; idx >= 0; idx--)
-			{
-				if (request.getPath()[idx] == '/')
-					break ;
-			}
-			staticPath = findDirectory(root, request.getPath().substr(idx + 1));
+			mainChain = serverConfig->findLocationUri(request.getPath());
+			std::cout << request.getPath().substr(mainChain.length() + 1) << " = pendingElements\n";
+			staticPath = findDirectory(std::string(root + "/" + request.getPath().substr(mainChain.length() + 1)), index);
 		}
 		std::cout << staticPath << " = staticPath\n";
 		request.setPath(staticPath);

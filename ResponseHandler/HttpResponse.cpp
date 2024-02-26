@@ -101,7 +101,6 @@ void	HttpResponse::listDirectory(std::string directory)
 
 void	HttpResponse::redirect(std::string redirectUri)
 {
-	std::cout << "HttpResponse::redirect\n";
 	setStatusCode("302");
 	putHeader("Content-Type", "text/html");
 	putHeader("Location", redirectUri);

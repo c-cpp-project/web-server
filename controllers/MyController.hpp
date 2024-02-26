@@ -15,7 +15,7 @@ public:
 	void	service(HttpRequest &request, HttpResponse &response);
 	void	runCgiScript(HttpRequest &request, HttpResponse &response);
 	void	runService(HttpRequest &request, HttpResponse &response);
-	std::string	findDirectory(std::string root, std::string file);
+	std::string	findDirectory(std::string fullpath, std::string defaultpage);
 	MyController();
 	MyController(int masking);
 	MyController(int masking, std::string mLocation);

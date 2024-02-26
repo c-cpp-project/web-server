@@ -119,7 +119,11 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 
 	uri = request.getPath();
 	if ("400" <= getStatusCode() && getStatusCode() <= "500") // fail.page
+	{
 		uri = serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str()));
+		if (uri == "")
+			uri = "static/html/welcome.html";
+	}
 	fd = open(uri.c_str(), O_RDONLY);
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 	if ((fd < 0) && serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str())) == "") 
@@ -128,7 +132,7 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 		close(fd);
 		throw "404";
 	}
-	std::cout << fd << ", " << uri  << "\n";
+	std::cout << fd << ", " << uri  << ": status code = "  << getStatusCode() << "\n";
 	if ("400" <= getStatusCode() && getStatusCode() <= "500")
 		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, *this));
 	else
@@ -241,7 +245,7 @@ void	HttpResponse::flush() // 마지막에 호출
 		i++;
 	}
 	send(this->sockfd, httpMsg.c_str(), httpMsg.length(), 0);
-	std::cout << "flush(): [" << httpMsg << "]\n";
+	// std::cout << "flush(): [" << httpMsg << "]\n";
 	this->buffer.clear();
 }
 

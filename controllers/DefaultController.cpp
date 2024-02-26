@@ -13,7 +13,6 @@ void    DefaultController::service(HttpRequest &request, HttpResponse &response)
     std::string         path;
     ServerConfiguration *serverConfig = response.getServerConfiguration();
 
-    std::cout << "MyController::service" << "\n";
     if (isAcceptableMethod(request.getMethod()) == false)
         throw "405";
     std::cout << "DefaultController::service" << "\n";

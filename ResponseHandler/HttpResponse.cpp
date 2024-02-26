@@ -228,11 +228,12 @@ void	HttpResponse::HttpResponseBody(std::string body)
 	this->buffer.push_back(body);
 }
 
-void	HttpResponse::flush() // 마지막에 호출
+int	HttpResponse::flush() // 마지막에 호출
 {
 	unsigned int	i;
 	int				size;
 	std::string		httpMsg;
+	long			ret;
 
 	httpMsg = "";
 	i = 0;
@@ -243,9 +244,10 @@ void	HttpResponse::flush() // 마지막에 호출
 		size += this->buffer[i].length();
 		i++;
 	}
-	send(this->sockfd, httpMsg.c_str(), httpMsg.length(), 0);
+	ret = send(this->sockfd, httpMsg.c_str(), httpMsg.length(), 0);
 	// std::cout << "flush(): [" << httpMsg << "]\n";
 	this->buffer.clear();
+	return (ret);
 }
 
 void	HttpResponse::setStatusCode(std::string code)

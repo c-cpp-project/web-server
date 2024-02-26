@@ -57,7 +57,7 @@ public:
 	void    processHeader();
 	
 	void	tokenizerFlush(std::string body);
-	void    flush(); // 마지막에 호출
+	int		flush(); // 마지막에 호출
 	void	setStatusCode(std::string code);
 	std::string	getStatusCode();
 

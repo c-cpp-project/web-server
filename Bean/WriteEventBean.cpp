@@ -11,10 +11,14 @@ int WriteEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   writeFd = httpHandler->getFd();
   data = httpHandler->getData();
   ret = write(writeFd, data.c_str(), data.length());
-  std::cout << " WriteEventBean::runBeanEvent: [" << data.length() << ", "
+  if (ret >= 0)
+  {
+    std::cout << " WriteEventBean::runBeanEvent: [" << data.length() << ", "
             << ret << "]\n";
-  close(writeFd);
-  event->saveEvent(writeFd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);  // EVFILT_WRITE
-  delete httpHandler;
-  return 0;
+    close(writeFd);
+    event->saveEvent(writeFd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);  // EVFILT_WRITE
+    delete httpHandler;
+    return (0);
+  }
+  return ret;
 }

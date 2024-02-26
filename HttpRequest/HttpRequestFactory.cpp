@@ -101,6 +101,8 @@ void HttpRequestFactory::SpecialExceptionHandling(const int& e, int socket_fd, H
 	switch(e)
 	{
 	case INCOMPLETE_REQUEST: // 불완전한 요청
+		if (HttpRequestHandler::getChunkedRequest(socket_fd) != NULL)
+			break;
 		delete request;
 		request = NULL;
 		break;

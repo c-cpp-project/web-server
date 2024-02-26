@@ -28,6 +28,6 @@ class ClientSocketCloseException : public std::exception
 		{
 			return "client close socket.";
 		}
-}
+};
 
 #endif

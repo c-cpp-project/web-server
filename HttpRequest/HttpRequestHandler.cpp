@@ -6,9 +6,9 @@
 #include "../ResponseHandler/FrontController.hpp"
 
 std::map<int, std::string>
-    HttpRequestHandler::buffers;  // 요청을 읽어오는 소켓, 버퍼
+		HttpRequestHandler::buffers;  // 요청을 읽어오는 소켓, 버퍼
 std::map<int, HttpRequest *>
-    HttpRequestHandler::chunkeds;  // chunked 수신 중인 소켓, request 객체
+		HttpRequestHandler::chunkeds;  // chunked 수신 중인 소켓, request 객체
 
 #include <unistd.h>
 
@@ -17,135 +17,135 @@ std::map<int, HttpRequest *>
 #define LAST_CHUNKED_REQUEST 3
 
 HttpRequestHandler::HttpRequestHandler(int _socket_fd,
-                                       ServerConfiguration *_server_config)
-    : socket_fd(_socket_fd), server_config(_server_config) {}
+																			 ServerConfiguration *_server_config)
+		: socket_fd(_socket_fd), server_config(_server_config) {}
 
 int HttpRequestHandler::handle(Event *event) {
-  try {
-    std::cout << "=====readRequest 시작======\n";
-    int read_status = readRequest();
-    std::cout << "======readRequest 종료=====\n";
-    std::cout
-        << "-------------------------------------------------------------------"
-        << read_status << '\n';
-    if (read_status == FAILURE)  // 클라이언트와 연결이 끊긴 경우
-      return;
-    while (buffers[socket_fd] != "") {
-      // std::cout << "\n\n********************* loop
-      // ***********************\n"; std::cout << "buffer:\n" <<
-      // buffers[socket_fd] << "\n!buffer end!\n";
-      try {
-        HttpRequest *request = HttpRequestFactory::create(socket_fd, server_config);
-        if (request == NULL &&
-            buffers[socket_fd].size() == (size_t)server_config->getClientRequestSize())
-          throw SocketCloseException400();  // 제한된 크기를 초과하는 요청
-        if (request == NULL) return;  // 버퍼에 완전한 요청이 없거나 연결이 끊김
-        if (ChunkedRequestHandling(request) == IN_PROGRESS_CHUNKED_REQUEST)
-          continue;  // 아직 끝나지 않은 chunked 요청
-        int kqueue_fd = 0;
-        FrontController front_controller(socket_fd, server_config, event);
-        front_controller.run(*request);
-        delete request;
-      } catch (const char *e) {
-        std::cout << e << ": handle\n";
-        errorHandling(e, server_config, event);
-      }
-    }
-  } catch (const std::exception &e) {
-    // socket에 대한 close는 yuikim씨 코드에서 #### 유의사항 1
-    removeBuffer(socket_fd);
-    removeAndDeleteChunkedRequest(socket_fd);
-    std::cout << "socket 닫기: " << e.what() << "\n";
-    errorHandling(e.what(), server_config, event);
-    throw;
-  }
-  return 0;
+	try {
+		std::cout << "=====readRequest 시작======\n";
+		int read_status = readRequest();
+		std::cout << "======readRequest 종료=====\n";
+		std::cout
+				<< "-------------------------------------------------------------------"
+				<< read_status << '\n';
+		if (read_status == FAILURE)  // 클라이언트와 연결이 끊긴 경우
+			return (0);
+		while (buffers[socket_fd] != "") {
+			// std::cout << "\n\n********************* loop
+			// ***********************\n"; std::cout << "buffer:\n" <<
+			// buffers[socket_fd] << "\n!buffer end!\n";
+			try {
+				HttpRequest *request = HttpRequestFactory::create(socket_fd, server_config);
+				if (request == NULL &&
+						buffers[socket_fd].size() == (size_t)server_config->getClientRequestSize())
+					throw SocketCloseException400();  // 제한된 크기를 초과하는 요청
+				if (request == NULL) return (0);  // 버퍼에 완전한 요청이 없거나 연결이 끊김
+				if (ChunkedRequestHandling(request) == IN_PROGRESS_CHUNKED_REQUEST)
+					continue;  // 아직 끝나지 않은 chunked 요청
+				int kqueue_fd = 0;
+				FrontController front_controller(socket_fd, server_config, event);
+				front_controller.run(*request);
+				delete request;
+			} catch (const char *e) {
+				std::cout << e << ": handle\n";
+				errorHandling(e, server_config, event);
+			}
+		}
+	} catch (const std::exception &e) {
+		// socket에 대한 close는 yuikim씨 코드에서 #### 유의사항 1
+		removeBuffer(socket_fd);
+		removeAndDeleteChunkedRequest(socket_fd);
+		std::cout << "socket 닫기: " << e.what() << "\n";
+		errorHandling(e.what(), server_config, event);
+		throw;
+	}
+	return 0;
 }
 
 int HttpRequestHandler::readRequest() {
 
-  int remaining_size =
-      server_config->getClientRequestSize() -
-      buffers[socket_fd]
-          .size();
-  char *temp_buffer =
-      new char[remaining_size];  // 여유 크기만큼 버퍼 메모리 할당
+	int remaining_size =
+			server_config->getClientRequestSize() -
+			buffers[socket_fd]
+					.size();
+	char *temp_buffer =
+			new char[remaining_size];  // 여유 크기만큼 버퍼 메모리 할당
 
-  int read_byte = recv(socket_fd, temp_buffer, remaining_size, 0);
-  if (read_byte <= 0) {
-    delete[] temp_buffer;
-    if (read_byte == -1)
-      throw SocketCloseException500();  // recv 시스템 콜 오류
-    return (FAILURE);                   // 클라이언트와 연결 끊김
-    // TODO : 클라이언트 측에서 연결을 끊은 경우, 소켓 닫기 & buffer, chunked
-    // 삭제는 kqueue 쪽에서 해주려나?
-  }
+	int read_byte = recv(socket_fd, temp_buffer, remaining_size, 0);
+	if (read_byte <= 0) {
+		delete[] temp_buffer;
+		if (read_byte == -1)
+			throw SocketCloseException500();  // recv 시스템 콜 오류
+		return (FAILURE);                   // 클라이언트와 연결 끊김
+		// TODO : 클라이언트 측에서 연결을 끊은 경우, 소켓 닫기 & buffer, chunked
+		// 삭제는 kqueue 쪽에서 해주려나?
+	}
 
-  buffers[socket_fd] += std::string(temp_buffer, read_byte);
-  delete[] temp_buffer;
+	buffers[socket_fd] += std::string(temp_buffer, read_byte);
+	delete[] temp_buffer;
 
-  return (SUCCESS);
+	return (SUCCESS);
 }
 
 int HttpRequestHandler::ChunkedRequestHandling(HttpRequest *request) {
-  if (request->getHeader("Transfer-Encoding") != "chunked")
-    return (NO_CHUNKED_REQUEST);
+	if (request->getHeader("Transfer-Encoding") != "chunked")
+		return (NO_CHUNKED_REQUEST);
 
-  // chunkeds 맵에 포함된 chunked 요청인 경우 -> 아직 chunked 요청 전체가 끝나지
-  // 않았음
-  if (chunkeds.find(socket_fd) != chunkeds.end())
-    return (IN_PROGRESS_CHUNKED_REQUEST);
+	// chunkeds 맵에 포함된 chunked 요청인 경우 -> 아직 chunked 요청 전체가 끝나지
+	// 않았음
+	if (chunkeds.find(socket_fd) != chunkeds.end())
+		return (IN_PROGRESS_CHUNKED_REQUEST);
 
-  // 마지막 chunked 요청인 경우
-  HttpRequestParser::parseRequestParams(request);
-  return (LAST_CHUNKED_REQUEST);
+	// 마지막 chunked 요청인 경우
+	HttpRequestParser::parseRequestParams(request);
+	return (LAST_CHUNKED_REQUEST);
 }
 
 void HttpRequestHandler::errorHandling(const char *erorr_code, ServerConfiguration *server_config, Event *event) {
-  HttpRequest empty;
-  HttpResponse response(socket_fd, server_config, event);
+	HttpRequest empty;
+	HttpResponse response(socket_fd, server_config, event);
 
-  std::cout << "erorr_code : " << erorr_code << "\n";
-  response.setStatusCode(erorr_code);
-  response.forward(empty);
-  std::cout << "errorHandling done\n";
-  // response.flush();
+	std::cout << "erorr_code : " << erorr_code << "\n";
+	response.setStatusCode(erorr_code);
+	response.forward(empty);
+	std::cout << "errorHandling done\n";
+	// response.flush();
 }
 
 void HttpRequestHandler::removeBuffer(int socket_fd) {
-  std::map<int, std::string>::iterator it = buffers.find(socket_fd);
-  if (it != buffers.end()) buffers.erase(it);
+	std::map<int, std::string>::iterator it = buffers.find(socket_fd);
+	if (it != buffers.end()) buffers.erase(it);
 }
 
 HttpRequest *HttpRequestHandler::removeChunkedRequest(int socket_fd) {
-  std::map<int, HttpRequest *>::iterator it = chunkeds.find(socket_fd);
-  if (it == chunkeds.end()) return (NULL);
-  HttpRequest *request = it->second;
-  chunkeds.erase(it);
-  return (request);
+	std::map<int, HttpRequest *>::iterator it = chunkeds.find(socket_fd);
+	if (it == chunkeds.end()) return (NULL);
+	HttpRequest *request = it->second;
+	chunkeds.erase(it);
+	return (request);
 }
 
 void HttpRequestHandler::removeAndDeleteChunkedRequest(int socket_fd) {
-  HttpRequest *request = removeChunkedRequest(socket_fd);
-  delete request;
+	HttpRequest *request = removeChunkedRequest(socket_fd);
+	delete request;
 }
 
 HttpRequest *HttpRequestHandler::getChunkedRequest(int socket_fd) {
-  std::map<int, HttpRequest *>::iterator it = chunkeds.find(socket_fd);
-  if (it == chunkeds.end()) return (NULL);
-  return (it->second);
+	std::map<int, HttpRequest *>::iterator it = chunkeds.find(socket_fd);
+	if (it == chunkeds.end()) return (NULL);
+	return (it->second);
 }
 
 const std::string &HttpRequestHandler::getBuffer(int socket_fd) {
-  return (buffers[socket_fd]);
+	return (buffers[socket_fd]);
 }
 
 void HttpRequestHandler::addChunkedRequest(int socket_fd,
-                                           HttpRequest *request) {
-  chunkeds[socket_fd] = request;
+																					 HttpRequest *request) {
+	chunkeds[socket_fd] = request;
 }
 
 void HttpRequestHandler::removePartOfBuffer(int socket_fd, int start,
-                                            int count) {
-  buffers[socket_fd].erase(start, count);
+																						int count) {
+	buffers[socket_fd].erase(start, count);
 }

@@ -1,73 +1,66 @@
 #include "HttpRequestParser.hpp"
 #include "HttpRequestHandler.hpp"
 
-void HttpRequestParser::parse(int socket_fd, HttpRequest*& request, ServerConfiguration *server_config)
+void HttpRequestParser::parse(HttpRequest*& request, ServerConfiguration *server_config, const std::string& buffer)
 {
-	readRequestHeader(socket_fd, server_config);
-	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
-
-	int start = 0;
+	long start = 0;
 	request = new HttpRequest();
 	parseRequestLine(request, server_config, buffer, start);
-	std::cout << "[INFO] after parse request line\n";
+	std::cout << "[INFO] complete parse request line\n";
 	parseRequestHeaders(request, server_config, buffer, start);
-	std::cout << "[INFO] after parse headers\n";
-
+	std::cout << "[INFO] complete parse headers\n";
 	if (isExistBody(request))
 	{
-		parseRequestBody(socket_fd, request, server_config, start);
-		std::cout << "[INFO] after parse body\n";
+		parseRequestBody(request, server_config, buffer, start);
+		std::cout << "[INFO] complete parse body\n";
 	}
 	parseRequestParams(request);
-	std::cout << "[INFO] after parse params\n";
+	std::cout << "[INFO] complete parse params\n";
 }
 
-void HttpRequestParser::readRequestHeader(int socket_fd, ServerConfiguration *server_config)
+void HttpRequestParser::parseRequestLine(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, long& start)
 {
-	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
-	if (buffer.find("\r\n\r\n") != std::string::npos)
-		return; // 버퍼에 연속된 CRLF가 있다면 더 읽을 필요 없음
-	long client_header_size = server_config->getClientHeaderSize();
-	HttpRequestHandler::readRequest(socket_fd, client_header_size);
-}
-
-void HttpRequestParser::parseRequestLine(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, int& start)
-{
-	// 요청 라인 전에 들어오는 CRLF는 무시하고 정상적으로 처리한다.
+	// 요청 라인 전에 들어오는 CRLF는 건너뛰기
 	while (buffer.substr(start, 2) == "\r\n")
 		start += 2;
 
+	// 요청 라인이 들어왔는지 확인하기
 	size_t end_of_line = buffer.find("\r\n");
-	if (end_of_line == std::string::npos)
+	if (end_of_line == std::string::npos) // 요청 라인의 끝을 식별할 수 없는 경우
 	{
-		if (buffer.size() >= server_config->getClientHeaderSize())
-			throw SocketCloseException400();
-		throw INCOMPLETE_REQUEST;
+		if (buffer.size() >= server_config->getClientHeaderSize())	// 최대 헤더 크기만큼 충분히 읽었다면
+			throw SocketCloseException400();						// -> 너무 긴 요청 라인
+		else														// 최대 헤더 크기만큼 충분히 읽지 못했다면
+			throw INCOMPLETE_REQUEST;								// -> 불완전한 요청 라인
 	}
+
+	// 요청 라인 파싱하기
 	std::string line = buffer.substr(0, end_of_line);
 	request->setRequestLine(new RequestLine(line));
 	start = end_of_line + 2;
 }
 
-void HttpRequestParser::parseRequestHeaders(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, int& start)
+void HttpRequestParser::parseRequestHeaders(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, long& start)
 {
-	size_t end_of_headers = buffer.find("\r\n\r\n");
-	if (end_of_headers == std::string::npos)
+	// 요청 헤더가 들어왔는지 확인하기
+	size_t end_of_headers = buffer.find("\r\n\r\n", start);
+	if (end_of_headers == std::string::npos) // 요청 헤더의 끝을 식별할 수 없는 경우
 	{
-		if (buffer.size() >= server_config->getClientHeaderSize())
-			throw SocketCloseException400();
-		throw INCOMPLETE_REQUEST;
+		if (buffer.size() >= server_config->getClientHeaderSize())	// 최대 헤더 크기만큼 충분히 읽었다면
+			throw SocketCloseException400();						// -> 너무 긴 헤더
+		else														// 최대 헤더 크기만큼 충분히 읽지 못했다면
+			throw INCOMPLETE_REQUEST;								// 불완전한 요청 라인
 	}
 
+	// 요청 헤더 파싱하기
 	request->setRequestHeaders(new HttpHeaders());
-
 	while (true)
 	{
 		int nl_pos = buffer.find("\r\n", start);
 		if (nl_pos == start)
-			break; // 헤더 부분이 끝남
+			break; // 헤더 부분이 끝난 경우 while문 탈출
 		std::string line = buffer.substr(start, nl_pos - start);
-		if (request->addHeader(line) == FAILURE)
+		if (request->addHeader(line) == FAILURE) // 한 줄을 파싱하여 헤더에 추가
 			throw "400";
 		start = nl_pos + 2;
 	}
@@ -79,6 +72,7 @@ void HttpRequestParser::parseRequestHeaders(HttpRequest *request, ServerConfigur
 
 bool HttpRequestParser::isExistBody(HttpRequest *request)
 {
+	// POST 요청이 아닌 경우 요청 본문이 없다고 판단하기
 	if (request->getMethod() != "POST")
 		return (false);
 
@@ -95,46 +89,36 @@ bool HttpRequestParser::isExistBody(HttpRequest *request)
 	return (true);
 }
 
-long HttpRequestParser::readRequestBody(int socket_fd, HttpRequest *request, ServerConfiguration *server_config, int start)
+void HttpRequestParser::parseRequestBody(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, long start)
 {
+	// content_length 구하기
 	long content_length = RequestUtility::strToPositiveLong(request->getHeader("Content-Length"));
 	if (content_length == FAILURE)
-		throw "400";
-	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
-	if ((long)buffer.size() >= start + content_length)
-		return (content_length); // bufffer에 이미 content-length 만큼 있으면 더 읽을 필요 없음
+		throw "400"; // content_length 값이 유효하지 않은 경우
+	if (content_length > server_config->getClientBodySize(request->getPath()))
+		throw SocketCloseException400(); // content_length가 제한된 본문 크기를 초과하는 경우
+	if (buffer.size() < start + content_length)
+		throw INCOMPLETE_REQUEST; // 버퍼에 content_length 만큼 충분히 없는 경우
 
-	long client_body_size = server_config->getClientBodySize(request->getPath());
-	if (content_length > client_body_size)
-		throw SocketCloseException400();
-
-	HttpRequestHandler::readRequest(socket_fd, client_body_size);
-	return (content_length);
-}
-
-void HttpRequestParser::parseRequestBody(int socket_fd, HttpRequest *request, ServerConfiguration *server_config, int start)
-{
-	long content_length = readRequestBody(socket_fd, request, server_config, start);
-	const std::string& buffer = HttpRequestHandler::getBuffer(socket_fd);
-
-	// content-length 만큼 본문이 없는 경우 -> 불완전한 요청
-	if ((long)buffer.size() < start + content_length)
-		throw INCOMPLETE_REQUEST;
-
+	// Content-Type이 없는 경우 -> 쿼리스트링으로 인식하기
 	// TODO : Content-Type이 없는 경우, 강제로 쿼리스트링으로 인식해도 될까?
 	if (request->getHeader("Content-Type") == "")
 		request->setHeader("Content-Type", "application/x-www-form-urlencoded");
+	
+	// 본문 설정하기
 	request->setRequestBody(buffer.substr(start, content_length));
 }
 
 void HttpRequestParser::parseRequestParams(HttpRequest *request)
 {
 	request->setRequestParams(new RequestParams());
+
+	// 요청 라인의 uri 뒤에 붙은 쿼리 스트링 파싱하기
 	if (request->addRequestParamsToQueryString(request->getQueryString()) == FAILURE)
 		throw "400";
-	if (request->getHeader("Content-Type") == "application/x-www-form-urlencoded")
-	{
-		if (request->addRequestParamsToQueryString(request->getBody()) == FAILURE)
-			throw "400";
-	}
+
+	// 본문의 쿼리 스트링 파싱하기
+	if (request->getHeader("Content-Type") == "application/x-www-form-urlencoded" &&
+		request->addRequestParamsToQueryString(request->getBody()) == FAILURE)
+		throw "400";
 }

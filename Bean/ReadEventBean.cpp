@@ -13,7 +13,6 @@ int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   if (response == 0)  // flush -> delete.
     return 0;
   body = response->readFile(readFd);
-  event->saveEvent(readFd, EVFILT_READ, EV_DISABLE, 0, 0, 0);
   if (body == "")
     errorSaveEvent(httpHandler, event);
   else

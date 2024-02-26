@@ -2,6 +2,7 @@
 #ifndef MY_CONTROLLER_HPP
 # define MY_CONTROLLER_HPP
 #include"Controller.hpp"
+#include <sys/stat.h>
 
 class HttpResponse;
 class HttpRequest;

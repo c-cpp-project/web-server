@@ -18,16 +18,15 @@ std::string	MyController::findDirectory(std::string directory, std::string file)
 	struct dirent	*entry;
 	size_t          idx;
 	std::string     d_name;
-	char            fullpath[1024];
+	// char			fullpath[1024];
+	struct stat 	buf;
 
 	std::cout << "MyController::findDirectory: ["<< directory << "], [" << file  << "]\n";
-	if (access(std::string(directory +  "/" + file).c_str(), F_OK) == 0)
-		return (directory + "/" + file);
 	// getcwd(fullpath, 1023);
 	// std::cout << fullpath << " = fullpath\n";
 	// directory = std::string(fullpath) + "/" + directory.substr(0, directory.length() - 1);
 	dir = opendir(directory.c_str());
-	if (dir == NULL || file.find(".") != std::string::npos)
+	if (dir == NULL)
 	{
 		std::cout << "Error opening directory\n";
 		throw "404";
@@ -36,12 +35,16 @@ std::string	MyController::findDirectory(std::string directory, std::string file)
 	while ((entry = readdir(dir)) != NULL)
 	{
 		d_name = std::string(entry->d_name);
-		d_name = d_name.substr(0, d_name.find("."));
-		if (d_name == file)
+		stat(std::string(directory + "/" + d_name).c_str(), &buf);
+		if (S_ISDIR(buf.st_mode))
+			continue ;
+		if (file.find(".") == std::string::npos && d_name.substr(0, d_name.find(".")) == file)
+			break ;
+		if (file == d_name)
 			break ;
 	}
 	if (entry == NULL)
-		throw "404";
+		throw "403";
 	return (directory + "/" + std::string(entry->d_name));
 }
 

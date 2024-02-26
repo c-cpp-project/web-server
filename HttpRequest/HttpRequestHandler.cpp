@@ -24,10 +24,15 @@ int HttpRequestHandler::handle(Event *event)
 {
 	while (true)
 	{
+		std::cout << "[INFO] handle while\n";
 		if (RequestAndResponse(event) == FAILURE)
 			return (FAILURE);
 		if (buffers[socket_fd] == "")
+		{
+			if (chunkeds.find(socket_fd) != chunkeds.end())
+				return (FAILURE); // 버퍼의 내용은  다 처리했지만, chunked 요청 중인 경우 아직 요청을 더 받아야 함!
 			break;
+		}
 	}
 	return (SUCCESS);
 }
@@ -73,7 +78,6 @@ void HttpRequestHandler::readRequest(int socket_fd, long size)
 	if (buffers.find(socket_fd) == buffers.end())
 		buffers.insert(std::pair<int, std::string>(socket_fd, ""));
 	long read_size = size - buffers[socket_fd].size();
-	std::cout << "read size: " << read_size << '\n';
 	if (read_size <= 0)
 		return;
 	char *temp_buffer = new char[read_size];
@@ -86,7 +90,8 @@ void HttpRequestHandler::readRequest(int socket_fd, long size)
 		throw ClientSocketCloseException();
 	}
 	buffers[socket_fd] += std::string(temp_buffer, read_byte);
-	std::cout << "buffer: " << buffers[socket_fd] << "!end\n";
+	std::cout << "[INFO] buffer after read :\n";
+	std::cout << buffers[socket_fd] << "{end}\n";
 	delete[] temp_buffer;
 }
 

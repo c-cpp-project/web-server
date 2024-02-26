@@ -170,11 +170,21 @@ void Server::setAutoIndex(std::string& input) {
 }
 
 void Server::setClientBodySize(std::string& input) {
-  this->clientBodySize = std::strtod(input.c_str(), NULL);
+  int target = std::strtod(input.c_str(), NULL);
+  if (target > 0)
+    this->clientBodySize = target;
+  else
+    std::cout << "[WARN] body size is zero or negative. use default value.. "
+              << this->clientBodySize << std::endl;
 }
 
 void Server::setClientHeaderSize(std::string& input) {
-  this->clientBodySize = std::strtod(input.c_str(), NULL);
+  int target = std::strtod(input.c_str(), NULL);
+  if (target > 0)
+    this->clientBodySize = target;
+  else
+    std::cout << "[WARN] header size is zero or negative. use default.."
+              << this->clientBodySize << std::endl;
 }
 
 void Server::setUploadPath(std::string& input) { this->uploadedPath = input; }

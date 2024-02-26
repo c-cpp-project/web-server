@@ -152,7 +152,6 @@ std::string	HttpResponse::readFile(int fd)
 	{
 		size += ret;
 		body += std::string(&binaryData[0], ret);
-		// std::cout << std::string(&binaryData[0], ret).length() << ", " << ret << "\n";
 	}
 	std::cout << "[" << size << ", " << ret << "] = readFile : " << body.length() <<"\n";
 	close(fd);

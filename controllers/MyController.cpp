@@ -96,7 +96,6 @@ void	MyController::runService(HttpRequest &request, HttpResponse &response)
 			root = root.substr(0, extension_idx);
 		if (request.getPath() == serverConfig->findLocationUri(request.getPath())) // /root/index_file
 		{
-			// staticPath = serverConfig->getResourcePath(request.getPath());
 			staticPath = findDirectory(root, location->getIndex()[0]);
 			std::cout << "staticPath: " << staticPath << "\n";
 		}
@@ -132,7 +131,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
 	// 2. CGI 파열 경로는 어떻게 설정하는가? -> 42번 줄 확인 바람!
 	// 3. getResourcePath는 어떻게 설정되고 무엇을 반환하는가?
 	// ================================================================== //
-	if (request.getMethod() == "GET" && request.getQueryString() == "")
+	if ((request.getMethod() == "GET") && request.getQueryString() == "")
 		runService(request, response);
 	else
 		runCgiScript(request, response);

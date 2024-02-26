@@ -1,39 +1,43 @@
 #include"Controller.hpp"
 
-void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, const char *cgi_python, std::string mime)
+void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, const char *cgi_python, std::string filename)
 {
 	int			ret;
 	char		buffer[64 * K];
 	int     	pipefd1[2];
 	int			pipefd2[2];
-	const char	*path[5];
-	std::string uploadPath = response.getServerConfiguration()->getUploadPath();
-	std::string	queryString = request.getMethod() == "GET" ? request.getQueryString() : request.getBody();
+	const char	*path[6];
+	std::string uploadPath = request.getPath();
+	std::string	queryString;
 
 	path[0] = "/usr/bin/python3";
 	path[1] = cgi_python;
 	pipe(pipefd2);
 	if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded")
 	{
+		queryString = request.getMethod() == "GET" ? request.getQueryString() : request.getBody();
+
 		path[2] = uploadPath.c_str();
 		path[3] = queryString.c_str();
-		std::cout << "ARGV: [" << path[2] << ", " << path[3] << "]\n";
+		path[4] = filename.c_str();
+		std::cout << "ARGV: [" << path[2] << ", " << path[3] << ", " << path[4] << "]\n";
+		path[5] = NULL;
 	}
 	else if (request.getMethod() == "POST") // post
 	{
 		path[2] = uploadPath.c_str();
-		path[3] = mime.c_str(); // filename
+		path[3] = filename.c_str(); // filename
 		pipe(pipefd1);
 		std::cout << "ARGV: [" << path[2] << ", " << path[3] << "]\n";
+		path[4] = NULL;
 	}
 	else
 	{
-		path[2] = mime.c_str(); // target
+		path[2] = filename.c_str(); // target
 		std::cout << "ARGV: [" << path[2] << "]\n";
 		path[3] = NULL;
 	}
-	path[4] = NULL;
-	std::cout << request.getMethod() << "[" << mime << " : contentType]\n";
+	std::cout << request.getMethod() << "[" << filename << " : contentType]\n";
 	ret = fork();
 	if (ret == 0)
 	{
@@ -84,55 +88,84 @@ void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response)
 	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(readfd[0], response)); // EVFILT_READ, EVFILT_WRITE
 }
 
+std::pair<std::string, std::string>	Controller::getFileName(HttpRequest &request)
+{
+	std::string		filename = "";
+	std::string		directory = "";
+	std::string		fullpath = request.getPath();
+	struct stat		buf;
+	struct dirent	*entry;
+	size_t			s, e;
+
+	stat(fullpath.c_str(), &buf);
+	if (S_ISDIR(buf.st_mode))
+	{
+		if (request.getHeader("CONTENT-DISPOSITION") != "")
+		{
+			filename = request.getHeader("CONTENT-DISPOSITION").substr(request.getHeader("CONTENT-DISPOSITION").find("filename="));
+			s = filename.find('\"');
+			e = filename.find('\"', s + 1);
+			filename = filename.substr(s + 1, e - s - 1);
+		}
+		else
+		{
+			DIR		*dir;
+			size_t	count;
+			std::stringstream ss;
+
+			count = 0;
+			dir = opendir(fullpath.c_str());
+			while ((entry = readdir(dir)) != NULL)
+				count++;
+			ss << count;
+			filename = ss.str();
+		}
+		if (filename.find(".") == std::string::npos)
+			filename = filename + "." + request.getHeader("content-Type").substr(request.getHeader("content-Type").find("/") + 1);
+		std::cout << "doPost file_name: ["<< filename << "]\n";
+		directory = fullpath;
+	}
+	else
+	{
+		int	i;
+
+		for (i = fullpath.length() - 1; i >= 0; i--)
+		{
+			if (fullpath[i] == '/')
+				break ;
+		}
+		directory = fullpath.substr(0, i);
+		filename = fullpath.substr(i + 1);
+	}
+	return (std::pair<std::string, std::string>(directory, filename));
+}
+
 // parameter
 void    Controller::doGet(HttpRequest &request, HttpResponse &response)
 {
 	std::string	cgiFile;
-	// cgiFile = "cgi-bin/DoGet.py";
+	std::string filename;
+	std::pair<std::string, std::string>	path;
+
 	cgiFile = response.getServerConfiguration()->getGetCgiPath();
-	classifyEvent(request, response, cgiFile.c_str(), "");
+	path = getFileName(request);
+	request.setPath(path.first);
+	filename = path.second;
+	classifyEvent(request, response, cgiFile.c_str(), filename);
 }
 
 // file post
 void	Controller::doPost(HttpRequest &request, HttpResponse &response)
 {
-	std::string	cgiFile;
-	std::string	filename = "";
-	std::string	disposition;
-	std::string	contentType;
-	size_t		s, e;
+	std::string		cgiFile;
+	std::string 	filename;
+	std::pair<std::string, std::string>	path;
 
-	std::cout << "Controller::doPost\n";
-	// cgiFile = "cgi-bin/DoUpload.py";
-	cgiFile = response.getServerConfiguration()->getPostCgiPath();
-	std::cout << "[data.length: " << request.getBody().length() << ", content-length" << request.getHeader("CONTENT-LENGTH") << "]\n";
-	disposition = request.getHeader("CONTENT-DISPOSITION");
-	if (disposition != "")
-	{
-		filename = disposition.substr(disposition.find("filename="));
-		s = filename.find('\"');
-		e = filename.find('\"', s + 1);
-		filename = filename.substr(s + 1, e - s - 1);
-	}
-	if (filename == "")
-	{
-		DIR				*dir;
-		struct dirent	*entry;
-		int				count;
-		std::stringstream 	ss;
-
-		count = 0;
-		dir = opendir(response.getServerConfiguration()->getUploadPath().c_str());
-		while ((entry = readdir(dir)) != NULL)
-			count++;
-		ss << (count - 2);
-		filename = ss.str();
-		closedir(dir);
-	}
-	contentType = request.getHeader("content-Type");
-	if (filename.find(".") == std::string::npos)
-		filename = filename + "." + contentType.substr(contentType.find("/") + 1);
-	std::cout << "doPost file_name: ["<< filename << "]\n";
+	std::cout << request.getBody().length() << " = Controller::doPost\n";
+	cgiFile = response.getServerConfiguration()->getGetCgiPath();
+	path = getFileName(request);
+	request.setPath(path.first);
+	filename = path.second;
 	classifyEvent(request, response, cgiFile.c_str(), filename);
 }
 
@@ -141,11 +174,8 @@ void	Controller::doDelete(HttpRequest &request, HttpResponse &response)
 	std::string	target;
 	std::string	cgiFile;
 
-	// cgiFile = "cgi-bin/DoDelete.py";
 	cgiFile = response.getServerConfiguration()->getDeleteCgiPath();
 	target = request.getPath();
-	if (access(target.c_str(), F_OK) == -1) // 존재하지 않는다.
-		throw "404";
 	classifyEvent(request, response, cgiFile.c_str(), target);
 }
 

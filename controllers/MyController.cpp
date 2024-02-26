@@ -12,29 +12,30 @@ MyController::MyController(int masking, std::string mLocation) : Controller(mask
 MyController::~MyController()
 {}
 
-std::string	MyController::findDirectory(std::string fullpath, std::string page)
+std::string	MyController::findFullPath(std::string fullpath, std::string page)
 {
 	DIR             *dir;
 	struct dirent	*entry;
 	size_t          idx;
 	std::string     d_name;
 	struct stat 	buf;
+	int				i;
 
 	if (fullpath[fullpath.length() - 1] == '/')
 		fullpath = fullpath.substr(0, fullpath.length() - 1);
-	int	i;
 	for (i = fullpath.length() - 1; i >= 0; i--)
 	{
 		if (fullpath[i] == '/')
 			break ;
 	}
-	std::string		directory = fullpath.substr(0, i);
-	std::string		file = fullpath.substr(i + 1);
-	std::cout << "MyController::findDirectory: ["<< directory << "], [" << file  << "]\n";
+	std::string		directory = (i < 0) ? fullpath : fullpath.substr(0, i);
+	std::string		file = (i < 0) ? "" : fullpath.substr(i + 1);
+
+	std::cout << "MyController::findFullPath: ["<< directory << "], [" << file  << "]\n";
 	dir = opendir(directory.c_str());
-	if (dir == NULL)
+	if (dir == NULL || file == "")
 	{
-		std::cout << "Error opening directory\n";
+		std::cout << "Error opening directory OR Only Directory\n";
 		throw "404";
 	}
 	// file에 확장자 없을 경우: 가장 처음으로 만나는 동일한 이름의 파일에 대응된다.
@@ -56,28 +57,69 @@ std::string	MyController::findDirectory(std::string fullpath, std::string page)
 	return (directory + "/" + d_name);
 }
 
+std::string	MyController::getLocationIndex(ServerConfiguration *serverConfig, std::string path)
+{
+	std::vector<std::string>	vec;
+	
+	vec = serverConfig->getLocation(path)->getIndex();
+	if (vec.size() == 0)
+		return ("");
+	return (vec[0]);
+}
+
+// request.path를 수정해야 한다. 폴더/파일, 폴더
+// request.setPath(목적지) -> 폴더
+// 파일이 없다면 파일, 파일이 있다면 해당 파일명
 void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
 {
 	ServerConfiguration *serverConfig = response.getServerConfiguration();
-	// CGI 파일 경로 설정을 따로 해야 할 것으로 보임.. 아마도요?
-	// request.setPath("CGI PATH");
-	// std::cout << cgiPath << " = cgiPath\n";
+	std::string 	index = getLocationIndex(serverConfig, request.getPath());
+	std::string		root = serverConfig->getLocation(request.getPath())->getRoot();
+	std::string		mainChain;
+	std::string		fullpath;
+	struct stat 	buf;
+	std::string		changedPath;
+
+	// index가 없으면? -> folder에 새로운 파일 생성 및 데이터 작성
+	// index가 있으면? -> folder/index에 데이터 작성
+	mainChain = serverConfig->findLocationUri(request.getPath());
+	fullpath = "";
+	try
+	{
+		// /root/index_file
+		if (request.getPath() == serverConfig->findLocationUri(request.getPath()))
+		{
+			fullpath = std::string(root + "/" + index);
+			changedPath = findFullPath(fullpath, index);
+		}
+		else
+		{
+			std::string	mainChain;
+
+			mainChain = serverConfig->findLocationUri(request.getPath());
+			fullpath = std::string(root + "/" + request.getPath().substr(mainChain.length() + 1));
+			changedPath = findFullPath(fullpath, index);
+		}
+	}
+	catch(const char *e)
+	{
+		std::cout << "NO FILE: " << e << "\n";
+		stat(fullpath.c_str(), &buf);
+		if (! S_ISDIR(buf.st_mode))
+			throw "404";
+		changedPath = fullpath;
+	}
+	request.setPath(changedPath);
+	std::cout << fullpath << " = fullpath, " << changedPath << " = changedPath\n";
 	if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded") // get, post
 		doGet(request, response);
 	else if (request.getMethod() == "POST") // file upload
 		doPost(request, response);
 	else if (request.getMethod() == "DELETE")
 	{
-		long    idx;
-		std::string removePath;
-
-		for (idx = request.getPath().length() - 1; idx >= 0; idx--)
-		{
-			if (request.getPath()[idx] == '/')
-				break ;
-		}
-		removePath = findDirectory(std::string(serverConfig->getUploadPath() + "/" + request.getPath().substr(idx + 1)), "");
-		request.setPath(removePath);
+		stat(changedPath.c_str(), &buf);
+		if (S_ISDIR(buf.st_mode))
+			throw "404";
 		doDelete(request, response);
 	}
 }
@@ -101,14 +143,12 @@ void	MyController::runService(HttpRequest &request, HttpResponse &response)
 	}
 	else
 	{
-		std::string index = location->getIndex()[0];
+		std::string index = getLocationIndex(serverConfig, request.getPath());
 		std::string	root = location->getRoot();
-		size_t		extension_idx = root.find("/");
-		if (extension_idx != std::string::npos)
-			root = root.substr(0, extension_idx);
+
 		if (request.getPath() == serverConfig->findLocationUri(request.getPath())) // /root/index_file
 		{
-			staticPath = findDirectory(std::string(root + "/" + location->getIndex()[0]), index);
+			staticPath = findFullPath(std::string(root + "/" + index), index);
 			std::cout << "staticPath: " << staticPath << "\n";
 		}
 		else // /root/file_name
@@ -117,7 +157,7 @@ void	MyController::runService(HttpRequest &request, HttpResponse &response)
 
 			mainChain = serverConfig->findLocationUri(request.getPath());
 			std::cout << request.getPath().substr(mainChain.length() + 1) << " = pendingElements\n";
-			staticPath = findDirectory(std::string(root + "/" + request.getPath().substr(mainChain.length() + 1)), index);
+			staticPath = findFullPath(std::string(root + "/" + request.getPath().substr(mainChain.length() + 1)), index);
 		}
 		std::cout << staticPath << " = staticPath\n";
 		request.setPath(staticPath);

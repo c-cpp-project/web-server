@@ -15,7 +15,8 @@ public:
 	void	service(HttpRequest &request, HttpResponse &response);
 	void	runCgiScript(HttpRequest &request, HttpResponse &response);
 	void	runService(HttpRequest &request, HttpResponse &response);
-	std::string	findDirectory(std::string fullpath, std::string defaultpage);
+	std::string	findFullPath(std::string fullpath, std::string defaultpage);
+	std::string	getLocationIndex(ServerConfiguration *serverConfig, std::string path);
 	MyController();
 	MyController(int masking);
 	MyController(int masking, std::string mLocation);

@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <cstdlib>
 #include <vector>
+#include <sys/stat.h>
 
 class   HttpRequest;
 class   HttpResponse;
@@ -34,6 +35,7 @@ public:
 	void	doDelete(HttpRequest &request, HttpResponse &response);
 	void	response200(std::string body, HttpResponse &response);
 	bool	isAcceptableMethod(std::string method);
+	std::pair<std::string, std::string>	getFileName(HttpRequest &request);
 	virtual ~Controller();
 	Controller();
 	Controller(int masking);

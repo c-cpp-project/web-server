@@ -12,11 +12,16 @@ int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   response = &httpHandler->getHttpResponse();
   if (response == 0)  // flush -> delete.
     return 0;
-  body = response->readFile(readFd);
-  if (body == "")
+  try
+  {
+    body = response->readFile(readFd);
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << e.what() << '\n';
     errorSaveEvent(httpHandler, event);
-  else
-    responseSaveEvent(body, httpHandler, event);
+  }
+  responseSaveEvent(body, httpHandler, event);
   delete httpHandler;
   return 0;
 }

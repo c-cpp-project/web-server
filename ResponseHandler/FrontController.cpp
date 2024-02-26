@@ -35,7 +35,7 @@ void    FrontController::run(HttpRequest tmp)
 		request->at(i).printAllHeader();
 
 		std::cout << "=============== [Request Body] ===============\n";
-		std::cout << request->at(i).getBody() << "\n";
+		// std::cout << request->at(i).getBody() << "\n";
 		std::cout << "=============== [Request Body Length] ===============\n";
 		std::cout << request->at(i).getBody().length() << "\n";
 		std::cout << "===============================================\n";

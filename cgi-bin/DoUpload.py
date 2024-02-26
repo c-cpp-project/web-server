@@ -31,22 +31,13 @@ def fileUpload(targetDir, filename):
 
 file_size = fileUpload(targetDir, filename)
 
-if (file_size >= 0):
-    print ("<html>")
-    print ('<head>')
-    print ("<link rel='icon' href='data:,'>")
-    print ("<title>Hello - UPLOAD CGI Program</title>")
-    print ('</head>')
-    print ('<body>')
-
-    print(file_size)
-    print("<h2> Result Success </h2>")
-    print("<h2> Result Success </h2>")
-    print("<h2> Result Success </h2>")
-    print("<h2> Result Success </h2>")
-    print("<h2> Result Success </h2>")
-
-    print ('</body>')
-    print ('</html>')
-else:
-    print("500")
+if (file_size > 0):
+    try:
+        with open(filename, 'r') as file:
+            while True:
+                chunk = file.read(1024)
+                if not chunk:
+                    break
+                print(chunk, end='')
+    except IOError as e:
+        print(e)

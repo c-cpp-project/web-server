@@ -154,11 +154,13 @@ std::string	HttpResponse::readFile(int fd)
 	}
 	std::cout << "[" << size << ", " << ret << "] = readFile : " << body.length() <<"\n";
 	close(fd);
-	if (ret < 0)
+	if (ret < 0 && size <= 0)
 	{
 		std::cout << "READ OPERATION FAIL\n";
-		return ("");
+		throw	std::runtime_error("FAIL");
 	}
+	else if (ret == 0 && size == 0)
+		return ("");
 	return (body);
 }
 

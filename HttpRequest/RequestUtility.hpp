@@ -20,6 +20,7 @@ class RequestUtility
 		static long strToPositiveLong(const std::string& input);
 		static std::string positiveLongToStr(long input);
 		static long hexToDecimal(const std::string &hex_string);
+		static int countDigits(long input);
 };
 
 #endif

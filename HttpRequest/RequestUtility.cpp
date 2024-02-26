@@ -117,3 +117,9 @@ long RequestUtility::hexToDecimal(const std::string &hex_string)
 	}
 	return (result);
 }
+
+int RequestUtility::countDigits(long input)
+{
+	std::string str = positiveLongToStr(input);
+	return (str.length());
+}

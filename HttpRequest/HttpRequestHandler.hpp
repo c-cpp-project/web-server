@@ -5,32 +5,32 @@
 #include "../server/Event.hpp"
 
 class Event;
-class HttpRequestHandler {
- private:
-  int socket_fd;
-  ServerConfiguration *server_config;
+class HttpRequestHandler
+{
+	private:
+		int socket_fd;
+		ServerConfiguration *server_config;
 
-  static std::map<int, std::string> buffers;  // 요청을 읽어오는 소켓, 버퍼
-  static std::map<int, HttpRequest *>
-      chunkeds;  // chunked 수신 중인 소켓, request 객체
+		static std::map<int, std::string> buffers;		// 요청을 읽어오는 소켓, 버퍼
+		static std::map<int, HttpRequest *> chunkeds;	// chunked 수신 중인 소켓, request 객체
 
-  static void removeBuffer(int socket_fd);
+		void readRequest();
+		static void removeBuffer(int socket_fd);
 
- public:
-  HttpRequestHandler(int socket_fd, ServerConfiguration *server_config);
+	public:
+		HttpRequestHandler(int socket_fd, ServerConfiguration *server_config);
 
-  int handle(Event *event);
-  int RequestAndResponse(Event *event);
-  int ChunkedRequestHandling(HttpRequest *request);
-  void errorHandling(const char *erorr_code, ServerConfiguration *serverConfig, Event *event);
+		int handle(Event *event);
+		int RequestAndResponse(Event *event);
+		int ChunkedRequestHandling(HttpRequest *request);
+		void errorHandling(const char *erorr_code, ServerConfiguration *serverConfig, Event *event);
 
-  static void readRequest(int socket_fd, long size);
-  static HttpRequest *removeChunkedRequest(int socket_fd);
-  static void removeAndDeleteChunkedRequest(int socket_fd);
-  static HttpRequest *getChunkedRequest(int socket_fd);
-  static const std::string &getBuffer(int socket_fd);
-  static void addChunkedRequest(int socket_fd, HttpRequest *request);
-  static void removePartOfBuffer(int socket_fd, int start, int count);
+		static HttpRequest *removeChunkedRequest(int socket_fd);
+		static void removeAndDeleteChunkedRequest(int socket_fd);
+		static HttpRequest *getChunkedRequest(int socket_fd);
+		static const std::string &getBuffer(int socket_fd);
+		static void addChunkedRequest(int socket_fd, HttpRequest *request);
+		static void removePartOfBuffer(int socket_fd, int start, int count);
 };
-#endif
 
+#endif

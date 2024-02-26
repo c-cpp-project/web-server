@@ -14,7 +14,7 @@ HttpRequest *HttpRequestFactory::create(int socket_fd, ServerConfiguration *serv
 {
 	HttpRequest *request = NULL;
 	try
-	{
+	{ 
 		request = HttpRequestHandler::getChunkedRequest(socket_fd);
 		if (request != NULL) // chunked 전송 요청인 경우
 		{

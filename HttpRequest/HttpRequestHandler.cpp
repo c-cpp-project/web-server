@@ -45,6 +45,7 @@ int HttpRequestHandler::RequestAndResponse(Event *event)
 		// Response Part
 		int kqueue_fd = 0;
 		FrontController front_controller(socket_fd, server_config, event);
+		std::cout << "front_controller.run(*request);\n";
 		front_controller.run(*request);
 		delete request;
 	} 

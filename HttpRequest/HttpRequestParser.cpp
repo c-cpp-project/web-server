@@ -102,8 +102,8 @@ void HttpRequestParser::parseRequestBody(HttpRequest *request, ServerConfigurati
 
 	// Content-Type이 없는 경우 -> 쿼리스트링으로 인식하기
 	// TODO : Content-Type이 없는 경우, 강제로 쿼리스트링으로 인식해도 될까?
-	if (request->getHeader("Content-Type") == "")
-		request->setHeader("Content-Type", "application/x-www-form-urlencoded");
+	// if (request->getHeader("Content-Type") == "")
+	// 	request->setHeader("Content-Type", "application/x-www-form-urlencoded");
 	
 	// 본문 설정하기
 	request->setRequestBody(buffer.substr(start, content_length));

@@ -91,3 +91,8 @@ std::string		HttpHandler::getData(void)
 {
     return (this->data);
 }
+
+void    HttpHandler::setData(std::string data)
+{
+    this->data = data;
+}

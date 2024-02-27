@@ -32,6 +32,7 @@ public:
 	HttpResponse	&getHttpResponse(void);
 	ServerConfiguration*	getServerConfiguration(void);
 	std::string		getData(void);
+	void    		setData(std::string data);
 };
 // HttpResponse 대입 연산자를 만들어야 한다.
 #endif

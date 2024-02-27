@@ -15,7 +15,7 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 
 	std::cout << serverConfig << " = SendEventBean::runBeanEvent\n";
 	ret = send(socketfd, dump.c_str(), dump.length(), 0);
-	std::cout << dump << " = dump\n";
+	// std::cout << dump << " = dump\n";
 	if (ret <= 0)
 	{
 		event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);

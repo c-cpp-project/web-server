@@ -19,6 +19,7 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 	std::cout << socketfd << ", " << dump.length() << ": size => " << BUF_SIZE << "\n";
 	try
 	{
+		buf_size = BUF_SIZE;
 		if (dump.length() < BUF_SIZE)
 			buf_size = dump.length();
 		ret = send(socketfd, dump.c_str(), buf_size, 0);

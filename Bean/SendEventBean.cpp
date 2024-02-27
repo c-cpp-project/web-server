@@ -3,13 +3,14 @@
 SendEventBean::SendEventBean() {}
 SendEventBean::~SendEventBean() {}
 
-#define BUF_SIZE 1024
+#define BUF_SIZE 1400
 int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 	ServerConfiguration 	*serverConfig;
 	std::string				dump;
 	int						socketfd;
 	int						ret;
 	int						buf_size;
+	char					buffer[1400];
 
 	serverConfig = httpHandler->getServerConfiguration();
 	socketfd = httpHandler->getFd();
@@ -17,29 +18,22 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 
 	std::cout << serverConfig << " = SendEventBean::runBeanEvent\n";
 	std::cout << socketfd << ", " << dump.length() << ": size => " << BUF_SIZE << "\n";
-	try
-	{
-		buf_size = BUF_SIZE;
-		if (dump.length() < BUF_SIZE)
-			buf_size = dump.length();
-		ret = send(socketfd, dump.c_str(), buf_size, 0);
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-		std::cout << "FUCK\n";
-	}
+	buf_size = BUF_SIZE;
+	if (dump.length() < BUF_SIZE)
+		buf_size = dump.length();
+	strncpy(buffer, dump.substr(0, buf_size).c_str(), buf_size);
+	std::cout << buf_size << "\n";
+	ret = send(socketfd, buffer, buf_size, 0);
 	std::cout << ret << " = ret\n";
-	if (ret <= 0)
+	if (ret == 0)
 	{
 		event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);
 		event->saveEvent(socketfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0,
 										new HttpHandler(socketfd, serverConfig));
 		delete httpHandler;
 		std::cout << "================== SEND DONE ============================\n";
-		return (0);
 	}
-	else
+	else if (ret > 0)
 		httpHandler->setData(dump.substr(ret));
 	return (ret);
 }

@@ -57,7 +57,6 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 			writeEventRegister(pipefd1, pipefd2, response, request.getBody());
 		else
 			readEventRegsiter(pipefd2, response);
-		// wait(NULL);
 	}
 }
 
@@ -93,6 +92,7 @@ std::pair<std::string, std::string>	Controller::getFileName(HttpRequest &request
 	std::string		filename = "";
 	std::string		directory = "";
 	std::string		fullpath = request.getPath();
+	std::string		type = "";
 	struct stat		buf;
 	struct dirent	*entry;
 	size_t			s, e;
@@ -121,7 +121,12 @@ std::pair<std::string, std::string>	Controller::getFileName(HttpRequest &request
 			filename = ss.str();
 		}
 		if (filename.find(".") == std::string::npos)
-			filename = filename + "." + request.getHeader("content-Type").substr(request.getHeader("content-Type").find("/") + 1);
+		{
+			type = request.getHeader("content-Type").substr(request.getHeader("content-Type").find("/") + 1);
+			if (type == "")
+				type = "txt";
+			filename = filename + "." + type;
+		}
 		std::cout << "doPost file_name: ["<< filename << "]\n";
 		directory = fullpath;
 	}
@@ -162,7 +167,7 @@ void	Controller::doPost(HttpRequest &request, HttpResponse &response)
 	std::pair<std::string, std::string>	path;
 
 	std::cout << request.getBody().length() << " = Controller::doPost\n";
-	cgiFile = response.getServerConfiguration()->getGetCgiPath();
+	cgiFile = response.getServerConfiguration()->getPostCgiPath();
 	path = getFileName(request);
 	request.setPath(path.first);
 	filename = path.second;

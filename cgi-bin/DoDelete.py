@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
 import sys
-import os
+import os, shutil
 
 def removeFile(file_path):
     try:
-        os.remove(file_path)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        if os.path.isdir(folder_path):
+            shutil.rmtree(folder_path)
         return True
     except OSError as e:
         return False

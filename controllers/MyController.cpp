@@ -75,53 +75,36 @@ void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
 	ServerConfiguration *serverConfig = response.getServerConfiguration();
 	std::string 	index = getLocationIndex(serverConfig, request.getPath());
 	std::string		root = serverConfig->getLocation(request.getPath())->getRoot();
-	std::string		mainChain;
 	std::string		fullpath;
-	struct stat 	buf;
-	std::string		changedPath;
+	std::string		targetPath;
+	std::string		mainChain;
 
-	// index가 없으면? -> folder에 새로운 파일 생성 및 데이터 작성
-	// index가 있으면? -> folder/index에 데이터 작성
-	mainChain = serverConfig->findLocationUri(request.getPath());
-	fullpath = "";
 	try
 	{
-		// /root/index_file
-		if (request.getPath() == serverConfig->findLocationUri(request.getPath()))
-		{
-			fullpath = std::string(root + "/" + index);
-			changedPath = findFullPath(fullpath, index);
-		}
+		mainChain = serverConfig->findLocationUri(request.getPath());
+		if (request.getPath() == mainChain)
+			fullpath = root;
 		else
-		{
-			std::string	mainChain;
-
-			mainChain = serverConfig->findLocationUri(request.getPath());
 			fullpath = std::string(root + "/" + request.getPath().substr(mainChain.length() + 1));
-			changedPath = findFullPath(fullpath, index);
-		}
+		targetPath = findFullPath(fullpath, "");
 	}
 	catch(const char *e)
 	{
 		std::cout << "NO FILE: " << e << "\n";
-		stat(fullpath.c_str(), &buf);
-		if (! S_ISDIR(buf.st_mode))
+		if (access(fullpath.c_str(), F_OK) != 0)
 			throw "404";
-		changedPath = fullpath;
+		targetPath = fullpath;
 	}
-	request.setPath(changedPath);
-	std::cout << fullpath << " = fullpath, " << changedPath << " = changedPath\n";
+	// targetPath는 폴더 혹은 파일이다.
+	if (targetPath[targetPath.length() - 1] == '/')
+		targetPath = targetPath.substr(0, targetPath.length() - 1);
+	request.setPath(targetPath);
 	if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded") // get, post
 		doGet(request, response);
-	else if (request.getMethod() == "POST") // file upload
+	else if (request.getMethod() == "POST")
 		doPost(request, response);
 	else if (request.getMethod() == "DELETE")
-	{
-		stat(changedPath.c_str(), &buf);
-		if (S_ISDIR(buf.st_mode))
-			throw "404";
 		doDelete(request, response);
-	}
 }
 
 void	MyController::runService(HttpRequest &request, HttpResponse &response)
@@ -146,6 +129,8 @@ void	MyController::runService(HttpRequest &request, HttpResponse &response)
 		std::string index = getLocationIndex(serverConfig, request.getPath());
 		std::string	root = location->getRoot();
 
+		if (root[root.length() - 1] == '/')
+			root = root.substr(0, root.length() - 1);
 		if (request.getPath() == serverConfig->findLocationUri(request.getPath())) // /root/index_file
 		{
 			staticPath = findFullPath(std::string(root + "/" + index), index);

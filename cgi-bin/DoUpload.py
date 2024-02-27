@@ -32,12 +32,15 @@ def fileUpload(targetDir, filename):
 file_size = fileUpload(targetDir, filename)
 
 if (file_size > 0):
+    data = b''
+    path = targetDir + "/" + filename
     try:
-        with open(filename, 'r') as file:
+        with open(path, 'r') as file:
             while True:
-                chunk = file.read(1024)
+                chunk = file.buffer.read(1024)
                 if not chunk:
                     break
-                print(chunk, end='')
+                data += chunk    
+        print(data, end='')
     except IOError as e:
         print(e)

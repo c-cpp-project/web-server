@@ -96,7 +96,7 @@ void	HttpResponse::listDirectory(std::string directory)
 	putHeader("Content-Type", "text/html");
 	putHeader("Content-Length", ss.str());
 	sendBody(body);
-	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), *this)); // SEND
+	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), getByteDump(), serverConfig)); // SEND
 }
 
 void	HttpResponse::redirect(std::string redirectUri)
@@ -107,7 +107,7 @@ void	HttpResponse::redirect(std::string redirectUri)
 	putHeader("Content-Length", "0");
 	sendBody("");
 	// BeanFactory::registerEvent("SEND", new HttpHandler(getSockfd(), *this), event);H
-	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), *this)); // SEND
+	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), getByteDump(), serverConfig)); // SEND
 }
 
 void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한다.

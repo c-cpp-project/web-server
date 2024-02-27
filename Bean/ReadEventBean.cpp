@@ -55,10 +55,8 @@ void ReadEventBean::responseSaveEvent(std::string body,
   // response.putHeader("Content-Type", "image/png");
   response.sendBody(body);  // this->buffer에 string으로 모두 담긴다.
   std::cout << "ReadEventBean::response -> saveEvent\n";
-  std::cout << bodyLength << " = \"Content-Length\"\n";
+  std::cout << bodyLength << " = Content-Length\n";
 
   data = response.getByteDump();
-  event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0,
-                   new HttpHandler(response.getSockfd(),
-                                   data, serverConfig));  // EVFILT_READ, EVFILT_WRITE
+  event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(response.getSockfd(), data, serverConfig));  // EVFILT_READ, EVFILT_WRITE
 }

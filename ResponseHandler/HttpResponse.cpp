@@ -150,7 +150,8 @@ std::string	HttpResponse::readFile(int fd)
 	while ((ret = read(fd, &binaryData[0], K)) > 0)
 	{
 		size += ret;
-		body += std::string(&binaryData[0], ret);
+		binaryData[ret] = '\0';
+		body += std::string(&binaryData[0]);
 	}
 	std::cout << "[" << size << ", " << ret << "] = readFile : " << body.length() <<"\n";
 	close(fd);
@@ -162,31 +163,6 @@ std::string	HttpResponse::readFile(int fd)
 	else if (ret == 0 && size == 0)
 		return ("");
 	return (body);
-}
-
-void	HttpResponse::tokenizerFlush(std::string body)
-{
-	std::stringstream 	ss;
-	std::string			length;
-
-	flush();
-	ss << std::hex << this->max_size;
-    length = ss.str();
-	while (body.size() > this->max_size)
-	{
-		this->buffer.push_back(length + "\r\n");
-		this->buffer.push_back(body.substr(0, this->max_size) + "\r\n");
-		flush();
-		body = body.substr(this->max_size);
-	}
-	ss.str("");
-	ss << std::hex << body.size();
-	length = ss.str();
-	this->buffer.push_back(length + "\r\n");
-	this->buffer.push_back(body + "\r\n");
-	flush();
-	this->buffer.push_back("0\r\n\r\n");
-	flush();
 }
 
 void    HttpResponse::sendBody(std::string body) // api 요청에 대한 응답
@@ -229,26 +205,19 @@ void	HttpResponse::HttpResponseBody(std::string body)
 	this->buffer.push_back(body);
 }
 
-int	HttpResponse::flush() // 마지막에 호출
+std::string	HttpResponse::getByteDump(void)
 {
 	unsigned int	i;
-	int				size;
 	std::string		httpMsg;
-	long			ret;
 
 	httpMsg = "";
 	i = 0;
-	size = 0;
 	while (i < this->buffer.size())
 	{
 		httpMsg += this->buffer[i];
-		size += this->buffer[i].length();
 		i++;
 	}
-	ret = send(this->sockfd, httpMsg.c_str(), httpMsg.length(), 0);
-	// std::cout << "flush(): [" << httpMsg << "]\n";
-	this->buffer.clear();
-	return (ret);
+	return (httpMsg);
 }
 
 void	HttpResponse::setStatusCode(std::string code)

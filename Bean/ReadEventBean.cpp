@@ -42,6 +42,7 @@ void ReadEventBean::responseSaveEvent(std::string body,
   ServerConfiguration *serverConfig;
   HttpResponse &response = httpHandler->getHttpResponse();
   HttpRequest &request = httpHandler->getHttpRequest();
+  std::string data;
 
   serverConfig = response.getServerConfiguration();
   response.putHeader("Server", serverConfig->getServerName());
@@ -56,7 +57,8 @@ void ReadEventBean::responseSaveEvent(std::string body,
   std::cout << "ReadEventBean::response -> saveEvent\n";
   std::cout << bodyLength << " = \"Content-Length\"\n";
 
+  data = response.getByteDump();
   event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0,
                    new HttpHandler(response.getSockfd(),
-                                   response));  // EVFILT_READ, EVFILT_WRITE
+                                   data, serverConfig));  // EVFILT_READ, EVFILT_WRITE
 }

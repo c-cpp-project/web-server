@@ -5,18 +5,16 @@ import sys
 
 targetDir = sys.argv[1]
 filename = sys.argv[2]
+length = int(sys.argv[3])
 file_size = 0
+chunk_size = 1024 * 1024
 
-def fileUpload(targetDir, filename):
+def fileUpload(targetDir, filename, length):
     data = b''
-    while True:
-        chunk = sys.stdin.buffer.read(1028)
-        if not chunk:
-            break
-        data += chunk
-    # data = data.replace(b'\r\n', b'')
-    # print(len(data), len(data[:-2]))
-    data = data[:-2]
+    while len(data) != length:
+        chunk = sys.stdin.buffer.read(chunk_size)
+        if chunk:
+            data += chunk
     try:
         if not os.path.exists(targetDir):
             os.makedirs(targetDir)
@@ -29,18 +27,18 @@ def fileUpload(targetDir, filename):
         return (-1)
     return (file_size)
 
-file_size = fileUpload(targetDir, filename)
+file_size = fileUpload(targetDir, filename, length)
 
 if (file_size > 0):
     data = b''
     path = targetDir + "/" + filename
     try:
-        with open(path, 'r') as file:
+        with open(path, 'rb') as file:
             while True:
-                chunk = file.buffer.read(1024)
+                chunk = file.read(chunk_size)
                 if not chunk:
                     break
-                data += chunk    
-        print(data, end='')
+                data += chunk
+        sys.stdout.write(data.decode('utf-8'))
     except IOError as e:
         print(e)

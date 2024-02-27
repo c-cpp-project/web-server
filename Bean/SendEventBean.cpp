@@ -4,22 +4,27 @@ SendEventBean::SendEventBean() {}
 SendEventBean::~SendEventBean() {}
 
 int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
-  ServerConfiguration *serverConfig;
-  HttpResponse *response;
+	ServerConfiguration 	*serverConfig;
+	std::string				dump;
+	int						socketfd;
+	int						ret;
 
-  response = &httpHandler->getHttpResponse();
-  serverConfig = response->getServerConfiguration();
-  if (response == 0)  // flush -> delete
-    return 0;
-  std::cout << serverConfig << " = SendEventBean::runBeanEvent\n";
-  if (response->flush() >= 0)
-  {
-    event->saveEvent(response->getSockfd(), EVFILT_WRITE, EV_DISABLE, 0, 0, 0);
-    event->saveEvent(response->getSockfd(), EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0,
-                    new HttpHandler(response->getSockfd(), serverConfig));
-    delete httpHandler;
-    std::cout << "================== SEND DONE ============================\n";
-    return (0);
-  } // 실패할 경우는 재시도를 하기 위하여 아무것도 변경하지 않는다.
-  return (-1);
+	serverConfig = httpHandler->getServerConfiguration();
+	socketfd = httpHandler->getFd();
+	dump = httpHandler->getData();
+
+	std::cout << serverConfig << " = SendEventBean::runBeanEvent\n";
+	ret = send(socketfd, dump.c_str(), dump.length(), 0);
+	if (ret <= 0)
+	{
+		event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);
+		event->saveEvent(socketfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0,
+										new HttpHandler(socketfd, serverConfig));
+		delete httpHandler;
+		std::cout << "================== SEND DONE ============================\n";
+		return (0);
+	}
+	else
+		httpHandler->setData(dump.substr(ret));
+	return (ret);
 }

@@ -21,15 +21,17 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 		path[3] = queryString.c_str();
 		path[4] = filename.c_str();
 		std::cout << "ARGV: [" << path[2] << ", " << path[3] << ", " << path[4] << "]\n";
-		path[5] = NULL;
 	}
 	else if (request.getMethod() == "POST") // post
 	{
+		std::stringstream ss;
+
+		ss << request.getBody().length();
 		path[2] = uploadPath.c_str();
 		path[3] = filename.c_str(); // filename
+		path[4] = ss.str().c_str();
 		pipe(pipefd1);
 		std::cout << "ARGV: [" << path[2] << ", " << path[3] << "]\n";
-		path[4] = NULL;
 	}
 	else
 	{
@@ -37,6 +39,7 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 		std::cout << "ARGV: [" << path[2] << "]\n";
 		path[3] = NULL;
 	}
+	path[5] = NULL;
 	std::cout << request.getMethod() << "[" << filename << " : contentType]\n";
 	ret = fork();
 	if (ret == 0)

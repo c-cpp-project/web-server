@@ -66,7 +66,6 @@ void Handler::errorHandling(const char* erorr_code) {
   HttpResponse response(fd);
   response.setStatusCode(erorr_code);
   response.forward(empty);
-  response.flush();
 }
 
 // chunked 상태 관리는 이벤트 처리를 다르게 하는 방식을 처리해야 할 것 같습니다.

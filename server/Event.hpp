@@ -6,7 +6,7 @@
 #include <sstream>
 #include <vector>
 #define EVENTLIST_SIZE 1000
-#define MAX_CPU_TIME_USED 60
+#define MAX_CPU_TIME_USED 10000
 
 class Event {
  private:

@@ -120,14 +120,15 @@ void WebServer::handleEvent() {
 
 void WebServer::processEvent(struct kevent& currEvent) {
   if (currEvent.flags & EV_ERROR) {
+    std::cout << "[INFO] " << currEvent.flags << std::endl;
     processErrorEvent(currEvent);
-    struct sockaddr_in server;
-    memset(&server, 0, sizeof(server));
-    server.sin_family = AF_INET;
-    server.sin_port = htons(80);
-    int ret =
-        connect(currEvent.ident, (struct sockaddr*)&server, sizeof(server));
-    std::cout << "[INFO] connect failure bool " << (ret < 0) << std::endl;
+    // struct sockaddr_in server;
+    // memset(&server, 0, sizeof(server));
+    // server.sin_family = AF_INET;
+    // server.sin_port = htons(80);
+    // int ret =
+    //     connect(currEvent.ident, (struct sockaddr*)&server, sizeof(server));
+    // std::cout << "[INFO] connect failure bool " << (ret < 0) << std::endl;
     return;
   }
   if (currEvent.udata == NULL) {
@@ -194,7 +195,10 @@ void WebServer::processWriteEvent(struct kevent& currEvent) {
   if (isClient(currEvent.ident)) {
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     // ServerConfiguration* serverConfig = handler->getServerConfiguration();
-    BeanFactory::runBeanByName("SEND", handler, &eventHandler);
+    int ret = BeanFactory::runBeanByName("SEND", handler, &eventHandler);
+    if (ret == -1) {
+      addCandidatesForDisconnection(currEvent.ident);
+    }
   } else {
     // CGI
     std::cout << "WRITE currEvent " << currEvent << std::endl;

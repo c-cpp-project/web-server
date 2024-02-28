@@ -162,11 +162,11 @@ const std::string ServerConfiguration::findLocationUri(std::string uri) const {
   std::string uriPattern;
   std::map<std::string, Location*> locations = server->getLocations();
   std::map<std::string, Location*>::iterator location;
-  Location* targetLocation = NULL;
-  bool matchesPattern;
+  // Location* targetLocation = NULL;
+  bool matchesPattern = false;
   long slashIdx;
   std::string foundUri;
-  if (uri[uri.size() - 1] != '/') uri += "/";
+  if (!uri.empty() && uri[uri.size() - 1] != '/') uri += "/";
   uriPattern = uri;
   while (uriPattern != "/") {
     if (matchesPattern) break;
@@ -181,11 +181,12 @@ const std::string ServerConfiguration::findLocationUri(std::string uri) const {
       if (uriPattern == location->first) {
         foundUri = location->first;
         matchesPattern = true;
-        targetLocation = location->second;
+        // targetLocation = location->second;
         break;
       }
     }
   }
+  std::cout << "----------------check2-----------------" << std::endl;
   if (matchesPattern) {
     return foundUri;
   }

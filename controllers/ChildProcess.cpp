@@ -26,7 +26,7 @@ void ChildProcess::earseChildProcess(pid_t pid)
 		child.erase(iter->first);
 }
 
-void ChildProcess::waitChildProcess(void)
+int	ChildProcess::waitChildProcess(void)
 {
 	std::unordered_map<int, timeval>::iterator iter;
 	timeval	endTimeval, startTimeval;
@@ -62,4 +62,5 @@ void ChildProcess::waitChildProcess(void)
 				std::cout << "Child process" << child_pid << " exited with status [" << WEXITSTATUS(status) << "]\n";
 		}
 	}
+	return (0);
 }

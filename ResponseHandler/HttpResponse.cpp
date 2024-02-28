@@ -138,32 +138,32 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, request, *this));
 }
 
-std::string	HttpResponse::readFile(int fd)
-{
-	int			ret;
-	size_t		size;
-	char		binaryData[K + 1];
-	std::string	body;
+// std::string	HttpResponse::readFile(int fd)
+// {
+// 	int			ret;
+// 	size_t		size;
+// 	char		binaryData[K + 1];
+// 	std::string	body;
 
-	size = 0;
-	body = "";
-	while ((ret = read(fd, &binaryData[0], K)) > 0)
-	{
-		size += ret;
-		binaryData[ret] = '\0';
-		body += std::string(&binaryData[0]);
-	}
-	std::cout << "[" << size << ", " << ret << "] = readFile : " << body.length() <<"\n";
-	close(fd);
-	if (ret < 0 && size <= 0)
-	{
-		std::cout << "READ OPERATION FAIL\n";
-		throw	std::runtime_error("FAIL");
-	}
-	else if (ret == 0 && size == 0)
-		return ("");
-	return (body);
-}
+// 	size = 0;
+// 	body = "";
+// 	while ((ret = read(fd, &binaryData[0], K)) > 0)
+// 	{
+// 		size += ret;
+// 		binaryData[ret] = '\0';
+// 		body += std::string(&binaryData[0]);
+// 	}
+// 	std::cout << "[" << size << ", " << ret << "] = readFile : " << body.length() <<"\n";
+// 	close(fd);
+// 	if (ret < 0 && size <= 0)
+// 	{
+// 		std::cout << "READ OPERATION FAIL\n";
+// 		throw	std::runtime_error("FAIL");
+// 	}
+// 	else if (ret == 0 && size == 0)
+// 		return ("");
+// 	return (body);
+// }
 
 void    HttpResponse::sendBody(std::string body) // api 요청에 대한 응답
 {

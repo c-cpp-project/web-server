@@ -122,13 +122,6 @@ void WebServer::processEvent(struct kevent& currEvent) {
   if (currEvent.flags & EV_ERROR) {
     std::cout << "[INFO] " << currEvent.flags << std::endl;
     processErrorEvent(currEvent);
-    // struct sockaddr_in server;
-    // memset(&server, 0, sizeof(server));
-    // server.sin_family = AF_INET;
-    // server.sin_port = htons(80);
-    // int ret =
-    //     connect(currEvent.ident, (struct sockaddr*)&server, sizeof(server));
-    // std::cout << "[INFO] connect failure bool " << (ret < 0) << std::endl;
     return;
   }
   if (currEvent.udata == NULL) {
@@ -197,7 +190,10 @@ void WebServer::processWriteEvent(struct kevent& currEvent) {
     // ServerConfiguration* serverConfig = handler->getServerConfiguration();
     int ret = BeanFactory::runBeanByName("SEND", handler, &eventHandler);
     if (ret == -1) {
-      addCandidatesForDisconnection(currEvent.ident);
+      if (errno == EPIPE)
+        std::cout << "Client connection reset. Reconnecting...\n";
+      close(currEvent.ident);
+      handlerMap.erase(currEvent.ident);
     }
   } else {
     // CGI

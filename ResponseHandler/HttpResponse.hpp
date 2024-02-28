@@ -47,7 +47,7 @@ public:
 	void    putHeader(std::string key, std::string value);
 	void	removeHeader(std::string key);
 	void	HttpResponseBody(std::string body);
-	std::string	readFile(int fd);
+	// std::string	readFile(int fd);
 
 	void	listDirectory(std::string directory);
 	void	redirect(std::string redirectUri);

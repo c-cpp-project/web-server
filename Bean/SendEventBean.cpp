@@ -1,4 +1,5 @@
 #include "SendEventBean.hpp"
+#include<sys/socket.h>
 
 SendEventBean::SendEventBean() {}
 SendEventBean::~SendEventBean() {}

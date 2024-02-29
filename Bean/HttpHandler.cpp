@@ -8,6 +8,7 @@ HttpHandler::HttpHandler(int fd, ServerConfiguration *serverConfig)
     this->fd = fd;
     this->serverConfig = serverConfig;
     this->data = "";
+    this->bodySize = -1;
 }
 
 HttpHandler::HttpHandler(int fd, std::string data, ServerConfiguration *serverConfig)
@@ -15,14 +16,16 @@ HttpHandler::HttpHandler(int fd, std::string data, ServerConfiguration *serverCo
     this->fd = fd;
     this->data = data;
     this->serverConfig = serverConfig;
+    this->bodySize = -1;
 }
 
-HttpHandler::HttpHandler(int fd, HttpResponse res)
+HttpHandler::HttpHandler(int fd, HttpResponse res, long long bodySize)
 {
     this->fd = fd;
     this->serverConfig = res.getServerConfiguration();
     this->response = res;
     this->data = "";
+    this->bodySize = bodySize;
 }
 
 HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res)
@@ -32,6 +35,17 @@ HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res)
     this->response = res;
     this->serverConfig = res.getServerConfiguration();
     this->data = "";
+    this->bodySize = -1;
+}
+
+HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, long long bodySize)
+{
+    this->fd = fd;
+    this->request = req;
+    this->response = res;
+    this->serverConfig = res.getServerConfiguration();
+    this->data = "";
+    this->bodySize = bodySize;
 }
 
 HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, ServerConfiguration *serverConfig)
@@ -41,6 +55,7 @@ HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, ServerConfig
     this->response = res;
     this->serverConfig = serverConfig;
     this->data = "";
+    this->bodySize = -1;
 }
 
 HttpHandler::~HttpHandler()
@@ -53,6 +68,7 @@ HttpHandler::HttpHandler(const HttpHandler& ref)
     response = ref.response;
     serverConfig = ref.serverConfig;
     data = ref.data;
+    bodySize = ref.bodySize;
 }
 
 HttpHandler&	HttpHandler::operator=(const HttpHandler& ref)
@@ -64,6 +80,7 @@ HttpHandler&	HttpHandler::operator=(const HttpHandler& ref)
     response = ref.response;
     serverConfig = ref.serverConfig;
     data = ref.data;
+    bodySize = ref.bodySize;
     return (*this);
 }
 
@@ -95,4 +112,9 @@ std::string		HttpHandler::getData(void)
 void    HttpHandler::setData(std::string data)
 {
     this->data = data;
+}
+
+long long   HttpHandler::getBodySize(void)
+{
+    return (this->bodySize);
 }

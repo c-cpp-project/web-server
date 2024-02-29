@@ -115,6 +115,7 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 	int			fd;
 	std::string	uri;
 	HttpHandler	*httpHandler;
+	struct stat buf;
 
 	uri = request.getPath();
 	if ("400" <= getStatusCode() && getStatusCode() <= "500") // fail.page
@@ -132,10 +133,11 @@ void	HttpResponse::forward(HttpRequest &request) // controller에서 사용한�
 		throw "404";
 	}
 	std::cout << fd << ", " << uri  << ": status code = "  << getStatusCode() << "\n";
+	stat(uri.c_str(), &buf);
 	if ("400" <= getStatusCode() && getStatusCode() <= "500")
-		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, *this));
+		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, *this, buf.st_size));
 	else
-		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, request, *this));
+		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(fd, request, *this, buf.st_size));
 }
 
 // std::string	HttpResponse::readFile(int fd)

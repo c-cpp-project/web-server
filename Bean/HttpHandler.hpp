@@ -16,13 +16,15 @@ private:
 	HttpResponse        response;
 	ServerConfiguration *serverConfig;
 	std::string			data;
+	long long			bodySize;
 	// Event               event;
 	HttpHandler();
 public:
 	HttpHandler(int fd, HttpRequest req, HttpResponse res);
+	HttpHandler(int fd, HttpRequest req, HttpResponse res, long long bodySize);
 	HttpHandler(int fd, HttpRequest req, HttpResponse res, ServerConfiguration *serverConfig);
 	HttpHandler(int fd, HttpRequest req, HttpResponse res,  std::string data, ServerConfiguration *serverConfig);
-	HttpHandler(int fd, HttpResponse res);
+	HttpHandler(int fd, HttpResponse res, long long size);
 	HttpHandler(int fd, std::string data, ServerConfiguration *serverConfig);
 	HttpHandler(int fd, ServerConfiguration *serverConfig);
 	~HttpHandler();
@@ -34,6 +36,7 @@ public:
 	ServerConfiguration*	getServerConfiguration(void);
 	std::string		getData(void);
 	void    		setData(std::string data);
+	long long   	getBodySize(void);
 };
 // HttpResponse 대입 연산자를 만들어야 한다.
 #endif

@@ -11,6 +11,5 @@ class Bean {
   Bean();
   virtual ~Bean();
   virtual int runBeanEvent(HttpHandler *httpHandler, Event *event) = 0;
-  bool isEndOfFile(int fd);
 };
 #endif

@@ -16,15 +16,13 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 	serverConfig = httpHandler->getServerConfiguration();
 	socketfd = httpHandler->getFd();
 	dump = httpHandler->getData();
-
 	std::cout << serverConfig << " = SendEventBean::runBeanEvent\n";
-	std::cout << socketfd << ", " << dump.length() << ": size => " << BUF_SIZE << "\n";
 	buf_size = BUF_SIZE;
 	if (dump.length() < BUF_SIZE)
 		buf_size = dump.length();
+	std::cout << socketfd << ", " << dump.length() << ": size => " << buf_size << "\n";
 	memcpy(buffer, dump.substr(0, buf_size).c_str(), buf_size);
 	std::cout << buf_size << "\n";
-	// ret = send(socketfd, buffer, buf_size, 0);
 	ret = write(socketfd, buffer, buf_size);
 	std::cout << ret << " = ret\n";
 	if (ret == 0)

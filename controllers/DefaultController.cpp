@@ -39,6 +39,7 @@ void    DefaultController::service(HttpRequest &request, HttpResponse &response)
             staticPath = staticPath.substr(staticPath.find("/") + 1);
         std::cout << staticPath << " = staticPath\n";
         request.setPath(staticPath);
+        response.putHeader("Content-Type", ResponseConfig::getContentType(request.getPath()));
         response.forward(request);
     }
 }

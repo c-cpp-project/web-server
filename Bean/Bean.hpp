@@ -1,7 +1,7 @@
 #ifndef BEAN_HPP
 #define BEAN_HPP
 #include <vector>
-
+#include <unistd.h>
 #include "../server/Event.hpp"
 #include "HttpHandler.hpp"
 
@@ -11,5 +11,6 @@ class Bean {
   Bean();
   virtual ~Bean();
   virtual int runBeanEvent(HttpHandler *httpHandler, Event *event) = 0;
+  bool isEndOfFile(int fd);
 };
 #endif

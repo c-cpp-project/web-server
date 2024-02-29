@@ -99,6 +99,7 @@ void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
 	if (targetPath[targetPath.length() - 1] == '/')
 		targetPath = targetPath.substr(0, targetPath.length() - 1);
 	request.setPath(targetPath);
+	response.putHeader("Content-Type", ResponseConfig::getContentType(request.getHeader("CONTENT-TYPE")));
 	if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded") // get, post
 		doGet(request, response);
 	else if (request.getMethod() == "POST")

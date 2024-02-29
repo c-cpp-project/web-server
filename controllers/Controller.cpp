@@ -67,14 +67,12 @@ void			Controller::writeEventRegister(int writefd[2], int readfd[2], HttpRespons
 {
 	ServerConfiguration *serverConfig;
 	Event				*event;
-	HttpHandler			*handler;
 
 	serverConfig = response.getServerConfiguration();
 	event = response.getEvent();
-	handler = new HttpHandler(writefd[1], data, serverConfig);
 	close(writefd[0]);
 	fcntl(writefd[1], F_SETFL, O_NONBLOCK);
-	event->saveEvent(writefd[1], EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, handler);
+	event->saveEvent(writefd[1], EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0,  new HttpHandler(writefd[1], data, serverConfig));
 	readEventRegsiter(readfd, response);
 }
 
@@ -87,6 +85,7 @@ void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response)
 	event = response.getEvent();
 	close(readfd[1]);
 	fcntl(readfd[0], F_SETFL, O_NONBLOCK);
+	std::cout << readfd[0] << " = Controller::readEventRegsiter\n";
 	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(readfd[0], response)); // EVFILT_READ, EVFILT_WRITE
 }
 

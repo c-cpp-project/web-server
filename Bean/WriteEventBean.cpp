@@ -4,9 +4,9 @@ WriteEventBean::WriteEventBean() {}
 WriteEventBean::~WriteEventBean() {}
 
 int WriteEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
-  int     writeFd;
-  size_t  idx;
-  size_t  ret;
+  int     		writeFd;
+  size_t  		idx;
+  size_t  		ret;
   std::string data;
 
   writeFd = httpHandler->getFd();

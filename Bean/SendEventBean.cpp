@@ -4,14 +4,14 @@
 SendEventBean::SendEventBean() {}
 SendEventBean::~SendEventBean() {}
 
-#define BUF_SIZE 1400
+#define BUF_SIZE 1024 * 1024
 int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 	ServerConfiguration 	*serverConfig;
 	std::string				dump;
 	int						socketfd;
 	int						ret;
 	int						buf_size;
-	char					buffer[1400];
+	char					buffer[BUF_SIZE];
 
 	serverConfig = httpHandler->getServerConfiguration();
 	socketfd = httpHandler->getFd();
@@ -22,9 +22,10 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 	buf_size = BUF_SIZE;
 	if (dump.length() < BUF_SIZE)
 		buf_size = dump.length();
-	strncpy(buffer, dump.substr(0, buf_size).c_str(), buf_size);
+	memcpy(buffer, dump.substr(0, buf_size).c_str(), buf_size);
 	std::cout << buf_size << "\n";
-	ret = send(socketfd, buffer, buf_size, 0);
+	// ret = send(socketfd, buffer, buf_size, 0);
+	ret = write(socketfd, buffer, buf_size);
 	std::cout << ret << " = ret\n";
 	if (ret == 0)
 	{

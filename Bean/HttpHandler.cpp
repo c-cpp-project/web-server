@@ -20,7 +20,7 @@ HttpHandler::HttpHandler(int fd, std::string data, ServerConfiguration *serverCo
 HttpHandler::HttpHandler(int fd, HttpResponse res)
 {
     this->fd = fd;
-    this->serverConfig = NULL;
+    this->serverConfig = res.getServerConfiguration();
     this->response = res;
     this->data = "";
 }
@@ -67,7 +67,7 @@ HttpHandler&	HttpHandler::operator=(const HttpHandler& ref)
     return (*this);
 }
 
-int				HttpHandler::getFd(void)
+int	HttpHandler::getFd(void)
 {
     return (fd);
 }

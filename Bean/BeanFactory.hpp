@@ -22,6 +22,7 @@ class BeanFactory {
  public:
   BeanFactory();   // Bean을 생성한다.
   ~BeanFactory();  // Bean을 소멸시킨다.
+  static bool isEndOfFile(int fd);
   static int runBeanByName(std::string beenName, HttpHandler *httpHandler,
                            Event *event);
 };

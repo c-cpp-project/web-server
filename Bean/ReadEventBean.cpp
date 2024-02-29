@@ -3,24 +3,27 @@
 ReadEventBean::ReadEventBean() {}
 ReadEventBean::~ReadEventBean() {}
 
-#define READ_BUF_SIZE 1024
+#define READ_BUF_SIZE 1024 * 1024
 int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 	int     			readFd;
 	int     			ret;
-	char		    	binaryData[READ_BUF_SIZE + 1];
-	std::string 	body;
+	char		    	binaryData[READ_BUF_SIZE];
+	std::string 		body;
 
 	std::cout << "ReadEventBean::runBeanEvent\n";
 	readFd = httpHandler->getFd();
+	memset(binaryData, '\0', READ_BUF_SIZE);
 	ret = read(readFd, binaryData, READ_BUF_SIZE);
 	body = httpHandler->getData() + std::string(binaryData, binaryData + ret);
+	std::cout << ret << ", " << body.length() << " = result\n";
 	httpHandler->setData(body);
-	if (ret == READ_BUF_SIZE)
+	if (isEndOfFile(readFd) == false)
 		return (ret);
 	else if (ret < 0)
 		errorSaveEvent(httpHandler, event);
-	else
+	else if (isEndOfFile(readFd) == true)
 		responseSaveEvent(body, httpHandler, event);
+	event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
 	delete httpHandler;
 	return 0;
 }
@@ -34,8 +37,7 @@ void ReadEventBean::errorSaveEvent(HttpHandler *httpHandler, Event *event) {
 	response.forward(empty);
 }
 
-void ReadEventBean::responseSaveEvent(std::string body,
-																			HttpHandler *httpHandler, Event *event) {
+void ReadEventBean::responseSaveEvent(std::string body, HttpHandler *httpHandler, Event *event) {
 	std::stringstream ss;
 	std::string bodyLength;
 	ServerConfiguration *serverConfig;
@@ -53,7 +55,6 @@ void ReadEventBean::responseSaveEvent(std::string body,
 	response.putHeader("Content-Length", bodyLength);
 	// response.putHeader("Content-Type", "image/png");
 	response.sendBody(body);  // this->buffer에 string으로 모두 담긴다.
-	std::cout << "ReadEventBean::response -> saveEvent\n";
 	std::cout << bodyLength << " = Content-Length\n";
 
 	data = response.getByteDump();

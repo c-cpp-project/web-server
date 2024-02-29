@@ -25,12 +25,12 @@ try:
 except Exception as e:
     print(e)
 
-try:
-    with open(fullpath, 'r') as file:
-        while True:
-            chunk = file.read(1024)
-            if not chunk:
-                break
-            print(chunk, end='')
-except IOError as e:
-    print(e)
+# try:
+#     with open(fullpath, 'r') as file:
+#         while True:
+#             chunk = file.read(1024)
+#             if not chunk:
+#                 break
+#             print(chunk, end='')
+# except IOError as e:
+#     print(e)

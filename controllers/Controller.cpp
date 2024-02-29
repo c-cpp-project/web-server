@@ -5,14 +5,15 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 	int			ret;
 	char		buffer[64 * K];
 	int     	pipefd1[2];
-	int			pipefd2[2];
+	int			readfd[2];
+	// int			pipefd2[2];
 	const char	*path[6];
 	std::string uploadPath = request.getPath();
 	std::string	queryString;
 
 	path[0] = "/usr/bin/python3";
 	path[1] = cgi_python;
-	pipe(pipefd2);
+	// pipe(pipefd2);
 	if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded")
 	{
 		queryString = request.getMethod() == "GET" ? request.getQueryString() : request.getBody();
@@ -41,11 +42,12 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 	}
 	path[5] = NULL;
 	std::cout << request.getMethod() << "[" << filename << " : contentType]\n";
+	
 	ret = fork();
 	if (ret == 0)
 	{
-		close(pipefd2[0]); dup2(pipefd2[1], STDOUT_FILENO); // 출력
-		close(pipefd2[1]);
+		// close(pipefd2[0]); dup2(pipefd2[1], STDOUT_FILENO); // 출력
+		// close(pipefd2[1]);
 		if (request.getMethod() == "POST" && request.getHeader("CONTENT-TYPE") != "application/x-www-form-urlencoded")
 		{
 			close(pipefd1[1]); dup2(pipefd1[0], STDIN_FILENO); // 입력
@@ -55,11 +57,19 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 	}
 	else
 	{
+		std::string	fullpath = uploadPath + "/" + filename;
+		int			flag;
+
+		readfd[0] = open(fullpath.c_str(), O_CREAT | O_RDONLY, S_IRUSR | S_IWUSR);
+		flag = fcntl(readfd[0], F_GETFL);
+		flag = flag | O_NONBLOCK;
+		fcntl(readfd[0], F_SETFL, flag);
+		std::cout << fullpath << ", " << readfd[0] << " = pipe\n";
 		ChildProcess::insertChildProcess(ret);
 		if (request.getMethod() == "POST" && request.getHeader("CONTENT-TYPE") != "application/x-www-form-urlencoded")
-			writeEventRegister(pipefd1, pipefd2, response, request.getBody());
+			writeEventRegister(pipefd1, readfd, response, request.getBody());
 		else
-			readEventRegsiter(pipefd2, response);
+			readEventRegsiter(readfd, response);
 	}
 }
 
@@ -83,8 +93,8 @@ void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response)
 	Event				*event;
 
 	event = response.getEvent();
-	close(readfd[1]);
-	fcntl(readfd[0], F_SETFL, O_NONBLOCK);
+	// close(readfd[1]);
+	// fcntl(readfd[0], F_SETFL, O_NONBLOCK);
 	std::cout << readfd[0] << " = Controller::readEventRegsiter\n";
 	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(readfd[0], response)); // EVFILT_READ, EVFILT_WRITE
 }

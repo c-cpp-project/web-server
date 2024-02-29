@@ -24,7 +24,6 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 	memcpy(buffer, dump.substr(0, buf_size).c_str(), buf_size);
 	std::cout << buf_size << "\n";
 	ret = write(socketfd, buffer, buf_size);
-	std::cout << ret << " = ret\n";
 	if (ret == 0)
 	{
 		event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);
@@ -35,5 +34,6 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 	}
 	else if (ret > 0)
 		httpHandler->setData(dump.substr(ret));
+	std::cout << ret << "\n";
 	return (ret);
 }

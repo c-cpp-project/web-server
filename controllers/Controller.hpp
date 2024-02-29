@@ -44,7 +44,7 @@ public:
 
 	// 모듈화
 	void			classifyEvent(HttpRequest &request, HttpResponse &response, const char *cgi_python, std::string contentType);
-	void			readEventRegsiter(int readfd[2], HttpResponse &response);
+	void			readEventRegsiter(int readfd[2], HttpResponse &response, size_t bodySize);
 	void			writeEventRegister(int writefd[2], int readfd[2], HttpResponse &response, std::string data);
 };
 

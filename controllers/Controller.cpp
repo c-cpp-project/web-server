@@ -69,7 +69,7 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 		if (request.getMethod() == "POST" && request.getHeader("CONTENT-TYPE") != "application/x-www-form-urlencoded")
 			writeEventRegister(pipefd1, readfd, response, request.getBody());
 		else
-			readEventRegsiter(readfd, response);
+			readEventRegsiter(readfd, response, request.getBody().size());
 	}
 }
 
@@ -83,12 +83,12 @@ void			Controller::writeEventRegister(int writefd[2], int readfd[2], HttpRespons
 	close(writefd[0]);
 	fcntl(writefd[1], F_SETFL, O_NONBLOCK);
 	event->saveEvent(writefd[1], EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0,  new HttpHandler(writefd[1], data, serverConfig));
-	readEventRegsiter(readfd, response);
+	readEventRegsiter(readfd, response, data.length());
 }
 
 // request
 // response
-void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response)
+void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response, size_t bodySize)
 {
 	Event				*event;
 
@@ -96,7 +96,8 @@ void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response)
 	// close(readfd[1]);
 	// fcntl(readfd[0], F_SETFL, O_NONBLOCK);
 	std::cout << readfd[0] << " = Controller::readEventRegsiter\n";
-	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(readfd[0], response)); // EVFILT_READ, EVFILT_WRITE
+	std::cout << bodySize << ": bodySize\n";
+	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(readfd[0], response, bodySize)); // EVFILT_READ, EVFILT_WRITE
 }
 
 std::pair<std::string, std::string>	Controller::getFileName(HttpRequest &request)

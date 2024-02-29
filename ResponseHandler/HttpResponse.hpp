@@ -15,6 +15,7 @@
 #include<string>
 #include <cstdlib>
 #include <unistd.h>
+#include <sys/stat.h>
 
 # define K 1000
 

@@ -10,18 +10,18 @@ int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 	char		    	binaryData[READ_BUF_SIZE];
 	std::string 		body;
 
-	std::cout << "ReadEventBean::runBeanEvent\n";
+	std::cout << "ReadEventBean::runBeanEvent = " << readFd << "\n";
 	readFd = httpHandler->getFd();
 	memset(binaryData, '\0', READ_BUF_SIZE);
 	ret = read(readFd, binaryData, READ_BUF_SIZE);
 	body = httpHandler->getData() + std::string(binaryData, binaryData + ret);
 	std::cout << ret << ", " << body.length() << " = result\n";
 	httpHandler->setData(body);
-	if (isEndOfFile(readFd) == false)
+	if (httpHandler->getBodySize() != httpHandler->getData().size())
 		return (ret);
 	else if (ret < 0)
 		errorSaveEvent(httpHandler, event);
-	else if (isEndOfFile(readFd) == true)
+	else if (httpHandler->getBodySize() == httpHandler->getData().size())
 		responseSaveEvent(body, httpHandler, event);
 	event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
 	delete httpHandler;

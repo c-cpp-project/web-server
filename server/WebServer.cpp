@@ -70,12 +70,12 @@ int WebServer::openPort(ServerConfiguration* serverConfig) {
   hint.ai_socktype = SOCK_STREAM;
   std::string portStr = StringUtils::toString(port);
   int res = getaddrinfo(serverName.c_str(), portStr.c_str(), &hint, &info);
-  // freeaddrinfo(info);
   if (res == -1)
     SocketUtils::exitWithPerror("[Error] getaddrinfo() error\n" +
                                 std::string(strerror(errno)));
   int serverSocket =
       socket(info->ai_family, info->ai_socktype, info->ai_protocol);
+  freeaddrinfo(info);
   if (serverSocket == -1)
     SocketUtils::exitWithPerror("[Error] socket() error\n" +
                                 std::string(strerror(errno)));
@@ -223,6 +223,8 @@ int WebServer::acceptClient(int serverSocket) {
   ServerConfiguration* serverConfig = serverConfigs[serverPort];
   addClient(clientSocket, serverConfig, &eventHandler);
   eventHandler.registerEnabledReadEvent(clientSocket, handlerMap[clientSocket]);
+  eventHandler.registerDisabledWriteEvent(clientSocket,
+                                          handlerMap[clientSocket]);
   return clientSocket;
 }
 

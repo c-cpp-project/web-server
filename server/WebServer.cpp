@@ -105,6 +105,7 @@ void WebServer::handleEvent() {
   BeanFactory baneFactory;
   while (true) {
     newEventCount = eventHandler.create();
+    std::cout << "newEventCount: " << newEventCount << "\n";
     if (newEventCount == -1) {
       SocketUtils::exitWithPerror("[ERROR] kevent() error\n" +
                                   std::string(strerror(errno)));
@@ -153,6 +154,7 @@ void WebServer::processErrorEvent(struct kevent& currEvent) {
 void WebServer::processReadEvent(struct kevent& currEvent) {
   // TODO: 고치기
   std::cout << "processReadEvent currEvent: " << currEvent << std::endl;
+  int fd;
   if (hasServerFd(currEvent)) {
     acceptClient(currEvent.ident);
   } else if (isClient(currEvent.ident)) {
@@ -185,20 +187,25 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
 void WebServer::processWriteEvent(struct kevent& currEvent) {
   // BeanFactory beanFactory;
   std::cout << "processWriteEvent currEvent" << currEvent << std::endl;
+  std::cout << "write buffer size: " << currEvent.data << "\n";
+  HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
   if (isClient(currEvent.ident)) {
-    HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     // ServerConfiguration* serverConfig = handler->getServerConfiguration();
-    int ret = BeanFactory::runBeanByName("SEND", handler, &eventHandler);
-    if (ret == -1) {
-      if (errno == EPIPE)
-        std::cout << "Client connection reset. Reconnecting...\n";
-      close(currEvent.ident);
-      handlerMap.erase(currEvent.ident);
+    if (currEvent.data == 0) {
+      return ;
+    }
+    else {
+      int ret = BeanFactory::runBeanByName("SEND", handler, &eventHandler);
+      if (ret == -1) {
+        if (errno == EPIPE)
+          std::cout << "Client connection reset. Reconnecting...\n";
+        close(currEvent.ident);
+        handlerMap.erase(currEvent.ident);
+      }
     }
   } else {
     // CGI
     std::cout << "WRITE currEvent " << currEvent << std::endl;
-    HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     // ServerConfiguration* serverConfig = handler->getServerConfiguration();
     BeanFactory::runBeanByName("WRITE", handler, &eventHandler);
   }
@@ -209,6 +216,7 @@ void WebServer::processTimerEvent(struct kevent& currEvent) {
 }
 
 int WebServer::acceptClient(int serverSocket) {
+  std::cout << "acceptClient\n";
   struct _linger linger;
   linger.l_onoff = 1;
   linger.l_linger = 0;
@@ -233,6 +241,7 @@ bool WebServer::hasServerFd(struct kevent& currEvent) {
 }
 
 void WebServer::disconnectPort(struct kevent& currEvent) {
+  std::cout << currEvent.ident << ": disconnectPort\n";
   close(currEvent.ident);
   serverConfigs.erase(serverSocketPortMap[currEvent.ident]);
 }
@@ -242,6 +251,7 @@ bool WebServer::isClient(int clientFd) {
 }
 
 void WebServer::disconnectClient(int clientFd) {
+  std::cout << clientFd << ": disconnectClient\n";
   close(clientFd);
   handlerMap.erase(clientFd);
 }

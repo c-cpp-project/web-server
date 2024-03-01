@@ -2,7 +2,7 @@
 
 void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, const char *cgi_python, std::string filename)
 {
-	int			ret;
+	int			pid;
 	char		buffer[64 * K];
 	int     	pipefd1[2];
 	int			readfd[2];
@@ -43,8 +43,8 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 	path[5] = NULL;
 	std::cout << request.getMethod() << "[" << filename << " : contentType]\n";
 	
-	ret = fork();
-	if (ret == 0)
+	pid = fork();
+	if (pid == 0)
 	{
 		// close(pipefd2[0]); dup2(pipefd2[1], STDOUT_FILENO); // 출력
 		// close(pipefd2[1]);
@@ -60,12 +60,14 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 		std::string	fullpath = uploadPath + "/" + filename;
 		int			flag;
 
-		readfd[0] = open(fullpath.c_str(), O_CREAT | O_RDONLY, S_IRUSR | S_IWUSR);
+		readfd[1] = open(fullpath.c_str(), O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+		close(readfd[1]);
+		readfd[0] = open(fullpath.c_str(), O_RDONLY, S_IRUSR | S_IWUSR);
 		flag = fcntl(readfd[0], F_GETFL);
 		flag = flag | O_NONBLOCK;
 		fcntl(readfd[0], F_SETFL, flag);
-		std::cout << fullpath << ", " << readfd[0] << " = pipe\n";
-		ChildProcess::insertChildProcess(ret);
+		std::cout << fullpath << ", " << readfd[0] << " = READ POST FILE\n";
+		ChildProcess::insertChildProcess(pid);
 		if (request.getMethod() == "POST" && request.getHeader("CONTENT-TYPE") != "application/x-www-form-urlencoded")
 			writeEventRegister(pipefd1, readfd, response, request.getBody());
 		else

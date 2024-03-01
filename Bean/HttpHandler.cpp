@@ -9,6 +9,7 @@ HttpHandler::HttpHandler(int fd, ServerConfiguration *serverConfig)
     this->serverConfig = serverConfig;
     this->data = "";
     this->bodySize = -1;
+    this->bufferIdx = 0;
 }
 
 HttpHandler::HttpHandler(int fd, std::string data, ServerConfiguration *serverConfig)
@@ -17,6 +18,7 @@ HttpHandler::HttpHandler(int fd, std::string data, ServerConfiguration *serverCo
     this->data = data;
     this->serverConfig = serverConfig;
     this->bodySize = -1;
+    this->bufferIdx = 0;
 }
 
 HttpHandler::HttpHandler(int fd, HttpResponse res, long long bodySize)
@@ -26,6 +28,7 @@ HttpHandler::HttpHandler(int fd, HttpResponse res, long long bodySize)
     this->response = res;
     this->data = "";
     this->bodySize = bodySize;
+    this->bufferIdx = 0;
 }
 
 HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res)
@@ -36,6 +39,7 @@ HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res)
     this->serverConfig = res.getServerConfiguration();
     this->data = "";
     this->bodySize = -1;
+    this->bufferIdx = 0;
 }
 
 HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, long long bodySize)
@@ -46,6 +50,7 @@ HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, long long bo
     this->serverConfig = res.getServerConfiguration();
     this->data = "";
     this->bodySize = bodySize;
+    this->bufferIdx = 0;
 }
 
 HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, ServerConfiguration *serverConfig)
@@ -56,6 +61,7 @@ HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, ServerConfig
     this->serverConfig = serverConfig;
     this->data = "";
     this->bodySize = -1;
+    this->bufferIdx = 0;
 }
 
 HttpHandler::~HttpHandler()
@@ -69,6 +75,7 @@ HttpHandler::HttpHandler(const HttpHandler& ref)
     serverConfig = ref.serverConfig;
     data = ref.data;
     bodySize = ref.bodySize;
+    bufferIdx = ref.bufferIdx;
 }
 
 HttpHandler&	HttpHandler::operator=(const HttpHandler& ref)
@@ -81,6 +88,7 @@ HttpHandler&	HttpHandler::operator=(const HttpHandler& ref)
     serverConfig = ref.serverConfig;
     data = ref.data;
     bodySize = ref.bodySize;
+    bufferIdx = ref.bufferIdx;
     return (*this);
 }
 
@@ -117,4 +125,14 @@ void    HttpHandler::setData(std::string data)
 long long   HttpHandler::getBodySize(void)
 {
     return (this->bodySize);
+}
+
+void    HttpHandler::setBufferIdx(long long bufferIdx)
+{
+    this->bufferIdx = bufferIdx;
+}
+
+long long   HttpHandler::getBufferIdx(void)
+{
+    return (this->bufferIdx);
 }

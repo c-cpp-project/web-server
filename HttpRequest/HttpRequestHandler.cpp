@@ -23,7 +23,6 @@ int HttpRequestHandler::handle(Event *event)
 	readRequest(); // 소켓으로부터 요청 읽어오기
 	while (true)
 	{
-		// std::cout << "[INFO] handle while\n";
 		if (RequestAndResponse(event) == FAILURE) // 불완전한 요청인 경우
 			return (FAILURE);
 		if (buffers[socket_fd] == "") // 버퍼의 요청을 모두 처리한 경우
@@ -34,6 +33,7 @@ int HttpRequestHandler::handle(Event *event)
 				return (FAILURE);
 			break;
 		}
+		std::cout << "<======== request end ===========================>\n";
 	}
 	return (SUCCESS);
 }
@@ -88,6 +88,7 @@ void HttpRequestHandler::readRequest()
 	// read_size 만큼 temp_buffer에 읽어오기
 	char *temp_buffer = new char[read_size];
 	long read_byte = recv(socket_fd, temp_buffer, read_size, 0);
+	// std::cout << "[[" << std::string(temp_buffer, read_byte) << ", " << read_byte << "]]= recv\n";
 	if (read_byte == -1) { // recv 시스템 콜 오류
 		delete[] temp_buffer;
 		throw SocketCloseException500();

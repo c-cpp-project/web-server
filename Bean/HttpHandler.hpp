@@ -17,6 +17,7 @@ private:
 	ServerConfiguration *serverConfig;
 	std::string			data;
 	long long			bodySize;
+	long long			bufferIdx;
 	// Event               event;
 	HttpHandler();
 public:
@@ -37,6 +38,8 @@ public:
 	std::string		getData(void);
 	void    		setData(std::string data);
 	long long   	getBodySize(void);
+	void    		setBufferIdx(long long bufferIdx);
+	long long   	getBufferIdx(void);
 };
 // HttpResponse 대입 연산자를 만들어야 한다.
 #endif

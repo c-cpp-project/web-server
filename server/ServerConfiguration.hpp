@@ -55,6 +55,7 @@ class ServerConfiguration {
   const std::string getPostCgiPath() const;
   const std::string getGetCgiPath() const;
   const std::string getDeleteCgiPath() const;
+  const std::string getCgiTestExt() const;
   const std::string findLocationUri(std::string uri) const;
   Location* getLocation(const std::string uri) const;
 };

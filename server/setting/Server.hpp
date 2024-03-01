@@ -15,6 +15,7 @@ class Server {
   std::string _getCgiPath;
   std::string postCgiPath;
   std::string deleteCgiPath;
+  std::string cgiTestExt;
   std::map<std::vector<int>, std::string> errorPage;
   std::map<int, std::string> errorCodePage;
   std::map<std::string, int> redirection;
@@ -54,6 +55,7 @@ class Server {
   std::string getServerName() const;
   std::string getUploadPath() const;
   std::string getCgiPath() const;
+  std::string getCgiTestExt() const;
   int getKeepAliveTimeout() const;
   std::string getGetCgiPath() const;
   std::string getPostCgiPath() const;
@@ -61,4 +63,5 @@ class Server {
   void setGetCgiPath(std::string& input);
   void setPostCgiPath(std::string& input);
   void setDeleteCgiPath(std::string& input);
+  void setCgiTestExt(std::string& input);
 };

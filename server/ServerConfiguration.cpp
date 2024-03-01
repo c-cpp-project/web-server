@@ -247,3 +247,7 @@ const std::string ServerConfiguration::findUriPattern(std::string uri) const {
   }
   return uri.erase(uri.size() - 1);
 }
+
+const std::string ServerConfiguration::getCgiTestExt() const {
+  return server->getCgiTestExt();
+}

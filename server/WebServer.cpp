@@ -105,7 +105,6 @@ void WebServer::handleEvent() {
   BeanFactory baneFactory;
   while (true) {
     newEventCount = eventHandler.create();
-    std::cout << "newEventCount: " << newEventCount << "\n";
     if (newEventCount == -1) {
       SocketUtils::exitWithPerror("[ERROR] kevent() error\n" +
                                   std::string(strerror(errno)));
@@ -115,7 +114,7 @@ void WebServer::handleEvent() {
       processEvent(eventHandler[i]);
     }
     ChildProcess::waitChildProcess();
-    clearClients();
+    // clearClients();
   }
 }
 
@@ -154,7 +153,6 @@ void WebServer::processErrorEvent(struct kevent& currEvent) {
 void WebServer::processReadEvent(struct kevent& currEvent) {
   // TODO: 고치기
   std::cout << "processReadEvent currEvent: " << currEvent << std::endl;
-  int fd;
   if (hasServerFd(currEvent)) {
     acceptClient(currEvent.ident);
   } else if (isClient(currEvent.ident)) {
@@ -163,14 +161,17 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
     // 소켓 정보 다 읽어들였을 때 소켓 fd close하는 후보에 추가
     // handler 메모리 할당된거 삭제
     if (currEvent.flags & EV_EOF) {
-      addCandidatesForDisconnection(currEvent.ident);
-      HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
-      delete handler;
+      std::cout << "[CHECK]" << std::endl;
+      eventHandler.saveEvent(currEvent.ident, EVFILT_READ, EV_DISABLE, 0, 0, 0);
+      // addCandidatesForDisconnection(currEvent.ident);
+      // HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+      // delete handler;
     } else {
       HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
       int ret = BeanFactory::runBeanByName("RECV", handler, &eventHandler);
       std::cout << "[INFO] RET" << ret << std::endl;
-      if (ret == SOCKET_CLOSE) {
+      if (ret == -1) {
+        addCandidatesForDisconnection(currEvent.ident);
         // 소켓을 재사용할지 아니면 끊어내야 할지
         // 사실 소켓까지 끊을 필요가 있을까?
         // addCandidatesForDisconnection(currEvent.ident);
@@ -187,25 +188,26 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
 void WebServer::processWriteEvent(struct kevent& currEvent) {
   // BeanFactory beanFactory;
   std::cout << "processWriteEvent currEvent" << currEvent << std::endl;
-  std::cout << "write buffer size: " << currEvent.data << "\n";
-  HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
   if (isClient(currEvent.ident)) {
-    // ServerConfiguration* serverConfig = handler->getServerConfiguration();
-    if (currEvent.data == 0) {
-      return ;
+    if (currEvent.flags & EV_EOF) {
+      std::cout << "[CHECK SEND ERROR]" << std::endl;
+      // addCandidatesForDisconnection(currEvent.ident);
+      // HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+      // delete handler;
     }
-    else {
-      int ret = BeanFactory::runBeanByName("SEND", handler, &eventHandler);
-      if (ret == -1) {
-        if (errno == EPIPE)
-          std::cout << "Client connection reset. Reconnecting...\n";
-        close(currEvent.ident);
-        handlerMap.erase(currEvent.ident);
-      }
+    HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+    // ServerConfiguration* serverConfig = handler->getServerConfiguration();
+    int ret = BeanFactory::runBeanByName("SEND", handler, &eventHandler);
+    if (ret == -1) {
+      // if (errno == EPIPE)
+      //   std::cout << "Client connection reset. Reconnecting...\n";
+      // close(currEvent.ident);
+      // handlerMap.erase(currEvent.ident);
     }
   } else {
     // CGI
     std::cout << "WRITE currEvent " << currEvent << std::endl;
+    HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     // ServerConfiguration* serverConfig = handler->getServerConfiguration();
     BeanFactory::runBeanByName("WRITE", handler, &eventHandler);
   }
@@ -216,10 +218,9 @@ void WebServer::processTimerEvent(struct kevent& currEvent) {
 }
 
 int WebServer::acceptClient(int serverSocket) {
-  std::cout << "acceptClient\n";
   struct _linger linger;
   linger.l_onoff = 1;
-  linger.l_linger = 0;
+  linger.l_linger = 1800;
   const int clientSocket = accept(serverSocket, NULL, NULL);
   const int serverPort = serverSocketPortMap[serverSocket];
   setsockopt(clientSocket, SOL_SOCKET, SO_LINGER, &linger, sizeof(_linger));
@@ -241,7 +242,6 @@ bool WebServer::hasServerFd(struct kevent& currEvent) {
 }
 
 void WebServer::disconnectPort(struct kevent& currEvent) {
-  std::cout << currEvent.ident << ": disconnectPort\n";
   close(currEvent.ident);
   serverConfigs.erase(serverSocketPortMap[currEvent.ident]);
 }
@@ -251,7 +251,6 @@ bool WebServer::isClient(int clientFd) {
 }
 
 void WebServer::disconnectClient(int clientFd) {
-  std::cout << clientFd << ": disconnectClient\n";
   close(clientFd);
   handlerMap.erase(clientFd);
 }

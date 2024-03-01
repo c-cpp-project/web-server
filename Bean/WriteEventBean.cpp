@@ -13,11 +13,7 @@ int WriteEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 
   writeFd = httpHandler->getFd();
   data = httpHandler->getData();
-  int buf_size = BUF_SIZE;
-  if (data.length() < buf_size) {
-    buf_size = BUF_SIZE;
-  }
-  ret = write(writeFd, data.c_str(), buf_size);
+  ret = write(writeFd, data.c_str(), data.length());
   std::cout << " WriteEventBean::runBeanEvent: " << writeFd << "["
             << data.length() << ", " << ret << "]\n";
   if (ret <= 0) {

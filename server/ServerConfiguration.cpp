@@ -109,8 +109,8 @@ const std::string ServerConfiguration::getUploadPath() const {
   return server->getUploadPath();
 }
 
-long ServerConfiguration::getClientBodySize(const std::string &uri) const {
-  Location *location = getLocation(uri);
+long ServerConfiguration::getClientBodySize(const std::string& uri) const {
+  Location* location = getLocation(uri);
   if (location == NULL || location->getClientBodySize() == 0)
     return server->getClientBodySize();
   else
@@ -119,7 +119,7 @@ long ServerConfiguration::getClientBodySize(const std::string &uri) const {
 long ServerConfiguration::getClientHeaderSize() const {
   return server->getClientHeaderSize();
 };
-long ServerConfiguration::getClientRequestSize(const std::string &uri) const {
+long ServerConfiguration::getClientRequestSize(const std::string& uri) const {
   return getClientBodySize(uri) + getClientHeaderSize();
 };
 
@@ -186,7 +186,6 @@ const std::string ServerConfiguration::findLocationUri(std::string uri) const {
       }
     }
   }
-  std::cout << "----------------check2-----------------" << std::endl;
   if (matchesPattern) {
     return foundUri;
   }

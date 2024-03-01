@@ -23,7 +23,7 @@ int RecvEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     ret = httpRequestHandler.handle(event);
   } catch (const std::exception &e) {
     std::cout << "[ERROR] SOCKET " << e.what() << std::endl;
-    ret = 0;
+    ret = -1;
   }
   std::cout << "[RET] " << ret << std::endl;
   if (ret == 0) {

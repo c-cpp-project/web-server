@@ -66,8 +66,12 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 		fcntl(readfd[0], F_SETFL, flag);
 		std::cout << fullpath << ", " << readfd[0] << " = pipe\n";
 		ChildProcess::insertChildProcess(ret);
-		if (request.getMethod() == "POST" && request.getHeader("CONTENT-TYPE") != "application/x-www-form-urlencoded")
+		if (request.getMethod() == "POST" && request.getHeader("CONTENT-TYPE") != "application/x-www-form-urlencoded") {
 			writeEventRegister(pipefd1, readfd, response, request.getBody());
+			//event->saveEvent(readfd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0,  new HttpHandler(writefd[1], data, serverConfig));
+			// event->saveEvent(readfd, EVFILT_READ,
+            //              EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(readfd, data, serverConfig));
+		}
 		else
 			readEventRegsiter(readfd, response, request.getBody().size());
 	}
@@ -82,6 +86,7 @@ void			Controller::writeEventRegister(int writefd[2], int readfd[2], HttpRespons
 	event = response.getEvent();
 	close(writefd[0]);
 	fcntl(writefd[1], F_SETFL, O_NONBLOCK);
+	std::cout << "[writefd] " << writefd[1] << "[read fd] " << readfd[0] << std::endl;
 	event->saveEvent(writefd[1], EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0,  new HttpHandler(writefd[1], data, serverConfig));
 	readEventRegsiter(readfd, response, data.length());
 }

@@ -101,11 +101,10 @@ char		**Controller::envpList(HttpRequest &request)
 
 	for (iter = request.getHeaderBegin(); iter != request.getHeaderEnd(); iter++)
 		size++;
-	size += 7; // METHOD, SERVER_PROTOCOL, PATH_INFO, REQUEST_URI, CONTENT_TYPE, PATH_TRANSLATED; SERVER_PROTOCOL
+	size += 9; // METHOD, SERVER_PROTOCOL, PATH_INFO, REQUEST_URI, CONTENT_TYPE, PATH_TRANSLATED; SERVER_PROTOCOL; SERVER_SOFTWARE, GATEWAY_INTERFACE
 	if (request.getQueryString() != "")
 		size++; // Query String
 	envp = new char*[size + 1];
-	envp[idx++] = strdup(std::string("SERVER_PROTOCOL=HTTP/1.1").c_str());
 	envp[idx++] = strdup(("REQUEST_METHOD=" + request.getMethod()).c_str());
 	if (request.getQueryString() != "")
 		envp[idx++] = strdup(("QUERY_STRING=" + request.getQueryString()).c_str());
@@ -114,6 +113,8 @@ char		**Controller::envpList(HttpRequest &request)
 	envp[idx++] = strdup(("REQUEST_URI=" + request.getRepository()).c_str());
 	envp[idx++] = strdup(("CONTENT_TYPE=" + ResponseConfig::getContentType(request.getPath())).c_str());
 	envp[idx++] = strdup(("SERVER_PROTOCOL=" + request.getProtocolString()).c_str());
+	envp[idx++] = strdup(std::string("SERVER_SOFTWARE=NGINX").c_str());
+	envp[idx++] = strdup(std::string("GATEWAY_INTERFACE=CGI/1.1").c_str());
 	for (iter = request.getHeaderBegin(); iter != request.getHeaderEnd(); iter++)
 	{
 		std::string	key;
@@ -123,7 +124,7 @@ char		**Controller::envpList(HttpRequest &request)
 		if (iter->first.find("SEC") != std::string::npos)
 			continue;
 		if (iter->first.find("CONTENT-LENGTH") == std::string::npos && iter->first.find("SERVER-PROTOCOL") == std::string::npos \
-		&& iter->first.find("SERVER-NAME") == std::string::npos && iter->first.find("SCRIPT-NAME") == std::string::npos)
+		&& iter->first.find("SERVER_PORT") == std::string::npos && iter->first.find("SCRIPT-NAME") == std::string::npos)
 			key = "HTTP_" + changeToUnderbar(iter->first);
 		else
 			key = changeToUnderbar(iter->first);

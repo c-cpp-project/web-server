@@ -166,6 +166,17 @@ void HttpResponse::sendBody(std::string body, bool isStaticFile)  // api 요청�
 		ResponseStatusLine();
 		processHeader();
 	}
+	else
+	{
+		size_t		pos;
+		std::string	target;
+		std::string	replacement = "HTTP/1.1";
+
+		target = "Status:";
+		pos = body.find(target);
+		if (pos != std::string::npos)
+			body = body.replace(pos, target.length(), replacement);
+	}
 	HttpResponseBody(body);
 }
 

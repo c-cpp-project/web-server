@@ -42,7 +42,7 @@ for key, value in os.environ.items():
 
 headers["CONTENT_LENGTH"] = str(file_size)
 headers["DATE"] = date_string
-print("{0} {1} OK\r\n".format(headers["SERVER_PROTOCOL"], 200), end='')
+print("{0} {1} OK\r\n".format("Status:", 200), end='')
 for key, value in headers.items():
     if key == "CONTENT_TYPE":
         value = "text/plain"

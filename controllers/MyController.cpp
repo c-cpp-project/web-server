@@ -166,14 +166,12 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
 		throw "405";
 	
 	ss << serverConfig->getPort();
-	request.setHeader("SERVER-NAME", ss.str());
-	request.setHeader("SERVER-PROTOCOL", serverConfig->getServerName());
+	request.setHeader("SERVER_PORT", ss.str());
+	request.setHeader("SERVER_SOFTWARE", serverConfig->getServerName());
 	if ((request.getMethod() == "GET") && request.getQueryString() == "")
 		runService(request, response);
 	else
-	{
 		runCgiScript(request, response);
-	}
 }
 
 // Controller를 Server 개수만큼만 만들자.

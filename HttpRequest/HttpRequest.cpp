@@ -53,6 +53,13 @@ std::string HttpRequest::getQueryString() const
 	return (request_line->getQueryString());
 }
 
+std::string HttpRequest::getProtocolString() const
+{
+	if (request_line == NULL)
+		return ("");
+	return (request_line->getProtocolString());
+}
+
 std::string HttpRequest::getHeader(const std::string& header) const
 {
 	if (request_headers == NULL)

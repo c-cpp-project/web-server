@@ -22,7 +22,8 @@ class HttpRequest
 
 		std::string getMethod() const;
 		std::string getPath() const;
-		std::string getQueryString() const; // 테스트용
+		std::string getQueryString() const;
+		std::string getProtocolString() const;
 		std::string getHeader(const std::string& header) const;
 		std::string getBody() const;
 		std::string getParameter(const std::string& param) const;

@@ -50,6 +50,7 @@ void RequestLine::parseProtocol(std::string protocol_string)
 	// TODO: 테스트기 돌려본 후 필요하다면 더 세심한 처리 필요
 	if (protocol_string != "HTTP/1.1")
 		throw "400";
+	this->protocol_string = protocol_string;
 }
 
 std::string RequestLine::getMethod() const
@@ -65,6 +66,11 @@ std::string RequestLine::getPath() const
 std::string RequestLine::getQueryString() const
 {
 	return (query_string);
+}
+
+std::string RequestLine::getProtocolString() const
+{
+	return (protocol_string);
 }
 
 void RequestLine::setMethod(const std::string& _method)

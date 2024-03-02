@@ -14,7 +14,6 @@ HttpResponse::HttpResponse(int sockfd, ServerConfiguration *serverConfig,
 	this->max_size = 64 * K;
 	this->status_code = "200";
 	this->responseBody = "";
-	this->overlaped = false;
 	this->serverConfig = serverConfig;
 	this->event = event;
 }
@@ -50,7 +49,6 @@ HttpResponse &HttpResponse::operator=(const HttpResponse &ref) {
 	status_code = ref.status_code;
 	responseBody = ref.responseBody;
 	authenticated = ref.authenticated;
-	overlaped = ref.overlaped;
 	serverConfig = ref.serverConfig;
 	event = ref.event;
 	return (*this);
@@ -85,7 +83,7 @@ void HttpResponse::listDirectory(std::string directory) {
 	ss << body.length();
 	putHeader("Content-Type", "text/html");
 	putHeader("Content-Length", ss.str());
-	sendBody(body);
+	sendBody(body, true);
 	event->saveEvent(
 			getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0,
 			new HttpHandler(getSockfd(), getByteDump(), serverConfig));  // SEND
@@ -97,7 +95,7 @@ void HttpResponse::redirect(std::string redirectUri) {
 	putHeader("Content-Type", "text/html");
 	putHeader("Location", redirectUri);
 	putHeader("Content-Length", "0");
-	sendBody("");
+	sendBody("", true);
 	// BeanFactory::registerEvent("SEND", new HttpHandler(getSockfd(), *this),
 	// event);H
 	event->saveEvent(
@@ -160,14 +158,14 @@ void  HttpResponse::forward(HttpRequest &request)  // controller에서 사용한
 										 new HttpHandler(fd, request, *this, buf.st_size));
 }
 
-void HttpResponse::sendBody(std::string body)  // api 요청에 대한 응답
+void HttpResponse::sendBody(std::string body, bool isStaticFile)  // api 요청에 대한 응답
 {
-	if (overlaped == false)
-		overlaped = true;
-	else
-		return;
-	ResponseStatusLine();
-	processHeader();
+	std::cout << "isStaticFile: " << isStaticFile << "\n";
+	if (isStaticFile == true)
+	{
+		ResponseStatusLine();
+		processHeader();
+	}
 	HttpResponseBody(body);
 }
 

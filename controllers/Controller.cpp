@@ -8,6 +8,7 @@ void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, c
 	char const 	*argv[3];
 	std::string	data;
 
+	request.setHeader("SCRIPT-NAME", std::string(cgi_python));
 	if (request.getMethod() == "POST" && request.getHeader("CONTENT-TYPE") != "application/x-www-form-urlencoded")
 		pipe(pipefd1);
 	pipe(pipefd2);
@@ -100,7 +101,7 @@ char		**Controller::envpList(HttpRequest &request)
 
 	for (iter = request.getHeaderBegin(); iter != request.getHeaderEnd(); iter++)
 		size++;
-	size += 7; // METHOD, SERVER_PROTOCOL, PATH_INFO, CONTENT_LENGTH, REQUEST_URI, CONTENT_TYPE, PATH_TRANSLATED
+	size += 7; // METHOD, SERVER_PROTOCOL, PATH_INFO, REQUEST_URI, CONTENT_TYPE, PATH_TRANSLATED; SERVER_PROTOCOL
 	if (request.getQueryString() != "")
 		size++; // Query String
 	envp = new char*[size + 1];
@@ -110,19 +111,29 @@ char		**Controller::envpList(HttpRequest &request)
 		envp[idx++] = strdup(("QUERY_STRING=" + request.getQueryString()).c_str());
 	envp[idx++] = strdup(("PATH_INFO=" + request.getRepository()).c_str());
 	envp[idx++] = strdup(("PATH_TRANSLATED=" + request.getPath()).c_str());
-	envp[idx++] = strdup(("CONTENT_LENGTH=" + request.getHeader("CONTENT_LENGTH")).c_str());
 	envp[idx++] = strdup(("REQUEST_URI=" + request.getRepository()).c_str());
-	envp[idx++] = strdup(("CONTENT_TYPE=" + request.getHeader("CONTENT_TYPE")).c_str());
+	envp[idx++] = strdup(("CONTENT_TYPE=" + ResponseConfig::getContentType(request.getPath())).c_str());
+	envp[idx++] = strdup(("SERVER_PROTOCOL=" + request.getProtocolString()).c_str());
 	for (iter = request.getHeaderBegin(); iter != request.getHeaderEnd(); iter++)
 	{
-		std::string	key = "HTTP_" + changeToUnderbar(iter->first);
+		std::string	key;
+
+		if (iter->first.find("ACCEPT") != std::string::npos || iter->first.find("CONTENT-TYPE") != std::string::npos)
+			continue;
+		if (iter->first.find("SEC") != std::string::npos)
+			continue;
+		if (iter->first.find("CONTENT-LENGTH") == std::string::npos && iter->first.find("SERVER-PROTOCOL") == std::string::npos \
+		&& iter->first.find("SERVER-NAME") == std::string::npos && iter->first.find("SCRIPT-NAME") == std::string::npos)
+			key = "HTTP_" + changeToUnderbar(iter->first);
+		else
+			key = changeToUnderbar(iter->first);
 		std::string	value = changeToUnderbar(iter->second);
 		std::string	env = key + "=" + value;
 
 		envp[idx++] = strdup(env.c_str());
 	}
 	envp[idx] = 0;
-	for (int i = 0; i < size; i++)
+	for (int i = 0; envp[i] != 0; i++)
 	{
 		std::cout << envp[i] << "\n";
 	}
@@ -257,8 +268,6 @@ bool    Controller::isAcceptableMethod(std::string method)
 	std::cout << "this->masking : " << this->masking << ", " << method << "\n";
 	if ((method == "GET")&& (1 & this->masking))
 		return (true);
-	// if ((method == "GET")&& (1 & this->masking))
-	// 	return (true);
 	else if (method == "POST" && (2 & this->masking))
 		return (true);
 	else if (method == "DELETE" && (8 & this->masking))

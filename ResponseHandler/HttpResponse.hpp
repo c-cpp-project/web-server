@@ -32,7 +32,6 @@ private:
 	std::string	status_code;
 	std::string	responseBody;
 	bool		authenticated;
-	bool		overlaped;
 	ServerConfiguration *serverConfig;
 	Event				*event;
 public:
@@ -54,7 +53,7 @@ public:
 	void	redirect(std::string redirectUri);
 	void    forward(HttpRequest &Httprequest);
 	void	putHeaders(int length, HttpRequest &request);
-	void    sendBody(std::string body);
+	void    sendBody(std::string body, bool isExclude);
 	void    ResponseStatusLine();
 	void    processHeader();
 	

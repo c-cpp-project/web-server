@@ -55,9 +55,10 @@ void ReadEventBean::responseSaveEvent(std::string body,
   HttpRequest &request = httpHandler->getHttpRequest();
   ServerConfiguration *serverConfig = response.getServerConfiguration();
 
-  if (request.getParameter("Range") != "" && request.getMethod() == "GET")
+  if (request.getParameter("Range") != "" && request.getMethod() == "GET" && request.getQueryString() == "")
     body = response.readRangeQuery(request.getParameter("Range"), body);
-  response.sendBody(body);
+  response.sendBody(body, (request.getQueryString() == "" && request.getMethod() == "GET" ||\
+  ("400" <= response.getStatusCode() && response.getStatusCode() <= "500")));
   event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0,
                    new HttpHandler(response.getSockfd(), response.getByteDump(),
                                    serverConfig));  // EVFILT_READ, EVFILT_WRITE

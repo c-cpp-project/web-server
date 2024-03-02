@@ -49,12 +49,14 @@ int HttpRequestHandler::RequestAndResponse(Event *event)
 			return (FAILURE);  // 버퍼에 완전한 요청이 없음
 		if (ChunkedRequestHandling(request) == IN_PROGRESS_CHUNKED_REQUEST)
 			return (SUCCESS); // chunk 요청 중인 경우 -> 아직 response 하지 않음
+
 		// Response Part
 		int kqueue_fd = 0;
 		FrontController front_controller(socket_fd, server_config, event);
 		front_controller.run(*request);
+
 		delete request;
-	} 
+	}
 	catch (const char *e) // 유효하지 않은 요청 -> 오류 응답
 	{
 		std::cout << e << ": handle\n";

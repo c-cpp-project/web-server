@@ -26,7 +26,7 @@ void HttpRequestParser::parseRequestLine(HttpRequest *request, ServerConfigurati
 		start += 2;
 
 	// 요청 라인이 들어왔는지 확인하기
-	size_t end_of_line = buffer.find("\r\n");
+	size_t end_of_line = buffer.find("\r\n", start);
 	if (end_of_line == std::string::npos) // 요청 라인의 끝을 식별할 수 없는 경우
 	{
 		if (buffer.size() >= server_config->getClientHeaderSize())	// 최대 헤더 크기만큼 충분히 읽었다면

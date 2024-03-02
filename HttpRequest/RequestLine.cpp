@@ -17,6 +17,7 @@ RequestLine::RequestLine(const RequestLine& ref)
 	method = ref.getMethod();
 	path = ref.getPath();
 	query_string = ref.getQueryString();
+	protocol_string = ref.getProtocolString();
 }
 
 void RequestLine::parseMethod(std::string method_string)

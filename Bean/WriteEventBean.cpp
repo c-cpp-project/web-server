@@ -6,7 +6,6 @@ WriteEventBean::~WriteEventBean() {}
 #define WRITE_BUFFER 1024 * 1024
 int WriteEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   int     		writeFd;
-  size_t  		idx;
   int      		ret;
   int         buf_size;
 
@@ -17,6 +16,7 @@ int WriteEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   ret = write(writeFd, httpHandler->getData().c_str() + httpHandler->getBufferIdx(), buf_size);
   std::cout << "WRITE RETURN: " << ret << ", GET_BUFFER_IDX: " << httpHandler->getBufferIdx() << "\n";
   httpHandler->setBufferIdx(httpHandler->getBufferIdx() + ret);
+  std::cout << "WRITE MOVED IDX: " << httpHandler->getBufferIdx() << "\n";
   if (ret < 0)
   {
     std::cout << "ERROR\n";

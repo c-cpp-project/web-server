@@ -62,6 +62,8 @@ bool Server::fillServer(std::map<std::string, Location*>& mapLocations,
   while (it != mapSentence.end()) {
     if (it->first == "listen")
       this->setListen(it->second);
+    else if (it->first == "cgi_test_ext")
+      this->setCgiTestExt(it->second);
     else if (it->first == "server_name")
       this->setServerName(it->second);
     else if (it->first == "root")
@@ -193,3 +195,7 @@ void Server::setPostCgiPath(std::string& input) { this->postCgiPath = input; }
 void Server::setDeleteCgiPath(std::string& input) {
   this->deleteCgiPath = input;
 }
+
+void Server::setCgiTestExt(std::string& input) { this->cgiTestExt = input; }
+
+std::string Server::getCgiTestExt() const { return this->cgiTestExt; }

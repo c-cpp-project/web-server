@@ -51,9 +51,9 @@ void ReadEventBean::errorSaveEvent(HttpHandler *httpHandler, Event *event) {
 void ReadEventBean::responseSaveEvent(std::string body,
                                       HttpHandler *httpHandler, Event *event) {
   std::cout << "ReadEventBean::responseSaveEvent\n";
-  ServerConfiguration *serverConfig;
   HttpResponse &response = httpHandler->getHttpResponse();
   HttpRequest &request = httpHandler->getHttpRequest();
+  ServerConfiguration *serverConfig = response.getServerConfiguration();
 
   if (request.getParameter("Range") != "" && request.getMethod() == "GET")
     body = response.readRangeQuery(request.getParameter("Range"), body);

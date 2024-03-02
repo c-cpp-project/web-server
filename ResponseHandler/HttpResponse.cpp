@@ -144,13 +144,11 @@ void  HttpResponse::forward(HttpRequest &request)  // controller에서 사용한
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 	if ((fd < 0) && serverConfig->getErrorpageResourcePath(
 											std::atoi(getStatusCode().c_str())) == "") {
-		std::cout << fd << ", " << request.getMethod() << ", " << uri << ", "
-							<< getStatusCode() << "\n";
+		std::cout << fd << ", " << request.getMethod() << ", " << uri << ", " << getStatusCode() << "\n";
 		close(fd);
 		throw "404";
 	}
-	std::cout << fd << ", " << uri << ": status code = " << getStatusCode()
-						<< "\n";
+	std::cout << fd << ", " << uri << ": status code = " << getStatusCode() << "\n";
 	stat(uri.c_str(), &buf);
 	putHeader("Content-Type", ResponseConfig::getContentType(request.getPath()));
 	putHeaders(buf.st_size, request);

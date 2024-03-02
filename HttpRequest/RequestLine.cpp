@@ -76,3 +76,8 @@ void RequestLine::setPath(const std::string& _path)
 {
 	path = _path;
 }
+
+void RequestLine::setQueryString(std::string querystring)
+{
+	this->query_string = querystring;
+}

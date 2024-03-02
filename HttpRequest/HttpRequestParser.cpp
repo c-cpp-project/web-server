@@ -3,6 +3,7 @@
 
 void HttpRequestParser::parse(HttpRequest*& request, ServerConfiguration *server_config, const std::string& buffer)
 {
+	std::cout << "HttpRequestParser::parse\n";
 	long start = 0;
 	request = new HttpRequest();
 	parseRequestLine(request, server_config, buffer, start);

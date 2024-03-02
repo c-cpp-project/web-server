@@ -19,10 +19,11 @@ HttpRequestHandler::HttpRequestHandler(int _socket_fd, ServerConfiguration *_ser
 // TODO : handle 리턴 값 필요 없을 수도 있음
 int HttpRequestHandler::handle(Event *event)
 {
-	// std::cout << "start handle\n";
+	std::cout << "start handle\n";
 	readRequest(); // 소켓으로부터 요청 읽어오기
 	while (true)
 	{
+		std::cout << "handle while\n";
 		if (RequestAndResponse(event) == FAILURE) // 불완전한 요청인 경우
 			return (FAILURE);
 		if (buffers[socket_fd] == "") // 버퍼의 요청을 모두 처리한 경우
@@ -84,6 +85,7 @@ void HttpRequestHandler::readRequest()
 		read_size = server_config->getClientBodySize(request->getPath()) + 23;
 	else					// 일반 요청 : server header size + server body size
 		read_size = server_config->getClientRequestSize("");
+	std::cout << "read_size: " << read_size << "\n";
 
 	// read_size 만큼 temp_buffer에 읽어오기
 	char *temp_buffer = new char[read_size];
@@ -96,6 +98,8 @@ void HttpRequestHandler::readRequest()
 		delete[] temp_buffer;
 		throw ClientSocketCloseException();
 	}
+	std::cout << "read_byte: " << read_byte << "\n";
+
 
 	// 읽어온 내용 버퍼에 추가하기
 	buffers[socket_fd] += std::string(temp_buffer, read_byte);

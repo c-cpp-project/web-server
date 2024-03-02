@@ -78,6 +78,7 @@ void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
 	std::string		fullpath;
 	std::string		targetPath;
 	std::string		mainChain;
+	std::string	request_uri = request.getPath();
 
 	try
 	{
@@ -98,8 +99,10 @@ void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
 	// targetPath는 폴더 혹은 파일이다.
 	if (targetPath[targetPath.length() - 1] == '/')
 		targetPath = targetPath.substr(0, targetPath.length() - 1);
+
+	request_uri += (request.getQueryString() == "" ? "" : "?" + request.getQueryString());
+	request.setRepository(request_uri);
 	request.setPath(targetPath);
-	response.putHeader("Content-Type", ResponseConfig::getContentType(request.getHeader("CONTENT-TYPE")));
 	if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded") // get, post
 		doGet(request, response);
 	else if (request.getMethod() == "POST")
@@ -147,7 +150,6 @@ void	MyController::runService(HttpRequest &request, HttpResponse &response)
 		}
 		std::cout << staticPath << " = staticPath\n";
 		request.setPath(staticPath);
-		response.putHeader("Content-Type", ResponseConfig::getContentType(staticPath));
 		response.forward(request);
 	}
 }

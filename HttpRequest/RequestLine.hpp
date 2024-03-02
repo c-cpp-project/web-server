@@ -21,6 +21,7 @@ class RequestLine
 		std::string getMethod() const;
 		std::string getPath() const;
 		std::string getQueryString() const;
+		void		setQueryString(std::string querystring);
 
 		void setMethod(const std::string& _method);
 		void setPath(const std::string& _path);

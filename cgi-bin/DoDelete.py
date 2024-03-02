@@ -3,17 +3,25 @@
 import sys
 import os, shutil
 
-def removeFile(file_path):
+def removeFile(path):
     try:
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-        if os.path.isdir(folder_path):
-            shutil.rmtree(folder_path)
-        return True
+        if os.path.isfile(path):
+            os.remove(path)
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        return "ok"
     except OSError as e:
-        return False
+        return "no"
 
 
 # file_path = sys.stdin.read()
-file_path = sys.argv[1]
-removeFile(file_path)
+path_info = os.environ["PATH_TRANSLATED"]
+for key, value in os.environ.items():
+    if key.startswith("HTTP_"):
+        key_without_http = key[5:]  # "HTTP_" 부분을 제외한 나머지 부분
+        headers[key_without_http] = value
+    else:
+        headers[key]  = value
+for key, value in headers.items():
+    print("{0}: {1}".format(key, value))
+value = removeFile(path_info)

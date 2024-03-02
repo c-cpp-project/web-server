@@ -42,8 +42,11 @@ public:
 	Controller(int masking, std::string mLocation);
 	Controller(int masking, ServerConfiguration	*serverConfig, std::string mLocation);
 
+	char		**envpList(HttpRequest &request);
+	void 		freeEnvpList(char *const *envp);
+	std::string	changeToUnderbar(std::string src);
 	// 모듈화
-	void			classifyEvent(HttpRequest &request, HttpResponse &response, const char *cgi_python, std::string contentType);
+	void			classifyEvent(HttpRequest &request, HttpResponse &response, const char *cgi_python);
 	void			readEventRegsiter(int readfd[2], HttpResponse &response, size_t bodySize);
 	void			writeEventRegister(int writefd[2], int readfd[2], HttpResponse &response, std::string data);
 };

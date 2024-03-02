@@ -8,6 +8,7 @@ class Event;
 class Bean;
 class ReadEventBean : public Bean {
  private:
+  static std::map<int, std::string> buffers;
   void responseSaveEvent(std::string body, HttpHandler *httpHandler,
                          Event *event);
   void errorSaveEvent(HttpHandler *httpHandler, Event *event);

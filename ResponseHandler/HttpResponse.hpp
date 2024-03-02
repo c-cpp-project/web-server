@@ -53,6 +53,7 @@ public:
 	void	listDirectory(std::string directory);
 	void	redirect(std::string redirectUri);
 	void    forward(HttpRequest &Httprequest);
+	void	putHeaders(int length, HttpRequest &request);
 	void    sendBody(std::string body);
 	void    ResponseStatusLine();
 	void    processHeader();

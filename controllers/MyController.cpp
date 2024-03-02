@@ -162,7 +162,7 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
 	std::stringstream 	ss;
 
 	std::cout << "MyController::service" << "\n";
-	if (isAcceptableMethod(request.getMethod()) == false)
+	if (isAcceptableMethod(request.getMethod()) == false || serverConfig->get)
 		throw "405";
 	
 	ss << serverConfig->getPort();

@@ -5,7 +5,6 @@
 #include "../Bean/BeanFactory.hpp"
 #include "ServerConfiguration.hpp"
 #include "SocketUtils.hpp"
-#include "mock/Handler.hpp"
 
 #define SOCKET_CLOSE 0
 #define SOCKET_OPEN -1

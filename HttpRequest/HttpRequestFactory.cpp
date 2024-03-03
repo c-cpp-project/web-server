@@ -79,9 +79,9 @@ void HttpRequestFactory::SpecialExceptionHandling(const int& e, int socket_fd, H
 	switch(e)
 	{
 	case INCOMPLETE_REQUEST: // 불완전한 요청
-		request = NULL;
 		if (!HttpRequestHandler::getChunkedRequest(socket_fd))
 			delete request; // chunk 요청의 경우 request 객체를 삭제하지 않기
+		request = NULL;
 		break;
 	case START_CHUNKED_REQUEST: // 청크 전송 시작 요청
 		HttpRequestHandler::addChunkedRequest(socket_fd, request); // chunkeds 맵에 request 객체 추가

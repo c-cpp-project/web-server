@@ -87,12 +87,10 @@ void HttpRequestHandler::readRequest()
 		read_size = server_config->getClientBodySize(request->getPath()) + 23;
 	else					// 일반 요청 : server header size + server body size
 		read_size = server_config->getClientRequestSize("");
-	std::cout << "read_size: " << read_size << "\n";
 
 	// read_size 만큼 temp_buffer에 읽어오기
 	char *temp_buffer = new char[read_size];
 	long read_byte = recv(socket_fd, temp_buffer, read_size, 0);
-	// std::cout << "[[" << std::string(temp_buffer, read_byte) << ", " << read_byte << "]]= recv\n";
 	if (read_byte == -1) { // recv 시스템 콜 오류
 		delete[] temp_buffer;
 		throw SocketCloseException500();
@@ -100,15 +98,10 @@ void HttpRequestHandler::readRequest()
 		delete[] temp_buffer;
 		throw ClientSocketCloseException();
 	}
-	std::cout << "read_byte: " << read_byte << "\n";
-
 
 	// 읽어온 내용 버퍼에 추가하기
 	buffers[socket_fd].append(temp_buffer, read_byte);
 	delete[] temp_buffer;
-
-	// std::cout << "[INFO] buffer after read: " << "\n";
-	// std::cout << buffers[socket_fd] << "{end}\n";
 }
 
 int HttpRequestHandler::ChunkedRequestHandling(HttpRequest *request)

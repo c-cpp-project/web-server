@@ -5,6 +5,8 @@
 #include "../Bean/BeanFactory.hpp"
 #include "ServerConfiguration.hpp"
 #include "SocketUtils.hpp"
+#include "setting/ConfigParser.hpp"
+#include "../controllers/ControllerMapping.hpp"
 
 #define SOCKET_CLOSE 0
 #define SOCKET_OPEN -1

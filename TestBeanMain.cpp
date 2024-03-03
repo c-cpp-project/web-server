@@ -1,7 +1,9 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
 #include <cstring>
+
 #include "server/WebServer.hpp"
 
 int main(int argc, char** argv) {
@@ -35,7 +37,7 @@ int main(int argc, char** argv) {
   ResponseConfig responseConfig;  // response에서 사용하는 메서드 설정
   ControllerMapping controllerMapping(serverConfigs);  // Controller
   WebServer& webServer = WebServer::getInstance(serverConfigs);
-  
+
   signal(SIGPIPE, SIG_IGN);
   webServer.execute();
 }

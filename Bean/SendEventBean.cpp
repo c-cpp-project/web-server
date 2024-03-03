@@ -21,7 +21,7 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   std::cout << "SEND BEFORE IDX: " << httpHandler->getBufferIdx() << " + " << ret << "\n";
   httpHandler->setBufferIdx(httpHandler->getBufferIdx() + ret);
   std::cout << "SEND MOVED IDX: " << httpHandler->getBufferIdx() << "\n";
-  if (100000 <= httpHandler->getData().length() && httpHandler->getData().length() <= 200000)
+  if (100000 <= httpHandler->getBufferIdx() && httpHandler->getBufferIdx() <= 200000)
     std::cout << "special header = [" << std::string(httpHandler->getData().c_str(), httpHandler->getBufferIdx()) << "]\n";
   if (ret < 0)
   {

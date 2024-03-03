@@ -90,8 +90,6 @@ std::string	Controller::changeToUnderbar(std::string src)
 	return (src);
 }
 
-
-
 char		**Controller::envpList(HttpRequest &request)
 {
 	std::map<std::string, std::string>::iterator iter;
@@ -118,19 +116,21 @@ char		**Controller::envpList(HttpRequest &request)
 	for (iter = request.getHeaderBegin(); iter != request.getHeaderEnd(); iter++)
 	{
 		std::string	key;
+		std::string	value;
+		std::string	env;
 
+		key = iter->first;
 		if (iter->first.find("ACCEPT") != std::string::npos || iter->first.find("CONTENT-TYPE") != std::string::npos)
 			continue;
-		if (iter->first.find("SEC") != std::string::npos)
+		if (iter->first.find("SEC-") != std::string::npos)
 			continue;
 		if (iter->first.find("CONTENT-LENGTH") == std::string::npos && iter->first.find("SERVER-PROTOCOL") == std::string::npos \
 		&& iter->first.find("SERVER_PORT") == std::string::npos && iter->first.find("SCRIPT-NAME") == std::string::npos)
-			key = "HTTP_" + changeToUnderbar(iter->first);
+			key = "HTTP_" + changeToUnderbar(key);
 		else
-			key = changeToUnderbar(iter->first);
-		std::string	value = changeToUnderbar(iter->second);
-		std::string	env = key + "=" + value;
-
+			key = changeToUnderbar(key);
+		value = changeToUnderbar(iter->second);
+		env = key + "=" + value;
 		envp[idx++] = strdup(env.c_str());
 	}
 	envp[idx] = 0;

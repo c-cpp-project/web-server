@@ -117,6 +117,11 @@ std::string		HttpHandler::getData(void)
     return (this->data);
 }
 
+int     HttpHandler::getDataLength(void)
+{
+    return (this->data.length());
+}
+
 void    HttpHandler::setData(std::string data)
 {
     this->data = data;
@@ -135,4 +140,9 @@ void    HttpHandler::setBufferIdx(long long bufferIdx)
 long long   HttpHandler::getBufferIdx(void)
 {
     return (this->bufferIdx);
+}
+
+const char  *HttpHandler::getBufferStartIdx(void)
+{
+    return (this->data.c_str());
 }

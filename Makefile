@@ -41,7 +41,7 @@ SRCS = TestBeanMain.cpp server/setting/ConfigFunctions.cpp server/setting/Config
 	
 OBJS = $(SRCS:.cpp=.o)
 CXX = c++
-CXXFLAGS = -Werror -std=c++98 -fsanitize=address -g
+CXXFLAGS = -Werror -std=c++98
 all : $(NAME)
 $(NAME) : $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)

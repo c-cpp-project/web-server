@@ -104,7 +104,7 @@ void HttpRequestHandler::readRequest()
 
 
 	// 읽어온 내용 버퍼에 추가하기
-	buffers[socket_fd] += std::string(temp_buffer, read_byte);
+	buffers[socket_fd].append(temp_buffer, read_byte);
 	delete[] temp_buffer;
 
 	// std::cout << "[INFO] buffer after read: " << "\n";

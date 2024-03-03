@@ -37,9 +37,11 @@ public:
 	ServerConfiguration*	getServerConfiguration(void);
 	std::string		getData(void);
 	void    		setData(std::string data);
+	int     		getDataLength(void);
 	long long   	getBodySize(void);
 	void    		setBufferIdx(long long bufferIdx);
 	long long   	getBufferIdx(void);
+	const char  	*getBufferStartIdx(void);
 };
 // HttpResponse 대입 연산자를 만들어야 한다.
 #endif

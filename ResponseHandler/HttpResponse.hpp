@@ -26,7 +26,7 @@ class HttpResponse
 private:
 	int         sockfd;
 	std::map<std::string, std::string> headers;
-	std::vector<std::string>    buffer;
+	std::string		buffer;
 	unsigned long	max_size;
 	std::string	send_timeout; // WAS
 	std::string	status_code;

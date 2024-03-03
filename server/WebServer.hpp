@@ -11,7 +11,7 @@
 #define SOCKET_OPEN -1
 class WebServer {
  public:
-  static const int LISTENCAPACITY = 1000;
+  static const int LISTENCAPACITY = 5000;
   static WebServer& getInstance(
       std::map<int, ServerConfiguration*> serverConfigs);
   void execute();

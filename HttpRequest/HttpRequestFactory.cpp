@@ -52,7 +52,7 @@ long HttpRequestFactory::parseChunkedRequest(HttpRequest* request, ServerConfigu
 	if (chunk_size == FAILURE)
 		throw SocketCloseException400(); // 청크 크기를 식별할 수 없는 경우
 	if (chunk_size > client_body_size)
-		throw SocketCloseException400(); // 제한된 바디 크기를 초과하는 청크 크기
+		throw SocketCloseException413(); // 제한된 바디 크기를 초과하는 청크 크기
 
 	// 청크 데이터가 들어왔는지 확인하기
 	if (buffer.size() < end_of_chunk_size + chunk_size + 4)

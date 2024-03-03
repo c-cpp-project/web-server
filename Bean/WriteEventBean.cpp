@@ -11,9 +11,9 @@ int WriteEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
 
   writeFd = httpHandler->getFd();
   buf_size = WRITE_BUFFER;
-  if (httpHandler->getData().length() - httpHandler->getBufferIdx() < WRITE_BUFFER)
-    buf_size = httpHandler->getData().length() - httpHandler->getBufferIdx();
-  ret = write(writeFd, httpHandler->getData().c_str() + httpHandler->getBufferIdx(), buf_size);
+  if (httpHandler->getDataLength() - httpHandler->getBufferIdx() < WRITE_BUFFER)
+    buf_size = httpHandler->getDataLength() - httpHandler->getBufferIdx();
+  ret = write(writeFd, httpHandler->getBufferStartIdx() + httpHandler->getBufferIdx(), buf_size);
   std::cout << "WRITE RETURN: " << ret << ", GET_BUFFER_IDX: " << httpHandler->getBufferIdx() << "\n";
   httpHandler->setBufferIdx(httpHandler->getBufferIdx() + ret);
   std::cout << "WRITE MOVED IDX: " << httpHandler->getBufferIdx() << "\n";
@@ -25,7 +25,7 @@ int WriteEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     delete httpHandler;
     return (ret);
   }
-  else if (httpHandler->getBufferIdx() == httpHandler->getData().length()) {
+  else if (httpHandler->getBufferIdx() == httpHandler->getDataLength()) {
     std::cout << "END\n";
     event->saveEvent(writeFd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);  // EVFILT_WRITE
     close(writeFd);

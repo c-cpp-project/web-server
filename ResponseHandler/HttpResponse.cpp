@@ -16,6 +16,7 @@ HttpResponse::HttpResponse(int sockfd, ServerConfiguration *serverConfig,
 	this->responseBody = "";
 	this->serverConfig = serverConfig;
 	this->event = event;
+	this->buffer = "";
 }
 
 HttpResponse::HttpResponse(int sockfd, int max_size,
@@ -28,7 +29,7 @@ HttpResponse::HttpResponse(int sockfd, int max_size,
 	this->status_code = "200";
 	this->serverConfig = serverConfig;
 	this->event = event;
-
+	this->buffer = "";
 }
 
 HttpResponse::HttpResponse(int sockfd, std::string send_timeout,
@@ -37,6 +38,7 @@ HttpResponse::HttpResponse(int sockfd, std::string send_timeout,
 	this->send_timeout = send_timeout;  // nginx send_timeout default
 	this->serverConfig = serverConfig;
 	this->event = event;
+	this->buffer = "";
 }
 
 HttpResponse &HttpResponse::operator=(const HttpResponse &ref) {
@@ -51,6 +53,7 @@ HttpResponse &HttpResponse::operator=(const HttpResponse &ref) {
 	authenticated = ref.authenticated;
 	serverConfig = ref.serverConfig;
 	event = ref.event;
+	buffer = ref.buffer;
 	return (*this);
 }
 
@@ -187,7 +190,7 @@ void HttpResponse::ResponseStatusLine() {
 	msg += this->status_code + " ";
 	msg += ResponseConfig::getHttpStatusMsg(this->status_code);
 	msg += "\r\n";
-	this->buffer.push_back(msg);
+	buffer.append(msg);
 }
 
 void HttpResponse::processHeader() {
@@ -197,25 +200,16 @@ void HttpResponse::processHeader() {
 	for (it = this->headers.begin(); it != this->headers.end(); ++it)
 		msg += (it->first + ": " + it->second + "\r\n");
 	msg += "\r\n";
-	this->buffer.push_back(msg);
+	buffer.append(msg);
 }
 
 void HttpResponse::HttpResponseBody(std::string body) {
 	if (body == "") return;
-	this->buffer.push_back(body);
+	buffer.append(body);
 }
 
 std::string HttpResponse::getByteDump(void) {
-	unsigned int i;
-	std::string httpMsg;
-
-	httpMsg = "";
-	i = 0;
-	while (i < this->buffer.size()) {
-		httpMsg += this->buffer[i];
-		i++;
-	}
-	return (httpMsg);
+	return (buffer);
 }
 
 void HttpResponse::setStatusCode(std::string code) { this->status_code = code; }

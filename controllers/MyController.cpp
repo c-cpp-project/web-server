@@ -35,7 +35,7 @@ std::string	MyController::findFullPath(std::string fullpath, std::string page)
 	dir = opendir(directory.c_str());
 	if (dir == NULL || file == "")
 	{
-		std::cout << "Error opening directory OR Only Directory\n";
+		std::cout << "Error Opening directory OR Only Directory\n";
 		throw "404";
 	}
 	// file에 확장자 없을 경우: 가장 처음으로 만나는 동일한 이름의 파일에 대응된다.
@@ -91,9 +91,14 @@ void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
 	}
 	catch(const char *e)
 	{
-		std::cout << "NO FILE: " << e << "\n";
-		if (access(fullpath.c_str(), F_OK) != 0)
-			throw "404";
+		std::cout << "NO FILE: " << e << "\n"; // DIRECTORY OR NO FILE
+		if (access(fullpath.c_str(), F_OK) != 0) // BEING IS NOTING
+		{
+			int fd = open(fullpath.c_str(), O_CREAT | O_TRUNC | O_RDWR, S_IRUSR | S_IWUSR);
+			if (fd < 0)
+				throw "500";
+			close(fd);
+		}
 		targetPath = fullpath;
 	}
 	// targetPath는 폴더 혹은 파일이다.
@@ -160,11 +165,19 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
 	ServerConfiguration *serverConfig = response.getServerConfiguration();
 	Location    		*location;
 	std::stringstream 	ss;
+	std::string			extension = serverConfig->getCgiTestExt();
+	bool				allowedMethod;
 
 	std::cout << "MyController::service" << "\n";
-	if (isAcceptableMethod(request.getMethod()) == false || serverConfig->get)
+	allowedMethod = false;
+	if (extension != "" && request.getPath().length() >= extension.length() && \
+	request.getPath().substr(request.getPath().length() - extension.length()) == extension)
+	{
+		if (request.getMethod() == "POST")
+			allowedMethod = true;
+	}
+	if (isAcceptableMethod(request.getMethod()) == false && allowedMethod == false)
 		throw "405";
-	
 	ss << serverConfig->getPort();
 	request.setHeader("SERVER_PORT", ss.str());
 	request.setHeader("SERVER_SOFTWARE", serverConfig->getServerName());
@@ -175,3 +188,9 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
 }
 
 // Controller를 Server 개수만큼만 만들자.
+
+// POST /directory/youpla.bla HTTP/1.1
+// Host: localhost
+// Content-Length: 5
+
+// aaaaa

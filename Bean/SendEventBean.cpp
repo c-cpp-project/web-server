@@ -21,6 +21,8 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   std::cout << "SEND BEFORE IDX: " << httpHandler->getBufferIdx() << " + " << ret << "\n";
   httpHandler->setBufferIdx(httpHandler->getBufferIdx() + ret);
   std::cout << "SEND MOVED IDX: " << httpHandler->getBufferIdx() << "\n";
+  if (100000 <= httpHandler->getData().length() && httpHandler->getData().length() <= 200000)
+    std::cout << "special header = [" << std::string(httpHandler->getData().c_str(), httpHandler->getBufferIdx()) << "]\n";
   if (ret < 0)
   {
     std::cout << "[" << std::string(httpHandler->getData().c_str(), httpHandler->getBufferIdx()) << "] BAD CGI BODY CONTENT";
@@ -32,6 +34,7 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   }
   else if (httpHandler->getBufferIdx() == httpHandler->getData().length()) {
     // event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);
+    // std::cout << "result = [" << std::string(httpHandler->getData().c_str(), httpHandler->getBufferIdx()) << "]\n";
     event->saveEvent(socketfd, EVFILT_READ, EV_ENABLE, 0, 0,
                      new HttpHandler(socketfd, serverConfig));
     close(socketfd);            

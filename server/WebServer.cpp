@@ -219,8 +219,8 @@ void WebServer::processTimerEvent(struct kevent& currEvent) {
 
 int WebServer::acceptClient(int serverSocket) {
   struct _linger linger;
-  linger.l_onoff = 1;
-  linger.l_linger = 1800;
+  linger.l_onoff = 0;
+  linger.l_linger = 5;
   const int clientSocket = accept(serverSocket, NULL, NULL);
   const int serverPort = serverSocketPortMap[serverSocket];
   setsockopt(clientSocket, SOL_SOCKET, SO_LINGER, &linger, sizeof(_linger));

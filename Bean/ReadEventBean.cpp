@@ -25,15 +25,13 @@ int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     delete[] temp_buffer;
   }
   buffers[readFd].append(temp_buffer, readByte);
-  std::cout << readByte << " , " << buffers[readFd].length() << "]\n";
+  std::cout << readByte << " , " << buffers[readFd].length() << " == " << httpHandler->getBodySize() << "]\n";
   delete[] temp_buffer;
-  if (readByte > 0 && buffers[readFd].length() < httpHandler->getBodySize())
+  if ((httpHandler->getBodySize() == 0 && readByte != 0) || (buffers[readFd].length() != httpHandler->getBodySize()))
     return (readByte);
-  else
-  {
-    responseSaveEvent(buffers[readFd], httpHandler, event);
-    buffers[readFd] = "";
-  }
+  responseSaveEvent(buffers[readFd], httpHandler, event);
+  buffers[readFd] = "";
+  close(httpHandler->getFd());
   event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
   delete httpHandler;
   return 0;

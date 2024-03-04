@@ -40,14 +40,13 @@ void    FrontController::run(HttpRequest tmp)
 		std::cout << request->at(i).getBody().length() << "\n";
 		std::cout << "===============================================\n";
 		std::cout << this->socketfd << ": this->socketfd\n";
+		// std::cout <<  "ADDRESS: [" << &serverConfig << ", " << &event << "]\n";
 		response = new HttpResponse(this->socketfd, serverConfig, event);
 		controller = ControllerMapping::getController(serverConfig->getPort(), request->at(i).getPath());
 		controller->service(request->at(i), (*response)); // CGI에서 대한 I/O 작업: READ, WRITE
+		delete response;
 		controller = nullptr;
 	}
-	// std::cout << "====================================================\n\n";
-	// response.flush(); // response I/O HTTP 작업: WRITE
-	// std::cout << "====================================================\n\n";
 	request->clear();
 	delete request;
 }

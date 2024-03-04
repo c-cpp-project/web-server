@@ -77,7 +77,7 @@ void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response, size
 	fcntl(readfd[0], F_SETFL, O_NONBLOCK);
 	std::cout << readfd[0] << " = Controller::readEventRegsiter\n";
 	std::cout << bodySize << " = bodySize\n";
-	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(readfd[0], response, bodySize)); // EVFILT_READ, EVFILT_WRITE
+	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(readfd[0], response, 0)); // EVFILT_READ, EVFILT_WRITE
 }
 
 std::string	Controller::changeToUnderbar(std::string src)
@@ -178,6 +178,7 @@ std::pair<std::string, std::string>	Controller::getFileName(HttpRequest &request
 			dir = opendir(fullpath.c_str());
 			while ((entry = readdir(dir)) != NULL)
 				count++;
+			closedir(dir);
 			ss << count;
 			filename = ss.str();
 		}

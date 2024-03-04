@@ -25,7 +25,7 @@ int WriteEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     delete httpHandler;
     return (ret);
   }
-  else if (httpHandler->getBufferIdx() == httpHandler->getDataLength()) {
+  else if (httpHandler->getBufferIdx() == httpHandler->getDataLength() || ret == 0) {
     std::cout << "END\n";
     event->saveEvent(writeFd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);  // EVFILT_WRITE
     close(writeFd);

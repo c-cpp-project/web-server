@@ -90,7 +90,7 @@ void HttpResponse::listDirectory(std::string directory) {
 	event->saveEvent(
 			getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0,
 			new HttpHandler(getSockfd(), getByteDump(), serverConfig));  // SEND
-	putHeader("Keep-Alive", "timeout=60, max=999");
+	// putHeader("Keep-Alive", "timeout=60, max=999");
 }
 
 void HttpResponse::redirect(std::string redirectUri) {
@@ -104,7 +104,7 @@ void HttpResponse::redirect(std::string redirectUri) {
 	event->saveEvent(
 			getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0,
 			new HttpHandler(getSockfd(), getByteDump(), serverConfig));  // SEND
-	putHeader("Keep-Alive", "timeout=60, max=999");
+	// putHeader("Keep-Alive", "timeout=60, max=999");
 }
 
 void  HttpResponse::putHeaders(int length, HttpRequest &request)
@@ -124,14 +124,13 @@ void  HttpResponse::putHeaders(int length, HttpRequest &request)
 	ss << length;
 	bodyLength = ss.str();
 	putHeader("Content-Length", bodyLength);
-	putHeader("Keep-Alive", "timeout=60, max=999");
+	// putHeader("Keep-Alive", "timeout=60, max=999");
 }
 
 void  HttpResponse::forward(HttpRequest &request)  // controller에서 사용한다.
 {
 	int fd;
 	std::string uri;
-	HttpHandler *httpHandler;
 	struct stat buf;
 
 	uri = request.getPath();

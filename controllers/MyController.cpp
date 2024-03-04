@@ -52,6 +52,7 @@ std::string	MyController::findFullPath(std::string fullpath, std::string page)
 		else if ((file.find(".") == std::string::npos && d_name.substr(0, d_name.find(".")) == file) || file == d_name)
 			break ;
 	}
+	closedir(dir);
 	if (entry == NULL)
 		throw "404";
 	return (directory + "/" + d_name);
@@ -78,7 +79,7 @@ void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
 	std::string		fullpath;
 	std::string		targetPath;
 	std::string		mainChain;
-	std::string	request_uri = request.getPath();
+	std::string		request_uri = request.getPath();
 
 	try
 	{
@@ -104,7 +105,6 @@ void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
 	// targetPath는 폴더 혹은 파일이다.
 	if (targetPath[targetPath.length() - 1] == '/')
 		targetPath = targetPath.substr(0, targetPath.length() - 1);
-
 	request_uri += (request.getQueryString() == "" ? "" : "?" + request.getQueryString());
 	request.setRepository(request_uri);
 	request.setPath(targetPath);
@@ -137,20 +137,15 @@ void	MyController::runService(HttpRequest &request, HttpResponse &response)
 	{
 		std::string index = getLocationIndex(serverConfig, request.getPath());
 		std::string	root = location->getRoot();
+		std::string	mainChain;
 
 		if (root[root.length() - 1] == '/')
 			root = root.substr(0, root.length() - 1);
 		if (request.getPath() == serverConfig->findLocationUri(request.getPath())) // /root/index_file
-		{
 			staticPath = findFullPath(std::string(root + "/" + index), index);
-			std::cout << "staticPath: " << staticPath << "\n";
-		}
 		else // /root/file_name
 		{
-			std::string	mainChain;
-
 			mainChain = serverConfig->findLocationUri(request.getPath());
-			std::cout << request.getPath().substr(mainChain.length() + 1) << " = pendingElements\n";
 			staticPath = findFullPath(std::string(root + "/" + request.getPath().substr(mainChain.length() + 1)), index);
 		}
 		std::cout << staticPath << " = staticPath\n";
@@ -163,7 +158,6 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
 {
 	std::string 		cgiPath;
 	ServerConfiguration *serverConfig = response.getServerConfiguration();
-	Location    		*location;
 	std::stringstream 	ss;
 	std::string			extension = serverConfig->getCgiTestExt();
 	bool				allowedMethod;

@@ -97,7 +97,7 @@ void HttpRequestParser::parseRequestBody(HttpRequest *request, ServerConfigurati
 	if (content_length == FAILURE)
 		throw "400"; // content_length 값이 유효하지 않은 경우
 	if (content_length > server_config->getClientBodySize(request->getPath()))
-		throw SocketCloseException400(); // content_length가 제한된 본문 크기를 초과하는 경우
+		throw SocketCloseException413(); // content_length가 제한된 본문 크기를 초과하는 경우
 	if (buffer.size() < start + content_length)
 		throw INCOMPLETE_REQUEST; // 버퍼에 content_length 만큼 충분히 없는 경우
 

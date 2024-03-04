@@ -42,7 +42,7 @@ long HttpRequestFactory::parseChunkedRequest(HttpRequest* request, ServerConfigu
 	if (end_of_chunk_size == std::string::npos)
 	{
 		if (buffer.size() >= body_size_length + 2)	// "client body size\r\n" 까지 충분히 읽었다면
-			throw SocketCloseException400();		// -> 너무 긴 청크 크기
+			throw SocketCloseException413();		// -> 너무 긴 청크 크기
 		else										// "client body size\r\n" 까지 충분히 읽지 못했다면
 			throw INCOMPLETE_REQUEST;				// -> 불완전한 청크 크기
 	}
@@ -79,9 +79,9 @@ void HttpRequestFactory::SpecialExceptionHandling(const int& e, int socket_fd, H
 	switch(e)
 	{
 	case INCOMPLETE_REQUEST: // 불완전한 요청
-		request = NULL;
 		if (!HttpRequestHandler::getChunkedRequest(socket_fd))
 			delete request; // chunk 요청의 경우 request 객체를 삭제하지 않기
+		request = NULL;
 		break;
 	case START_CHUNKED_REQUEST: // 청크 전송 시작 요청
 		HttpRequestHandler::addChunkedRequest(socket_fd, request); // chunkeds 맵에 request 객체 추가

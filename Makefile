@@ -6,14 +6,13 @@
 #    By: yuikim <yuikim@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/09/09 20:34:46 by sangwoki          #+#    #+#              #
-#    Updated: 2024/02/19 15:34:06 by yuikim           ###   ########.fr        #
+#    Updated: 2024/03/03 22:12:39 by yuikim           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = webserv
 SRCS = TestBeanMain.cpp server/setting/ConfigFunctions.cpp server/setting/ConfigParser.cpp server/setting/Location.cpp server/setting/Server.cpp server/ServerConfiguration.cpp server/WebServer.cpp \
 	 server/Event.cpp server/StringUtils.cpp server/SocketUtils.cpp \
-	 server/mock/Handler.cpp \
 	 HttpRequest/HttpRequestFactory.cpp \
 	 HttpRequest/HttpRequest.cpp \
 	 HttpRequest/HttpRequestParser.cpp \

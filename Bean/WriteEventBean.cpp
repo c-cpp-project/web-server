@@ -20,16 +20,18 @@ int WriteEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   if (ret < 0)
   {
     std::cout << "ERROR\n";
-    event->saveEvent(writeFd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);  // EVFILT_WRITE
+    event->saveEvent(writeFd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);  // EVFILT_WRITE
     close(writeFd);
     delete httpHandler;
+    httpHandler = 0;
     return (ret);
   }
   else if (httpHandler->getBufferIdx() == httpHandler->getDataLength() || ret == 0) {
     std::cout << "END\n";
-    event->saveEvent(writeFd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);  // EVFILT_WRITE
+    event->saveEvent(writeFd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);  // EVFILT_WRIT
     close(writeFd);
     delete httpHandler;
+    httpHandler = 0;
   }
   return ret;
 } 

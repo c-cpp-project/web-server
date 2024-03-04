@@ -35,7 +35,15 @@ std::vector<HttpRequest>	*MultiRequest::makeRequest(HttpRequest request)
 			HttpRequest	child;
 
 			child = request;
-			fillEachRequest(child, body.substr(cur, next - cur)); // [cur, next)
+			try
+			{
+				fillEachRequest(child, body.substr(cur, next - cur)); // [cur, next)
+			}
+			catch(const std::exception &e)
+			{
+				delete requestVec;
+				throw e;
+			}
 			requestVec->push_back(child);
 			cur = next + this->boundary.length() + std::string("\r\n").length();
 			next = body.find(this->boundary, cur);
@@ -62,7 +70,7 @@ void			MultiRequest::fillEachRequest(HttpRequest &request, std::string data)
 			break ;
 		std::string	line = data.substr(cur, next - cur);
 		if (request.addHeader(line) == FAILURE)
-			throw "400";
+			throw std::runtime_error("REQUEST FORMAT ERROR");;
 		cur = next + std::string("\r\n").length();
 	}
 	cur += std::string("\r\n").length();

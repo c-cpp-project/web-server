@@ -14,7 +14,7 @@ int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   int buf_size;
 
   readFd = httpHandler->getFd();
-  std::cout << "ReadEventBean::runBeanEvent = [" << readFd << ",";
+  std::cout << "ReadEventBean::runBeanEvent = [" << readFd << ", ";
   buf_size = serverConfig->getClientRequestSize("");
   temp_buffer = new char[buf_size];
   readByte = read(readFd, temp_buffer, buf_size);
@@ -27,13 +27,14 @@ int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   buffers[readFd].append(temp_buffer, readByte);
   std::cout << readByte << " , " << buffers[readFd].length() << " == " << httpHandler->getBodySize() << "]\n";
   delete[] temp_buffer;
-  if ((httpHandler->getBodySize() == 0 && readByte != 0) || (buffers[readFd].length() != httpHandler->getBodySize()))
+  if ((httpHandler->getBodySize() == 0 && readByte != 0) || (httpHandler->getBodySize() != 0 && buffers[readFd].length() != httpHandler->getBodySize()))
     return (readByte);
   responseSaveEvent(buffers[readFd], httpHandler, event);
   buffers[readFd] = "";
-  close(httpHandler->getFd());
-  event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
+  close(readFd);
+  // event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
   delete httpHandler;
+  httpHandler = 0;
   return 0;
 }
 
@@ -57,7 +58,7 @@ void ReadEventBean::responseSaveEvent(std::string body,
     body = response.readRangeQuery(request.getParameter("Range"), body);
   response.sendBody(body, (request.getQueryString() == "" && request.getMethod() == "GET" ||\
   ("400" <= response.getStatusCode() && response.getStatusCode() <= "500")));
-  event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0,
+  event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0,
                    new HttpHandler(response.getSockfd(), response.getByteDump(),
                                    serverConfig));  // EVFILT_READ, EVFILT_WRITE
 }

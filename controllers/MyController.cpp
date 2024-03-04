@@ -36,6 +36,7 @@ std::string	MyController::findFullPath(std::string fullpath, std::string page)
 	if (dir == NULL || file == "")
 	{
 		std::cout << "Error Opening directory OR Only Directory\n";
+		closedir(dir);
 		throw "404";
 	}
 	// file에 확장자 없을 경우: 가장 처음으로 만나는 동일한 이름의 파일에 대응된다.
@@ -96,9 +97,9 @@ void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
 		if (access(fullpath.c_str(), F_OK) != 0) // BEING IS NOTING
 		{
 			int fd = open(fullpath.c_str(), O_CREAT | O_TRUNC | O_RDWR, S_IRUSR | S_IWUSR);
+			close(fd);
 			if (fd < 0)
 				throw "500";
-			close(fd);
 		}
 		targetPath = fullpath;
 	}

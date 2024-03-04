@@ -37,7 +37,7 @@ bool Event::initKqueue() {
 int Event::create() {
   int res;
   struct timespec timeout;
-  timeout.tv_sec = MAX_CPU_TIME_USED;  // 3초
+  timeout.tv_sec = MAX_CPU_TIME_USED;
   timeout.tv_nsec = 0;
 
   res = kevent(kq, &changedList[0], changedList.size(), eventList,

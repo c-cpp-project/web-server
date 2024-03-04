@@ -5,8 +5,8 @@
 #include <ostream>
 #include <sstream>
 #include <vector>
-#define EVENTLIST_SIZE 1000
-#define MAX_CPU_TIME_USED 10000
+#define EVENTLIST_SIZE 1024
+#define MAX_CPU_TIME_USED 1000
 
 class Event {
  private:

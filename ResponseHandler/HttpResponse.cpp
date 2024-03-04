@@ -86,11 +86,9 @@ void HttpResponse::listDirectory(std::string directory) {
 	ss << body.length();
 	putHeader("Content-Type", "text/html");
 	putHeader("Content-Length", ss.str());
-	sendBody(body, true);
-	event->saveEvent(
-			getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0,
-			new HttpHandler(getSockfd(), getByteDump(), serverConfig));  // SEND
-	// putHeader("Keep-Alive", "timeout=60, max=999");
+	sendBody(body, true); 
+	putHeader("Connection", "keep-alive");
+	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), getByteDump(), serverConfig));  // SEND
 }
 
 void HttpResponse::redirect(std::string redirectUri) {
@@ -99,12 +97,8 @@ void HttpResponse::redirect(std::string redirectUri) {
 	putHeader("Location", redirectUri);
 	putHeader("Content-Length", "0");
 	sendBody("", true);
-	// BeanFactory::registerEvent("SEND", new HttpHandler(getSockfd(), *this),
-	// event);H
-	event->saveEvent(
-			getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0,
-			new HttpHandler(getSockfd(), getByteDump(), serverConfig));  // SEND
-	// putHeader("Keep-Alive", "timeout=60, max=999");
+	putHeader("Connection", "keep-alive");
+	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), getByteDump(), serverConfig));  // SEND
 }
 
 void  HttpResponse::putHeaders(int length, HttpRequest &request)
@@ -124,7 +118,7 @@ void  HttpResponse::putHeaders(int length, HttpRequest &request)
 	ss << length;
 	bodyLength = ss.str();
 	putHeader("Content-Length", bodyLength);
-	// putHeader("Keep-Alive", "timeout=60, max=999");
+	putHeader("Connection", "keep-alive");
 }
 
 void  HttpResponse::forward(HttpRequest &request)  // controller에서 사용한다.

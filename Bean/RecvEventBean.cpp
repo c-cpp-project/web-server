@@ -27,8 +27,10 @@ int RecvEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   }
   std::cout << "[RET] " << ret << std::endl;
   if (ret == 0) {
-    event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
+    event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DELETE, 0, 0, 0);
+    event->saveEvent(httpHandler->getFd(), EVFILT_TIMER, EV_DELETE, 0, 0, 0);
     delete httpHandler;
+    httpHandler = 0;
   }
   return ret;
 }

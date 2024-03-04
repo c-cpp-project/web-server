@@ -36,7 +36,6 @@ void WebServer::segSignalHandler(int signo) {
 void WebServer::init() {
   std::map<int, ServerConfiguration*>::iterator it = serverConfigs.begin();
   signal(SIGSEGV, WebServer::segSignalHandler);
-  int port = 8080;
   if (eventHandler.initKqueue()) {
     std::cout << "kqueue() error" << std::endl;
     exit(1);
@@ -71,26 +70,21 @@ int WebServer::openPort(ServerConfiguration* serverConfig) {
   hint.ai_socktype = SOCK_STREAM;
   std::string portStr = StringUtils::toString(port);
   int res = getaddrinfo(serverName.c_str(), portStr.c_str(), &hint, &info);
-  if (res == -1)
-    SocketUtils::exitWithPerror("[Error] getaddrinfo() error\n" +
-                                std::string(strerror(errno)));
+  if (res == -1) SocketUtils::exitWithPerror("[Error] getaddrinfo() error\n");
   int serverSocket =
       socket(info->ai_family, info->ai_socktype, info->ai_protocol);
   freeaddrinfo(info);
   if (serverSocket == -1)
-    SocketUtils::exitWithPerror("[Error] socket() error\n" +
-                                std::string(strerror(errno)));
+    SocketUtils::exitWithPerror("[Error] socket() error\n");
   setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
   res = bind(serverSocket, reinterpret_cast<struct sockaddr*>(&socketaddr),
              sizeof(socketaddr));
   if (res == -1) {
-    SocketUtils::exitWithPerror("[Error] bind() error\n" +
-                                std::string(strerror(errno)));
+    SocketUtils::exitWithPerror("[Error] bind() error\n");
   }
   res = listen(serverSocket, LISTENCAPACITY);
   if (res == -1) {
-    SocketUtils::exitWithPerror("[Error] bind() error\n" +
-                                std::string(strerror(errno)));
+    SocketUtils::exitWithPerror("[Error] listen() error\n");
   }
   return serverSocket;
 }
@@ -107,8 +101,7 @@ void WebServer::handleEvent() {
   while (true) {
     newEventCount = eventHandler.create();
     if (newEventCount == -1) {
-      SocketUtils::exitWithPerror("[ERROR] kevent() error\n" +
-                                  std::string(strerror(errno)));
+      SocketUtils::exitWithPerror("[ERROR] kevent() error\n");
     }
     eventHandler.clearChangedEventList();
     for (int i = 0; i < newEventCount; i++) {
@@ -162,9 +155,10 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
     // 소켓 정보 다 읽어들였을 때 소켓 fd close하는 후보에 추가
     // handler 메모리 할당된거 삭제
     if (currEvent.flags & EV_EOF) {
-      // std::cout << "[CHECK]" << std::endl;
-      // eventHandler.saveEvent(currEvent.ident, EVFILT_READ, EV_DISABLE, 0, 0,
-      // 0); addCandidatesForDisconnection(currEvent.ident); HttpHandler*
+      std::cout << "[CHECK]" << std::endl;
+      // eventHandler.saveEvent(currEvent.ident, EVFILT_READ, EV_DISABLE 0,
+      // 0); 
+      // addCandidatesForDisconnection(currEvent.ident); HttpHandler*
       // handler = reinterpret_cast<HttpHandler*>(currEvent.udata); delete
       // handler;
     } else {
@@ -218,7 +212,7 @@ void WebServer::processTimerEvent(struct kevent& currEvent) {
 int WebServer::acceptClient(int serverSocket) {
   struct _linger linger;
   linger.l_onoff = 1;
-  linger.l_linger = 1800;
+  linger.l_linger = 0;
   const int clientSocket = accept(serverSocket, NULL, NULL);
   const int serverPort = serverSocketPortMap[serverSocket];
   setsockopt(clientSocket, SOL_SOCKET, SO_LINGER, &linger, sizeof(_linger));

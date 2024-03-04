@@ -24,21 +24,18 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
             << ret << "\n";
   httpHandler->setBufferIdx(httpHandler->getBufferIdx() + ret);
   std::cout << "SEND MOVED IDX: " << httpHandler->getBufferIdx() << "\n";
-  if (ret < 0) {
-    ;
-    std::cout << "ERROR\n";
-    // event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0,
-    //                  0);  // EVFILT_WRITE
-    // close(socketfd);
-    delete httpHandler;
-    return (ret);
-  } else if (httpHandler->getBufferIdx() == httpHandler->getDataLength()) {
-    event->saveEvent(socketfd, EVFILT_READ, EV_ENABLE, 0, 0,
+  if (httpHandler->getBufferIdx() == httpHandler->getDataLength()) {
+    event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);
+    event->saveEvent(socketfd, EVFILT_READ, EV_ENABLE , 0, 0,
                      new HttpHandler(socketfd, serverConfig));
     // close(socketfd);
     delete httpHandler;
     std::cout << "================== SEND DONE ============================\n";
     return (0);
+  } else if (ret < 0) {
+    std::cout << "[SEND] ERROR\n";
+    delete httpHandler;
+    return (ret);
   }
   return (ret);
 }

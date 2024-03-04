@@ -91,7 +91,6 @@ bool Server::fillServer(std::map<std::string, Location*>& mapLocations,
     else if (it->first == "delete-cgi-path")
       this->setDeleteCgiPath(it->second);
     else {
-      std::cout << it->second << " " << it->first;
       return true;
     }
     it++;

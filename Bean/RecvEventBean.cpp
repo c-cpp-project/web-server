@@ -14,19 +14,24 @@ RecvEventBean::~RecvEventBean() {}
 int RecvEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   HttpRequestHandler httpRequestHandler(httpHandler->getFd(),
                                         httpHandler->getServerConfiguration());
-  std::cout << httpHandler->getFd() << ", "
-            << httpHandler->getServerConfiguration()
-            << " = RecvEventBean::runBeanEvent\n";
+  // std::cout << httpHandler->getFd() << ", "
+  //           << httpHandler->getServerConfiguration()
+  //           << " = RecvEventBean::runBeanEvent\n";
   int ret = -2;
   try {
     // return value 받아와야 함
     ret = httpRequestHandler.handle(event);
+  } catch (const ClientSocketCloseException &e) {
+    std::cout << "[EUIJIN] RECV DONE\n";
+    ret = 0;
+  } catch (const SocketCloseException413 &e) {
+    ret = 53;
   } catch (const std::exception &e) {
     std::cout << "[ERROR] SOCKET " << e.what() << std::endl;
     ret = -1;
   }
-  std::cout << "[RET] " << ret << std::endl;
-  if (ret == 0) {
+  if (ret != 32) std::cout << "[RET] " << ret << std::endl;
+  if (ret == 0 || ret == 53) {
     event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
     delete httpHandler;
   }

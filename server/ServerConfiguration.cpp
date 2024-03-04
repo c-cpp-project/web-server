@@ -32,10 +32,7 @@ ServerConfiguration::ServerConfiguration(Server& server) : server(&server) {
   this->defaultAllowedMethods.insert("GET");
 }
 
-int ServerConfiguration::getPort() const {
-  std::cout << server->getListen() << std::endl;
-  return server->getListen();
-}
+int ServerConfiguration::getPort() const { return server->getListen(); }
 
 int ServerConfiguration::getKeepAliveTimeout() {
   return server->getKeepAliveTimeout();
@@ -87,7 +84,6 @@ Location* ServerConfiguration::getLocation(const std::string uri) const {
 const std::pair<std::string, std::string>
 ServerConfiguration::getRedirectionPath(const std::string uri) const {
   const std::string locationUri = findLocationUri(uri);
-  std::cout << locationUri << std::endl;
   Location* location = server->getLocations()[locationUri];
   if (!server || location == NULL) {
     return std::pair<std::string, std::string>("400", "");  // 존재하지 않음
@@ -223,7 +219,6 @@ const std::string ServerConfiguration::findUriPattern(std::string uri) const {
       }
     }
   }
-  std::cout << matchesPattern << std::endl;
   if (matchesPattern) {
     std::string partial = uri.substr(slashIdx);
     partial.erase(partial.size() - 1);

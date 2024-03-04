@@ -14,7 +14,7 @@ int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   int buf_size;
 
   readFd = httpHandler->getFd();
-  std::cout << "ReadEventBean::runBeanEvent = [" << readFd << ",";
+  // std::cout << "ReadEventBean::runBeanEvent = [" << readFd << ",";
   buf_size = serverConfig->getClientRequestSize("");
   temp_buffer = new char[buf_size];
   readByte = read(readFd, temp_buffer, buf_size);
@@ -24,7 +24,7 @@ int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     delete[] temp_buffer;
   }
   buffers[readFd].append(temp_buffer, readByte);
-  std::cout << readByte << " , " << buffers[readFd].length() << "]\n";
+  // std::cout << readByte << " , " << buffers[readFd].length() << "]\n";
   delete[] temp_buffer;
   if (readByte > 0 && buffers[readFd].length() < httpHandler->getBodySize())
     return (readByte);
@@ -42,14 +42,14 @@ void ReadEventBean::errorSaveEvent(HttpHandler *httpHandler, Event *event) {
   HttpResponse &response = httpHandler->getHttpResponse();
   HttpRequest empty;
 
-  std::cout << "ReadEventBean::errorSaveEvent\n";
+  // std::cout << "ReadEventBean::errorSaveEvent\n";
   response.setStatusCode("500");
   response.forward(empty);
 }
 
 void ReadEventBean::responseSaveEvent(std::string body,
                                       HttpHandler *httpHandler, Event *event) {
-  std::cout << "ReadEventBean::responseSaveEvent\n";
+  // std::cout << "ReadEventBean::responseSaveEvent\n";
   HttpResponse &response = httpHandler->getHttpResponse();
   HttpRequest &request = httpHandler->getHttpRequest();
   ServerConfiguration *serverConfig = response.getServerConfiguration();
@@ -61,6 +61,9 @@ void ReadEventBean::responseSaveEvent(std::string body,
       body, (request.getQueryString() == "" && request.getMethod() == "GET" ||
              ("400" <= response.getStatusCode() &&
               response.getStatusCode() <= "500")));
+  event->saveEvent(response.getSockfd(), EVFILT_READ, EV_DISABLE, 0, 0,
+                   new HttpHandler(response.getSockfd(), response.getByteDump(),
+                                   serverConfig));
   event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0,
                    new HttpHandler(response.getSockfd(), response.getByteDump(),
                                    serverConfig));  // EVFILT_READ, EVFILT_WRITE

@@ -20,24 +20,25 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   ret = write(socketfd,
               httpHandler->getBufferStartIdx() + httpHandler->getBufferIdx(),
               buf_size);
-  std::cout << "SEND BEFORE IDX: " << httpHandler->getBufferIdx() << " + "
-            << ret << "\n";
+  // std::cout << "SEND BEFORE IDX: " << httpHandler->getBufferIdx() << " + "
+  //           << ret << "\n";
   httpHandler->setBufferIdx(httpHandler->getBufferIdx() + ret);
-  std::cout << "SEND MOVED IDX: " << httpHandler->getBufferIdx() << "\n";
+  // std::cout << "SEND MOVED IDX: " << httpHandler->getBufferIdx() << "\n";
   if (ret < 0) {
     ;
-    std::cout << "ERROR\n";
+    // std::cout << "ERROR\n";
     // event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0,
     //                  0);  // EVFILT_WRITE
     // close(socketfd);
     delete httpHandler;
     return (ret);
   } else if (httpHandler->getBufferIdx() == httpHandler->getDataLength()) {
-    event->saveEvent(socketfd, EVFILT_READ, EV_ENABLE, 0, 0,
-                     new HttpHandler(socketfd, serverConfig));
+    // event->saveEvent(socketfd, EVFILT_READ, EV_ENABLE, 0, 0,
+    //                  new HttpHandler(socketfd, serverConfig));
     // close(socketfd);
     delete httpHandler;
-    std::cout << "================== SEND DONE ============================\n";
+    // std::cout << "================== SEND DONE
+    // ============================\n";
     return (0);
   }
   return (ret);

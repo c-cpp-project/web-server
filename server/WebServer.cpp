@@ -164,14 +164,8 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
   } else if (isClient(currEvent.ident)) {
     std::cout << currEvent.ident << " = RECV currEvent.ident\n";
     std::cout << "[RECV] DONE " << (currEvent.flags & EV_EOF) << std::endl;
-    // 소켓 정보 다 읽어들였을 때 소켓 fd close하는 후보에 추가
-    // handler 메모리 할당된거 삭제
     if (currEvent.flags & EV_EOF) {
-      // std::cout << "[CHECK]" << std::endl;
       eventHandler.saveEvent(currEvent.ident, EVFILT_READ, EV_DISABLE, 0, 0, 0); 
-      //addCandidatesForDisconnection(currEvent.ident); HttpHandler*
-      // handler = reinterpret_cast<HttpHandler*>(currEvent.udata); delete
-      // handler;
     } else {
       HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
       int ret = BeanFactory::runBeanByName("RECV", handler, &eventHandler);
@@ -184,7 +178,8 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
         // 계속 하나의 소켓만 연결됨
       }
     }
-  } else {
+  } 
+  else {
     std::cout << currEvent.ident << " = READ currEvent.ident\n";
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     BeanFactory::runBeanByName("READ", handler, &eventHandler);
@@ -218,6 +213,7 @@ void WebServer::processWriteEvent(struct kevent& currEvent) {
 
 void WebServer::processTimerEvent(struct kevent& currEvent) {
   std::cout << "WebServer::processTimerEvent START: " << currEvent.ident << "\n";
+  eventHandler.saveEvent(currEvent.ident, EVFILT_TIMER, EV_DISABLE, 0, 0, 0);
   if (handlerMap.find(currEvent.ident) == handlerMap.end())
     return ;
   HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
@@ -242,7 +238,7 @@ int WebServer::acceptClient(int serverSocket) {
   ServerConfiguration* serverConfig = serverConfigs[serverPort];
   addClient(clientSocket, serverConfig, &eventHandler);
   eventHandler.registerEnabledReadEvent(clientSocket, handlerMap[clientSocket]);
-  eventHandler.saveEvent(clientSocket, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, 30, handlerMap[clientSocket]);
+  eventHandler.saveEvent(clientSocket, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, 100, handlerMap[clientSocket]);
   return clientSocket;
 }
 

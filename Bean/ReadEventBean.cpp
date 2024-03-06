@@ -18,23 +18,27 @@ int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   buf_size = serverConfig->getClientRequestSize("");
   temp_buffer = new char[buf_size];
   readByte = read(readFd, temp_buffer, buf_size);
-  if (readByte < 0)
+  if (readByte < 0 || (readByte == 0 && buffers[readFd] == ""))
   {
     errorSaveEvent(httpHandler, event);
     buffers[readFd] = "";
     delete[] temp_buffer;
   }
-  buffers[readFd].append(temp_buffer, readByte);
-  std::cout << readByte << " , " << buffers[readFd].length() << " == " << httpHandler->getBodySize() << "]\n";
-  delete[] temp_buffer;
-  if ((httpHandler->getBodySize() == 0 && readByte != 0) || (httpHandler->getBodySize() != 0 && buffers[readFd].length() != httpHandler->getBodySize()))
-    return (readByte);
-  responseSaveEvent(buffers[readFd], httpHandler, event);
-  buffers[readFd] = "";
+  else
+  {
+    buffers[readFd].append(temp_buffer, readByte);
+    std::cout << readByte << " , " << buffers[readFd].length() << " == " << httpHandler->getBodySize() << "]\n";
+    delete[] temp_buffer;
+    if ((httpHandler->getBodySize() == 0 && readByte != 0) || (httpHandler->getBodySize() != 0 && buffers[readFd].length() != httpHandler->getBodySize()))
+      return (readByte);
+    responseSaveEvent(buffers[readFd], httpHandler, event);
+    buffers[readFd] = "";
+  }
   close(readFd);
-  // event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
+  event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
   delete httpHandler;
   httpHandler = 0;
+  std::cout << "ReadEventBean::runBeanEvent DONE\n";
   return 0;
 }
 

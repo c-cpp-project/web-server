@@ -89,6 +89,7 @@ std::string	ResponseConfig::getContentType(std::string filename)
 	std::string	contentType;
 	int i;
 
+	std::cout << "content type: " << filename << "\n";
 	contentType = "text/plain";
 	for (i = filename.length() - 1; i >= 0; i--)
 	{

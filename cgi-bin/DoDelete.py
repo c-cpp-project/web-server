@@ -2,6 +2,14 @@
 
 import sys
 import os, shutil
+from datetime import datetime
+from datetime import timezone, timedelta
+
+# 현재 시간을 가져옵니다.
+current_time = datetime.now(timezone.utc)
+
+# 날짜 포맷을 지정합니다.
+date_string = current_time.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
 def removeFile(path):
     try:
@@ -26,12 +34,13 @@ for key, value in os.environ.items():
     else:
         headers[key]  = value
 
-value = removeFile(path_info)
+data = removeFile(path_info)
 
-headers["CONTENT_LENGTH"] = str(len(value))
+headers["CONTENT_LENGTH"] = str(len(data))
 headers["DATE"] = date_string
-  print("{0} {1} OK\r\n".format("Status:", 200), end='')
+print("{0} {1} OK\r\n".format("Status:", 200), end='')
 for key, value in headers.items():
     if key in ["HOST", "CONTENT_LENGTH", "CONTENT_TYPE", "DATE"]:
         print("{0}: {1}\r\n".format(key.replace('_', '-'), value.replace('_', '-')), end='')
 print("\r\n", end='')
+print(data, end='')

@@ -49,11 +49,12 @@ if file_size > 0:
             headers[key]  = value
     headers["CONTENT_LENGTH"] = str(file_size)
     headers["DATE"] = date_string
-    print("{0} {1} OK\r\n".format("Status:", 200), end='')
+    sys.stdout.write("{0} {1} OK\r\n".format("Status:", 200))
     for key, value in headers.items():
         if key in ["HOST", "CONTENT_LENGTH", "CONTENT_TYPE", "DATE"]:
-            print("{0}: {1}\r\n".format(key.replace('_', '-'), value.replace('_', '-')), end='')
-    print("\r\n", end='')
+            sys.stdout.write("{0}: {1}\r\n".format(key.replace('_', '-'), value.replace('_', '-')))
+    sys.stdout.write("\r\n")
+    sys.stdout.flush()
         
     data = b''
     path = path_info

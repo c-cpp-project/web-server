@@ -123,30 +123,30 @@ void  HttpResponse::putHeaders(int length, HttpRequest &request)
 
 void  HttpResponse::forward(HttpRequest &request)  // controller에서 사용한다.
 {
-	int fd;
+	int 		fd;
 	std::string uri;
 	struct stat buf;
 
 	uri = request.getPath();
-	if ("400" <= getStatusCode() && getStatusCode() <= "500")  // fail.page
+	if (400 <= std::atoi(getStatusCode().c_str()) && std::atoi(getStatusCode().c_str()) < 600)  // fail.page
 	{
-		uri = serverConfig->getErrorpageResourcePath(
-				std::atoi(getStatusCode().c_str()));
-		if (uri == "") uri = "static/html/welcome.html";
+		uri = serverConfig->getErrorpageResourcePath(std::atoi(getStatusCode().c_str()));
+		if (uri == "") 
+			uri = "static/html/welcome.html";
 	}
 	fd = open(uri.c_str(), O_RDONLY);
 	fcntl(fd, F_SETFL, O_NONBLOCK);
-	if ((fd < 0) && serverConfig->getErrorpageResourcePath(
-											std::atoi(getStatusCode().c_str())) == "") {
+	if (fd < 0)
+	{
 		std::cout << fd << ", " << request.getMethod() << ", " << uri << ", " << getStatusCode() << "\n";
 		close(fd);
 		throw "404";
 	}
-	std::cout << fd << ", " << uri << ": status code = " << getStatusCode() << "\n";
+	std::cout << fd << ", " << request.getPath() << ": status code = " << getStatusCode() << "\n";
 	stat(uri.c_str(), &buf);
-	putHeader("Content-Type", ResponseConfig::getContentType(request.getPath()));
+	putHeader("Content-Type", ResponseConfig::getContentType(uri));
 	putHeaders(buf.st_size, request);
-	if ("400" <= getStatusCode() && getStatusCode() <= "500")
+	if ("400" <= getStatusCode() && getStatusCode() < "600")
 		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0,
 										 new HttpHandler(fd, *this, buf.st_size));
 	else

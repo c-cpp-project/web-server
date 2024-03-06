@@ -21,6 +21,7 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   std::cout << "SEND BEFORE IDX: " << httpHandler->getBufferIdx() << " + " << ret << "\n";
   httpHandler->setBufferIdx(httpHandler->getBufferIdx() + ret);
   std::cout << "SEND MOVED IDX: " << httpHandler->getBufferIdx() << "\n";
+  std::cout << "SEND [" << std::string(httpHandler->getBufferStartIdx(), httpHandler->getBufferIdx()) << "]\n";
   if (ret < 0)
   {
     std::cout << "ERROR\n";

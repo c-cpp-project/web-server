@@ -49,6 +49,7 @@ for key, value in headers.items():
     if key in ["HOST", "CONTENT_LENGTH", "CONTENT_TYPE", "DATE"]:
         print("{0}: {1}\r\n".format(key.replace('_', '-'), value.replace('_', '-')), end='')
 print("\r\n", end='')
+sys.stdout.flush()
 
 try:
     file_path = path_info

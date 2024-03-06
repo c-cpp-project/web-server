@@ -49,8 +49,4 @@ int main(int argc, char** argv) {
   }
   WebServer& webServer = WebServer::getInstance(serverConfigs);
   webServer.execute();
-  // std::cout << serverConfigs[80]->getRedirectionPath("/ddd").first <<
-  // std::endl; std::cout << serverConfigs[8080]->getPort() << std::endl;
-
-  // std::set<std::string> sets = serverConfigs[80]->getAllowedMethod("/ddd");
 }

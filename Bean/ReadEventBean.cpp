@@ -18,18 +18,18 @@ int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   buf_size = serverConfig->getClientRequestSize("");
   temp_buffer = new char[buf_size];
   readByte = read(readFd, temp_buffer, buf_size);
-  if (readByte < 0 || (readByte == 0 && buffers[readFd] == ""))
-  {
+  if (readByte < 0 || (readByte == 0 && buffers[readFd] == "")) {
     errorSaveEvent(httpHandler, event);
     buffers[readFd] = "";
     delete[] temp_buffer;
-  }
-  else
-  {
+  } else {
     buffers[readFd].append(temp_buffer, readByte);
-    std::cout << readByte << " , " << buffers[readFd].length() << " == " << httpHandler->getBodySize() << "]\n";
+    std::cout << readByte << " , " << buffers[readFd].length()
+              << " == " << httpHandler->getBodySize() << "]\n";
     delete[] temp_buffer;
-    if ((httpHandler->getBodySize() == 0 && readByte != 0) || (httpHandler->getBodySize() != 0 && buffers[readFd].length() != httpHandler->getBodySize()))
+    if ((httpHandler->getBodySize() == 0 && readByte != 0) ||
+        (httpHandler->getBodySize() != 0 &&
+         buffers[readFd].length() != httpHandler->getBodySize()))
       return (readByte);
     responseSaveEvent(buffers[readFd], httpHandler, event);
     buffers[readFd] = "";
@@ -58,11 +58,14 @@ void ReadEventBean::responseSaveEvent(std::string body,
   HttpRequest &request = httpHandler->getHttpRequest();
   ServerConfiguration *serverConfig = response.getServerConfiguration();
 
-  if (request.getParameter("Range") != "" && request.getMethod() == "GET" && request.getQueryString() == "")
+  if (request.getParameter("Range") != "" && request.getMethod() == "GET" &&
+      request.getQueryString() == "")
     body = response.readRangeQuery(request.getParameter("Range"), body);
-  response.sendBody(body, (request.getQueryString() == "" && request.getMethod() == "GET" ||\
-  ("400" <= response.getStatusCode() && response.getStatusCode() <= "500")));
-  event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0,
+  response.sendBody(
+      body, (request.getQueryString() == "" && request.getMethod() == "GET" ||
+             ("400" <= response.getStatusCode() &&
+              response.getStatusCode() <= "500")));
+  event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0,
                    new HttpHandler(response.getSockfd(), response.getByteDump(),
                                    serverConfig));  // EVFILT_READ, EVFILT_WRITE
 }

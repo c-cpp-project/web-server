@@ -118,7 +118,7 @@ void WebServer::handleEvent() {
       processEvent(eventHandler[i]);
     }
     ChildProcess::waitChildProcess();
-    //clearClients();
+    // clearClients();
   }
 }
 
@@ -126,13 +126,17 @@ void WebServer::processEvent(struct kevent& currEvent) {
   if (currEvent.filter != EVFILT_TIMER && (currEvent.udata == NULL)) {
     return;
   }
-  // if (currEvent.flags & EV_ERROR) {
-  //   std::cout << "[INFO] ident: " << currEvent.ident << " Erro code: " <<  currEvent.data << std::endl;
-  //   HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
-  //   delete handler;
-  //   processErrorEvent(currEvent);
-  //   return;
-  // }
+  if (currEvent.flags & EV_ERROR) {
+    std::cout << "[CAUSE]\n";
+    std::cout << currEvent << "\n";
+    HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+    if (handler != NULL) {
+      delete handler;
+      handler = NULL;
+    }
+    processErrorEvent(currEvent);
+    return;
+  }
   switch (currEvent.filter) {
     case EVFILT_READ:
       processReadEvent(currEvent);
@@ -152,7 +156,7 @@ void WebServer::processErrorEvent(struct kevent& currEvent) {
     std::cout << currEvent.ident << "[INFO] server disconnected" << std::endl;
   } else {
     disconnectClient(currEvent.ident);
-    //addCandidatesForDisconnection(currEvent.ident);
+    // addCandidatesForDisconnection(currEvent.ident);
     std::cout << currEvent.ident << "[INFO] client disconnected" << std::endl;
   }
 }
@@ -166,7 +170,7 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
     std::cout << currEvent.ident << " = RECV currEvent.ident\n";
     std::cout << "[RECV] DONE " << (currEvent.flags & EV_EOF) << std::endl;
     if (currEvent.flags & EV_EOF) {
-      eventHandler.saveEvent(currEvent.ident, EVFILT_READ, EV_DISABLE, 0, 0, 0); 
+      eventHandler.saveEvent(currEvent.ident, EVFILT_READ, EV_DISABLE, 0, 0, 0);
     } else {
       HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
       int ret = BeanFactory::runBeanByName("RECV", handler, &eventHandler);
@@ -179,8 +183,7 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
         // 계속 하나의 소켓만 연결됨
       }
     }
-  } 
-  else {
+  } else {
     std::cout << currEvent.ident << " = READ currEvent.ident\n";
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     BeanFactory::runBeanByName("READ", handler, &eventHandler);
@@ -213,14 +216,14 @@ void WebServer::processWriteEvent(struct kevent& currEvent) {
 }
 
 void WebServer::processTimerEvent(struct kevent& currEvent) {
-  std::cout << "WebServer::processTimerEvent START: " << currEvent.ident << "\n";
+  std::cout << "WebServer::processTimerEvent START: " << currEvent.ident
+            << "\n";
   eventHandler.saveEvent(currEvent.ident, EVFILT_TIMER, EV_DISABLE, 0, 0, 0);
-  if (handlerMap.find(currEvent.ident) == handlerMap.end())
-    return ;
+  if (handlerMap.find(currEvent.ident) == handlerMap.end()) return;
   HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
   delete handler;
   disconnectClient(currEvent.ident);
-  //addCandidatesForDisconnection(currEvent.ident);
+  // addCandidatesForDisconnection(currEvent.ident);
 }
 
 int WebServer::acceptClient(int serverSocket) {
@@ -239,7 +242,10 @@ int WebServer::acceptClient(int serverSocket) {
   ServerConfiguration* serverConfig = serverConfigs[serverPort];
   addClient(clientSocket, serverConfig, &eventHandler);
   eventHandler.registerEnabledReadEvent(clientSocket, handlerMap[clientSocket]);
-  eventHandler.saveEvent(clientSocket, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, 150, handlerMap[clientSocket]);
+  eventHandler.registerDisabledWriteEvent(clientSocket,
+                                          handlerMap[clientSocket]);
+  eventHandler.saveEvent(clientSocket, EVFILT_TIMER, EV_ADD | EV_ENABLE,
+                         NOTE_SECONDS, 150, handlerMap[clientSocket]);
   return clientSocket;
 }
 

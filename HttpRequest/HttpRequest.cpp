@@ -146,7 +146,6 @@ int HttpRequest::addRequestParamsToQueryString(const std::string& query_string)
 	return (request_params->addQuearyString(query_string));
 }
 
-// 테스트용
 void HttpRequest::printAllHeader() const
 {
 	if (request_headers == NULL)

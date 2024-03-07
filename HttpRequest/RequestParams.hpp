@@ -10,7 +10,6 @@ class RequestParams
 
 	public:
 		int addQuearyString(const std::string& query_string);
-		// void addJsonData();
 		std::string getParameter(const std::string& param);
 
 		// 테스트용

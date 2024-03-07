@@ -239,7 +239,7 @@ int WebServer::acceptClient(int serverSocket) {
   ServerConfiguration* serverConfig = serverConfigs[serverPort];
   addClient(clientSocket, serverConfig, &eventHandler);
   eventHandler.registerEnabledReadEvent(clientSocket, handlerMap[clientSocket]);
-  eventHandler.saveEvent(clientSocket, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, 100, handlerMap[clientSocket]);
+  eventHandler.saveEvent(clientSocket, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, 150, handlerMap[clientSocket]);
   return clientSocket;
 }
 

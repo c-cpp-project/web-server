@@ -16,7 +16,6 @@ std::map<int, HttpRequest *> HttpRequestHandler::chunkeds;  // chunked 수신 �
 HttpRequestHandler::HttpRequestHandler(int _socket_fd, ServerConfiguration *_server_config)
 	: socket_fd(_socket_fd), server_config(_server_config) {}
 
-// TODO : handle 리턴 값 필요 없을 수도 있음
 int HttpRequestHandler::handle(Event *event)
 {
 	readRequest(); // 소켓으로부터 요청 읽어오기
@@ -27,7 +26,6 @@ int HttpRequestHandler::handle(Event *event)
 		if (buffers.at(socket_fd) == "" || buffers.find(socket_fd) == buffers.end()) // 버퍼의 요청을 모두 처리한 경우
 		{
 			// 버퍼는 다 처리했지만, chunked 요청 중인 경우 -> 요청을 더 받기
-			// TODO : handle 리턴 값 필요 없어지면 이 부분도 필요 없어짐
 			if (chunkeds.find(socket_fd) != chunkeds.end())
 				return (FAILURE);
 			break;
@@ -75,8 +73,7 @@ int HttpRequestHandler::RequestAndResponse(Event *event)
 // 버퍼에 추가적으로 요청을 읽어오는 함수
 void HttpRequestHandler::readRequest()
 {
-	// 버퍼가 존재하지 않는 경우 추가하기
-	if (buffers.find(socket_fd) == buffers.end())
+	if (buffers.find(socket_fd) == buffers.end()) 	// 버퍼가 존재하지 않는 경우 추가하기
 		buffers.insert(std::pair<int, std::string>(socket_fd, ""));
 
 	// 읽어올 크기 read_size 설정하기

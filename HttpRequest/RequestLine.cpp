@@ -26,9 +26,6 @@ void RequestLine::parseMethod(std::string method_string)
 		if (!std::isupper(method_string[i]))
 			throw "400"; // 메서드에 영어 대문자 이외의 문자가 포함된 경우
 	}
-	// 유효하지 않거나 지원하지 않은 메서드인 경우 -> 버퍼 비우기
-	// if (method_string != "GET" && method_string != "POST" && method_string != "DELETE")
-	// 	throw "400";
 	method = method_string;
 }
 
@@ -48,7 +45,6 @@ void RequestLine::parseURI(std::string uri_string)
 
 void RequestLine::parseProtocol(std::string protocol_string)
 {
-	// TODO: 테스트기 돌려본 후 필요하다면 더 세심한 처리 필요
 	if (protocol_string != "HTTP/1.1")
 		throw "400";
 	this->protocol_string = protocol_string;

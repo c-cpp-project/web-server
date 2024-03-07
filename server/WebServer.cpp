@@ -118,7 +118,7 @@ void WebServer::handleEvent() {
       processEvent(eventHandler[i]);
     }
     ChildProcess::waitChildProcess();
-    clearClients();
+    //clearClients();
   }
 }
 
@@ -151,7 +151,8 @@ void WebServer::processErrorEvent(struct kevent& currEvent) {
     disconnectPort(currEvent);
     std::cout << currEvent.ident << "[INFO] server disconnected" << std::endl;
   } else {
-    addCandidatesForDisconnection(currEvent.ident);
+    disconnectClient(currEvent.ident);
+    //addCandidatesForDisconnection(currEvent.ident);
     std::cout << currEvent.ident << "[INFO] client disconnected" << std::endl;
   }
 }
@@ -218,7 +219,8 @@ void WebServer::processTimerEvent(struct kevent& currEvent) {
     return ;
   HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
   delete handler;
-  addCandidatesForDisconnection(currEvent.ident);
+  disconnectClient(currEvent.ident);
+  //addCandidatesForDisconnection(currEvent.ident);
 }
 
 int WebServer::acceptClient(int serverSocket) {

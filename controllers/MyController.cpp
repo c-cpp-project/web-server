@@ -36,7 +36,8 @@ std::string	MyController::findFullPath(std::string fullpath, std::string page)
 	if (dir == NULL || file == "")
 	{
 		std::cout << "Error Opening directory OR Only Directory\n";
-		closedir(dir);
+		if (file == "")
+			closedir(dir);
 		throw "404";
 	}
 	// file에 확장자 없을 경우: 가장 처음으로 만나는 동일한 이름의 파일에 대응된다.

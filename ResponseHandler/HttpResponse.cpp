@@ -138,7 +138,10 @@ void  HttpResponse::forward(HttpRequest &request)  // controller에서 사용한
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 	if (fd < 0)
 	{
+		std::cout << strerror(errno) << "\n";
 		std::cout << fd << ", " << request.getMethod() << ", " << uri << ", " << getStatusCode() << "\n";
+		if (access(uri.c_str(), F_OK) == 0)
+			return ; // no file descriptor
 		close(fd);
 		throw "404";
 	}

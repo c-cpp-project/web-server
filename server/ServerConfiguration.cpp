@@ -4,41 +4,11 @@
 
 ServerConfiguration::ServerConfiguration() : server(NULL) {}
 
-ServerConfiguration::ServerConfiguration(Server& server) : server(&server) {
-  this->supportedTypes.insert("text/html");
-  this->supportedTypes.insert("text/plain");
-  this->supportedTypes.insert("text/css");
-  this->supportedTypes.insert(
-      "text/javascript");  // 또는 application/javascript
-
-  // 애플리케이션 타입
-  this->supportedTypes.insert("application/json");
-  this->supportedTypes.insert("application/xml");
-  this->supportedTypes.insert("application/x-www-form-urlencoded");
-  this->supportedTypes.insert("application/pdf");
-  this->supportedTypes.insert("application/octet-stream");
-
-  // 이미지 타입
-  this->supportedTypes.insert("image/jpeg");
-  this->supportedTypes.insert("image/png");
-  this->supportedTypes.insert("image/gif");
-  this->supportedTypes.insert("image/webp");
-
-  // 오디오/비디오 타입
-  this->supportedTypes.insert("audio/mpeg");
-  this->supportedTypes.insert("audio/ogg");
-  this->supportedTypes.insert("video/mp4");
-  this->supportedTypes.insert("video/webm");
-  this->defaultAllowedMethods.insert("GET");
-}
+ServerConfiguration::ServerConfiguration(Server& server) : server(&server) {}
 
 int ServerConfiguration::getPort() const {
   std::cout << server->getListen() << std::endl;
   return server->getListen();
-}
-
-int ServerConfiguration::getKeepAliveTimeout() {
-  return server->getKeepAliveTimeout();
 }
 
 const std::string ServerConfiguration::getServerName() const {
@@ -48,10 +18,6 @@ const std::string ServerConfiguration::getServerName() const {
 const std::string ServerConfiguration::getCgiPath() const {
   return server->getCgiPath();
 };
-
-const std::string ServerConfiguration::getResourcePath(std::string uri) const {
-  return findUriPattern(uri);
-}
 
 const std::string ServerConfiguration::getPathByRootAndValue(
     std::string root, std::string value) const {
@@ -93,10 +59,6 @@ ServerConfiguration::getRedirectionPath(const std::string uri) const {
     return std::pair<std::string, std::string>("400", "");  // 존재하지 않음
   }
   return location->getRedirectionInfo();
-}
-
-bool ServerConfiguration::hasContentType(const std::string& contentType) {
-  return supportedTypes.find(contentType) != supportedTypes.end();
 }
 
 Server* ServerConfiguration::getServer() { return server; }

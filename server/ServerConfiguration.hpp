@@ -7,7 +7,6 @@
 class ServerConfiguration {
  private:
   std::set<std::string> defaultAllowedMethods;
-  std::set<std::string> supportedTypes;
   std::map<int, int> serverSocketPortMap;
   Server* server;
   const std::string getPathByRootAndValue(std::string root,
@@ -19,18 +18,14 @@ class ServerConfiguration {
   ~ServerConfiguration();
   // 서버 설정에서 listen 포트번호를 의미한다. 설정파일에서 설정안하면 80
   int getPort() const;
-  // keep-alive 옵션의 TCP 연결 지속시간
-  int getKeepAliveTimeout();
   // max client body size 설정파일에서 설정안하면 10000
-  long getClientBodySize(const std::string &uri) const;
+  long getClientBodySize(const std::string& uri) const;
   // max client header size 설정파일에서 설정안하면 10000
   long getClientHeaderSize() const;
   // max client body size + max client header size
-  long getClientRequestSize(const std::string &uri) const;
+  long getClientRequestSize(const std::string& uri) const;
   // 서버 이름 설정 파일에서 설정안하면 default 값""
   const std::string getServerName() const;
-  // 해당 uri를 넣으면 접근해야할 정적 리소스 경로 반환
-  const std::string getResourcePath(std::string uri) const;
   // 해당 에러 상태코드를 넣으면 반환할 errorpage 경로 (ex. fail.html) 반환
   // 해당 에러 상태코드에 대한 반환할 error page가 없으면 "" 반환
   const std::string getErrorpageResourcePath(int statusCode) const;
@@ -40,7 +35,7 @@ class ServerConfiguration {
       const std::string uri) const;
   //"application/json"과 같이 Content-Type을 std::string으로 넣으면 해당
   // contentType이 지원되는지 반환
-  bool hasContentType(const std::string& contentType);
+  // bool hasContentType(const std::string& contentType);
   // Server 객체에 직접 접근 가능
   Server* getServer();
   // 정적자원을 찾는 최상위 폴더인 root 반환

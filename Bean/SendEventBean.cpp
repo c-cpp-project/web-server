@@ -21,7 +21,7 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   std::cout << "SEND BEFORE IDX: " << httpHandler->getBufferIdx() << " + " << ret << "\n";
   httpHandler->setBufferIdx(httpHandler->getBufferIdx() + ret);
   std::cout << "SEND MOVED IDX: " << httpHandler->getBufferIdx() << "\n";
-  std::cout << "SEND [" << std::string(httpHandler->getBufferStartIdx(), httpHandler->getBufferIdx()) << "]\n";
+  // std::cout << "SEND [" << std::string(httpHandler->getBufferStartIdx(), httpHandler->getBufferIdx()) << "]\n";
   if (ret < 0)
   {
     std::cout << "ERROR\n";
@@ -34,9 +34,8 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     std::cout << "SEND FD: " << socketfd << ", RET: " << ret << "\n";
     HttpHandler *recvHandler = new HttpHandler(socketfd, serverConfig);
     event->saveEvent(socketfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, recvHandler);
-    event->saveEvent(socketfd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, 3, recvHandler);
+    event->saveEvent(socketfd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, 5, recvHandler);
     event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);  // EVFILT_WRITE 
-    // close(socketfd);
     delete httpHandler;
     httpHandler = 0;
     std::cout << "================== SEND DONE ============================\n";

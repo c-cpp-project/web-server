@@ -36,7 +36,7 @@ std::string	MyController::findFullPath(std::string fullpath, std::string page)
 	if (dir == NULL || file == "")
 	{
 		std::cout << "Error Opening directory OR Only Directory\n";
-		if (file == "")
+		if (file == "" && directory != "")
 			closedir(dir);
 		throw "404";
 	}

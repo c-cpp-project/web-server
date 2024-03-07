@@ -219,7 +219,6 @@ void WebServer::processTimerEvent(struct kevent& currEvent) {
   HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
   delete handler;
   addCandidatesForDisconnection(currEvent.ident);
-  std::cout << "WebServer::processTimerEvent DONE\n";
 }
 
 int WebServer::acceptClient(int serverSocket) {

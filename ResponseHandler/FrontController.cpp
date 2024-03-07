@@ -43,7 +43,16 @@ void    FrontController::run(HttpRequest tmp)
 		// std::cout <<  "ADDRESS: [" << &serverConfig << ", " << &event << "]\n";
 		response = new HttpResponse(this->socketfd, serverConfig, event);
 		controller = ControllerMapping::getController(serverConfig->getPort(), request->at(i).getPath());
-		controller->service(request->at(i), (*response)); // CGI에서 대한 I/O 작업: READ, WRITE
+
+		try {
+			controller->service(request->at(i), (*response)); // CGI에서 대한 I/O 작업: READ, WRITE
+		} catch (const char *e) {
+			delete response;
+			controller = nullptr;
+			request->clear();
+			delete request;
+			throw;
+		}
 		delete response;
 		controller = nullptr;
 	}

@@ -19,14 +19,12 @@ HttpRequestHandler::HttpRequestHandler(int _socket_fd, ServerConfiguration *_ser
 // TODO : handle 리턴 값 필요 없을 수도 있음
 int HttpRequestHandler::handle(Event *event)
 {
-	std::cout << "start handle\n";
 	readRequest(); // 소켓으로부터 요청 읽어오기
 	while (true)
 	{
-		std::cout << "handle while\n";
 		if (RequestAndResponse(event) == FAILURE) // 불완전한 요청인 경우
 			return (FAILURE);
-		if (buffers[socket_fd] == "") // 버퍼의 요청을 모두 처리한 경우
+		if (buffers.at(socket_fd) == "" || buffers.find(socket_fd) == buffers.end()) // 버퍼의 요청을 모두 처리한 경우
 		{
 			// 버퍼는 다 처리했지만, chunked 요청 중인 경우 -> 요청을 더 받기
 			// TODO : handle 리턴 값 필요 없어지면 이 부분도 필요 없어짐
@@ -34,17 +32,17 @@ int HttpRequestHandler::handle(Event *event)
 				return (FAILURE);
 			break;
 		}
-		std::cout << "<======== request end ===========================>\n";
 	}
 	return (SUCCESS);
 }
 
 int HttpRequestHandler::RequestAndResponse(Event *event)
 {
+	HttpRequest *request = NULL;
 	try
 	{
 		// Request Part
-		HttpRequest *request = HttpRequestFactory::create(socket_fd, server_config);
+		request = HttpRequestFactory::create(socket_fd, server_config);
 		if (request == NULL)
 			return (FAILURE);  // 버퍼에 완전한 요청이 없음
 		if (ChunkedRequestHandling(request) == IN_PROGRESS_CHUNKED_REQUEST)
@@ -59,8 +57,8 @@ int HttpRequestHandler::RequestAndResponse(Event *event)
 	}
 	catch (const char *e) // 유효하지 않은 요청 -> 오류 응답
 	{
-		std::cout << e << ": handle\n";
 		errorHandling(e, server_config, event);
+		delete request;
 	}
 	catch (const std::exception &e) // 유효하지 않은 요청 -> 오류 응답 + 소켓 닫기
 	{
@@ -68,6 +66,7 @@ int HttpRequestHandler::RequestAndResponse(Event *event)
 		removeAndDeleteChunkedRequest(socket_fd);
 		errorHandling(e.what(), server_config, event);
 		std::cout << "socket 닫기: " << e.what() << "\n";
+		delete request;
 		throw;
 	}
 	return (SUCCESS);
@@ -126,8 +125,6 @@ void HttpRequestHandler::errorHandling(const char *erorr_code, ServerConfigurati
 	std::cout << "erorr_code : " << erorr_code << "\n";
 	response.setStatusCode(erorr_code);
 	response.forward(empty);
-	std::cout << "errorHandling done\n";
-	// response.flush();
 }
 
 void HttpRequestHandler::removeBuffer(int socket_fd)

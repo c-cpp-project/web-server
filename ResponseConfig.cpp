@@ -89,7 +89,6 @@ std::string	ResponseConfig::getContentType(std::string filename)
 	std::string	contentType;
 	int i;
 
-	std::cout << "content type: " << filename << "\n";
 	contentType = "text/plain";
 	for (i = filename.length() - 1; i >= 0; i--)
 	{
@@ -97,7 +96,6 @@ std::string	ResponseConfig::getContentType(std::string filename)
 			break ;
 	}
 	extension = filename.substr(i + 1);
-	std::cout << "extension: " << extension << "\n";
 	for (iter = supportedTypesRepo.begin(); iter != supportedTypesRepo.end(); iter++)
 	{
 		if ((*iter).find(extension) != std::string::npos)
@@ -106,7 +104,6 @@ std::string	ResponseConfig::getContentType(std::string filename)
 			break ;
 		}
 	}
-	std::cout << "ResponseConfig::getContentType: " << contentType << "\n";
 	return (contentType);
 }
 

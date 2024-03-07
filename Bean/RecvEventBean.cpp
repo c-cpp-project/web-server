@@ -11,6 +11,7 @@ RecvEventBean::~RecvEventBean() {}
 
 // event->saveEvent(tcp_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new
 // HttpHandler(tcp_socket, *ServerConfig));
+// 100sec
 int RecvEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   HttpRequestHandler httpRequestHandler(httpHandler->getFd(),
                                         httpHandler->getServerConfiguration());
@@ -23,7 +24,8 @@ int RecvEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     ret = httpRequestHandler.handle(event);
   } catch (const std::exception &e) {
     std::cout << "[ERROR] SOCKET " << e.what() << std::endl;
-    ret = -1;
+    ret = 0;
+    // ret = -1;
   }
   std::cout << "[RET] " << ret << std::endl;
   if (ret == 0) {
@@ -34,3 +36,5 @@ int RecvEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   }
   return ret;
 }
+
+// tcp socket 연결:100sec -> recv: timer 해제 -> ... -> send: timer 5sec (next recv 기다림)

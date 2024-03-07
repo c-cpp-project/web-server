@@ -3,20 +3,13 @@
 
 void HttpRequestParser::parse(HttpRequest*& request, ServerConfiguration *server_config, const std::string& buffer)
 {
-	std::cout << "HttpRequestParser::parse\n";
 	long start = 0;
 	request = new HttpRequest();
 	parseRequestLine(request, server_config, buffer, start);
-	std::cout << "[INFO] complete parse request line\n";
 	parseRequestHeaders(request, server_config, buffer, start);
-	std::cout << "[INFO] complete parse headers\n";
 	if (isExistBody(request))
-	{
 		parseRequestBody(request, server_config, buffer, start);
-		std::cout << "[INFO] complete parse body\n";
-	}
 	parseRequestParams(request);
-	std::cout << "[INFO] complete parse params\n";
 }
 
 void HttpRequestParser::parseRequestLine(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, long& start)

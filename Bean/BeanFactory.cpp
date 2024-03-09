@@ -37,7 +37,8 @@ int BeanFactory::runBeanByName(std::string beanName, HttpHandler *eventProcess,
   // HttpHandler *eventPending;
 
   bean = getBeanByName(beanName);
-  int ret =  bean->runBeanEvent(eventProcess, event);  // event 처리 -> event 등록
+  int ret =
+      bean->runBeanEvent(eventProcess, event);  // event 처리 -> event 등록
   // delete eventProcess; // event 제거
   return ret;
 }

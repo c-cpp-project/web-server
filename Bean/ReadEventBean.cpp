@@ -3,28 +3,42 @@
 ReadEventBean::ReadEventBean() {}
 ReadEventBean::~ReadEventBean() {}
 
-#define READ_BUF_SIZE 1024 * 1024
+std::map<int, std::string> ReadEventBean::buffers;
+
 int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   int readFd;
-  int ret;
-  char binaryData[READ_BUF_SIZE];
-  std::string body;
+  int readByte;
+  char *temp_buffer;
+  HttpResponse &response = httpHandler->getHttpResponse();
+  ServerConfiguration *serverConfig = response.getServerConfiguration();
+  int buf_size;
 
-  std::cout << "ReadEventBean::runBeanEvent = " << readFd << "\n";
   readFd = httpHandler->getFd();
-  memset(binaryData, '\0', READ_BUF_SIZE);
-  ret = read(readFd, binaryData, READ_BUF_SIZE);
-  body = httpHandler->getData() + std::string(binaryData, binaryData + ret);
-  std::cout << ret << ", " << body.length() << " = result\n";
-  httpHandler->setData(body);
-  if (httpHandler->getBodySize() != httpHandler->getData().size())
-    return (ret);
-  else if (ret < 0)
+  std::cout << "ReadEventBean::runBeanEvent = [" << readFd << ", ";
+  buf_size = serverConfig->getClientRequestSize("");
+  temp_buffer = new char[buf_size];
+  readByte = read(readFd, temp_buffer, buf_size);
+  if (readByte < 0 || (readByte == 0 && buffers[readFd] == "")) {
     errorSaveEvent(httpHandler, event);
-  else if (httpHandler->getBodySize() == httpHandler->getData().size())
-    responseSaveEvent(body, httpHandler, event);
+    buffers[readFd] = "";
+    delete[] temp_buffer;
+  } else {
+    buffers[readFd].append(temp_buffer, readByte);
+    std::cout << readByte << " , " << buffers[readFd].length()
+              << " == " << httpHandler->getBodySize() << "]\n";
+    delete[] temp_buffer;
+    if ((httpHandler->getBodySize() == 0 && readByte != 0) ||
+        (httpHandler->getBodySize() != 0 &&
+         buffers[readFd].length() != httpHandler->getBodySize()))
+      return (readByte);
+    responseSaveEvent(buffers[readFd], httpHandler, event);
+    buffers[readFd] = "";
+  }
+  close(readFd);
   event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
   delete httpHandler;
+  httpHandler = 0;
+  std::cout << "ReadEventBean::runBeanEvent DONE\n";
   return 0;
 }
 
@@ -39,27 +53,19 @@ void ReadEventBean::errorSaveEvent(HttpHandler *httpHandler, Event *event) {
 
 void ReadEventBean::responseSaveEvent(std::string body,
                                       HttpHandler *httpHandler, Event *event) {
-  std::stringstream ss;
-  std::string bodyLength;
-  ServerConfiguration *serverConfig;
+  std::cout << "ReadEventBean::responseSaveEvent\n";
   HttpResponse &response = httpHandler->getHttpResponse();
   HttpRequest &request = httpHandler->getHttpRequest();
-  std::string data;
+  ServerConfiguration *serverConfig = response.getServerConfiguration();
 
-  serverConfig = response.getServerConfiguration();
-  response.putHeader("Server", serverConfig->getServerName());
-  response.putHeader("Date", ResponseConfig::getCurrentDate());
-  if (request.getParameter("Range") != "" && request.getMethod() == "GET")
+  if (request.getParameter("Range") != "" && request.getMethod() == "GET" &&
+      request.getQueryString() == "")
     body = response.readRangeQuery(request.getParameter("Range"), body);
-  ss << body.length();
-  bodyLength = ss.str();
-  response.putHeader("Content-Length", bodyLength);
-  // response.putHeader("Content-Type", "image/png");
-  response.sendBody(body);  // this->buffer에 string으로 모두 담긴다.
-  std::cout << bodyLength << " = Content-Length\n";
-
-  data = response.getByteDump();
+  response.sendBody(
+      body, (request.getQueryString() == "" && request.getMethod() == "GET" ||
+             ("400" <= response.getStatusCode() &&
+              response.getStatusCode() <= "500")));
   event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0,
-                   new HttpHandler(response.getSockfd(), data,
+                   new HttpHandler(response.getSockfd(), response.getByteDump(),
                                    serverConfig));  // EVFILT_READ, EVFILT_WRITE
 }

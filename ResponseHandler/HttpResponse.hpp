@@ -26,13 +26,12 @@ class HttpResponse
 private:
 	int         sockfd;
 	std::map<std::string, std::string> headers;
-	std::vector<std::string>    buffer;
+	std::string		buffer;
 	unsigned long	max_size;
 	std::string	send_timeout; // WAS
 	std::string	status_code;
 	std::string	responseBody;
 	bool		authenticated;
-	bool		overlaped;
 	ServerConfiguration *serverConfig;
 	Event				*event;
 public:
@@ -53,7 +52,8 @@ public:
 	void	listDirectory(std::string directory);
 	void	redirect(std::string redirectUri);
 	void    forward(HttpRequest &Httprequest);
-	void    sendBody(std::string body);
+	void	putHeaders(int length, HttpRequest &request);
+	void    sendBody(std::string body, bool isExclude);
 	void    ResponseStatusLine();
 	void    processHeader();
 	

@@ -57,7 +57,6 @@ void ControllerMapping::mapController(
   std::map<int, ServerConfiguration *>::iterator portIter;
   std::stringstream ss;
 
-  std::cout << "size: " << serverConfigs.size() << "\n";
   for (portIter = serverConfigs.begin(); portIter != serverConfigs.end();
        portIter++) {
     int port = portIter->first;

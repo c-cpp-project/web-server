@@ -35,7 +35,9 @@ std::string	MyController::findFullPath(std::string fullpath, std::string page)
 	dir = opendir(directory.c_str());
 	if (dir == NULL || file == "")
 	{
-		std::cout << "Error opening directory OR Only Directory\n";
+		std::cout << "Error Opening directory OR Only Directory\n";
+		if (file == "" && directory != "")
+			closedir(dir);
 		throw "404";
 	}
 	// file에 확장자 없을 경우: 가장 처음으로 만나는 동일한 이름의 파일에 대응된다.
@@ -52,6 +54,7 @@ std::string	MyController::findFullPath(std::string fullpath, std::string page)
 		else if ((file.find(".") == std::string::npos && d_name.substr(0, d_name.find(".")) == file) || file == d_name)
 			break ;
 	}
+	closedir(dir);
 	if (entry == NULL)
 		throw "404";
 	return (directory + "/" + d_name);
@@ -78,6 +81,7 @@ void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
 	std::string		fullpath;
 	std::string		targetPath;
 	std::string		mainChain;
+	std::string		request_uri = request.getPath();
 
 	try
 	{
@@ -90,16 +94,22 @@ void	MyController::runCgiScript(HttpRequest &request, HttpResponse &response)
 	}
 	catch(const char *e)
 	{
-		std::cout << "NO FILE: " << e << "\n";
-		if (access(fullpath.c_str(), F_OK) != 0)
-			throw "404";
+		std::cout << "NO FILE: " << e << "\n"; // DIRECTORY OR NO FILE
+		if (access(fullpath.c_str(), F_OK) != 0) // BEING IS NOTING
+		{
+			int fd = open(fullpath.c_str(), O_CREAT | O_TRUNC | O_RDWR, S_IRUSR | S_IWUSR);
+			close(fd);
+			if (fd < 0)
+				throw "500";
+		}
 		targetPath = fullpath;
 	}
 	// targetPath는 폴더 혹은 파일이다.
 	if (targetPath[targetPath.length() - 1] == '/')
 		targetPath = targetPath.substr(0, targetPath.length() - 1);
+	request_uri += (request.getQueryString() == "" ? "" : "?" + request.getQueryString());
+	request.setRepository(request_uri);
 	request.setPath(targetPath);
-	response.putHeader("Content-Type", ResponseConfig::getContentType(request.getHeader("CONTENT-TYPE")));
 	if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded") // get, post
 		doGet(request, response);
 	else if (request.getMethod() == "POST")
@@ -129,43 +139,44 @@ void	MyController::runService(HttpRequest &request, HttpResponse &response)
 	{
 		std::string index = getLocationIndex(serverConfig, request.getPath());
 		std::string	root = location->getRoot();
+		std::string	mainChain;
 
 		if (root[root.length() - 1] == '/')
 			root = root.substr(0, root.length() - 1);
 		if (request.getPath() == serverConfig->findLocationUri(request.getPath())) // /root/index_file
-		{
 			staticPath = findFullPath(std::string(root + "/" + index), index);
-			std::cout << "staticPath: " << staticPath << "\n";
-		}
 		else // /root/file_name
 		{
-			std::string	mainChain;
-
 			mainChain = serverConfig->findLocationUri(request.getPath());
-			std::cout << request.getPath().substr(mainChain.length() + 1) << " = pendingElements\n";
 			staticPath = findFullPath(std::string(root + "/" + request.getPath().substr(mainChain.length() + 1)), index);
 		}
 		std::cout << staticPath << " = staticPath\n";
 		request.setPath(staticPath);
-		response.putHeader("Content-Type", ResponseConfig::getContentType(staticPath));
 		response.forward(request);
 	}
 }
 
 void    MyController::service(HttpRequest &request, HttpResponse &response)
 {
-	std::string cgiPath;
+	std::string 		cgiPath;
 	ServerConfiguration *serverConfig = response.getServerConfiguration();
-	Location    *location;
+	std::stringstream 	ss;
+	std::string			extension = serverConfig->getCgiTestExt();
+	bool				allowedMethod;
 
 	std::cout << "MyController::service" << "\n";
-	if (isAcceptableMethod(request.getMethod()) == false)
+	allowedMethod = false;
+	if (extension != "" && request.getPath().length() >= extension.length() && \
+	request.getPath().substr(request.getPath().length() - extension.length()) == extension)
+	{
+		if (request.getMethod() == "POST")
+			allowedMethod = true;
+	}
+	if (isAcceptableMethod(request.getMethod()) == false && allowedMethod == false)
 		throw "405";
-	// ============================ 애매한 부분 ============================ //
-	// 1. redirectPath는 어떻게 설정하는가?
-	// 2. CGI 파열 경로는 어떻게 설정하는가? -> 42번 줄 확인 바람!
-	// 3. getResourcePath는 어떻게 설정되고 무엇을 반환하는가?
-	// ================================================================== //
+	ss << serverConfig->getPort();
+	request.setHeader("SERVER_PORT", ss.str());
+	request.setHeader("SERVER_SOFTWARE", serverConfig->getServerName());
 	if ((request.getMethod() == "GET") && request.getQueryString() == "")
 		runService(request, response);
 	else
@@ -173,3 +184,9 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
 }
 
 // Controller를 Server 개수만큼만 만들자.
+
+// POST /directory/youpla.bla HTTP/1.1
+// Host: localhost
+// Content-Length: 5
+
+// aaaaa

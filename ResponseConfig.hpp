@@ -8,6 +8,8 @@
 #include <iomanip>
 #include <sstream>
 #include <iostream>
+#include <ctime>
+#include <cstdio>
 
 class ServerConfiguration;
 class Event;
@@ -18,9 +20,8 @@ private:
 	void	setHttpContentType(void);
 	static  std::map<std::string, std::string>  statusCodeRepo;
 	static	std::set<std::string>				supportedTypesRepo;
-
-
 	static  std::map<std::string, std::string>  cgiAddressRepo;
+	std::string	date;
 public:
 	ResponseConfig();
 	~ResponseConfig();

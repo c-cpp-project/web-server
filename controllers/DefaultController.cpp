@@ -12,9 +12,18 @@ void    DefaultController::service(HttpRequest &request, HttpResponse &response)
     std::string         staticPath;
     std::string         path;
     ServerConfiguration *serverConfig = response.getServerConfiguration();
+    std::string			extension = serverConfig->getCgiTestExt();
+	bool				allowedMethod;
 
-    if (isAcceptableMethod(request.getMethod()) == false)
-        throw "405";
+    allowedMethod = false;
+	if (request.getPath().length() >= extension.length() && \
+	request.getPath().substr(request.getPath().length() - extension.length()) == extension)
+	{
+		if (request.getMethod() == "POST")
+			allowedMethod = true;
+	}
+	if (isAcceptableMethod(request.getMethod()) == false && allowedMethod == false)
+		throw "405";
     std::cout << "DefaultController::service" << "\n";
     // 메서드 허용 여부 검사
     std::cout << "============ 1 serverConfig->getPort() ========\n";

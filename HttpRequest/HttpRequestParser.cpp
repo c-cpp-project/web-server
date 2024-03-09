@@ -6,16 +6,10 @@ void HttpRequestParser::parse(HttpRequest*& request, ServerConfiguration *server
 	long start = 0;
 	request = new HttpRequest();
 	parseRequestLine(request, server_config, buffer, start);
-	std::cout << "[INFO] complete parse request line\n";
 	parseRequestHeaders(request, server_config, buffer, start);
-	std::cout << "[INFO] complete parse headers\n";
 	if (isExistBody(request))
-	{
 		parseRequestBody(request, server_config, buffer, start);
-		std::cout << "[INFO] complete parse body\n";
-	}
 	parseRequestParams(request);
-	std::cout << "[INFO] complete parse params\n";
 }
 
 void HttpRequestParser::parseRequestLine(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, long& start)
@@ -25,7 +19,7 @@ void HttpRequestParser::parseRequestLine(HttpRequest *request, ServerConfigurati
 		start += 2;
 
 	// 요청 라인이 들어왔는지 확인하기
-	size_t end_of_line = buffer.find("\r\n");
+	size_t end_of_line = buffer.find("\r\n", start);
 	if (end_of_line == std::string::npos) // 요청 라인의 끝을 식별할 수 없는 경우
 	{
 		if (buffer.size() >= server_config->getClientHeaderSize())	// 최대 헤더 크기만큼 충분히 읽었다면
@@ -96,14 +90,9 @@ void HttpRequestParser::parseRequestBody(HttpRequest *request, ServerConfigurati
 	if (content_length == FAILURE)
 		throw "400"; // content_length 값이 유효하지 않은 경우
 	if (content_length > server_config->getClientBodySize(request->getPath()))
-		throw SocketCloseException400(); // content_length가 제한된 본문 크기를 초과하는 경우
+		throw SocketCloseException413(); // content_length가 제한된 본문 크기를 초과하는 경우
 	if (buffer.size() < start + content_length)
 		throw INCOMPLETE_REQUEST; // 버퍼에 content_length 만큼 충분히 없는 경우
-
-	// Content-Type이 없는 경우 -> 쿼리스트링으로 인식하기
-	// TODO : Content-Type이 없는 경우, 강제로 쿼리스트링으로 인식해도 될까?
-	// if (request->getHeader("Content-Type") == "")
-	// 	request->setHeader("Content-Type", "application/x-www-form-urlencoded");
 	
 	// 본문 설정하기
 	request->setRequestBody(buffer.substr(start, content_length));

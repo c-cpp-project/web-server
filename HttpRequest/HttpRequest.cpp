@@ -7,6 +7,7 @@ HttpRequest::HttpRequest()
 	request_headers = NULL;
 	request_params = NULL;
 	request_body = "";
+	repository = "";
 }
 
 HttpRequest::HttpRequest(const HttpRequest& ref)
@@ -20,6 +21,7 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& ref)
 	request_headers = new HttpHeaders(*ref.request_headers);
 	request_body = ref.request_body;
 	request_params = new RequestParams(*ref.request_params);
+	repository = ref.repository;
 	return (*this);
 }
 
@@ -144,7 +146,6 @@ int HttpRequest::addRequestParamsToQueryString(const std::string& query_string)
 	return (request_params->addQuearyString(query_string));
 }
 
-// 테스트용
 void HttpRequest::printAllHeader() const
 {
 	if (request_headers == NULL)
@@ -161,4 +162,31 @@ void HttpRequest::printAllParams() const
 	std::map<std::string, std::string>::iterator it;
 	for(it = request_params->getBegin(); it != request_params->getEnd(); it++)
 		std::cout << it->first << ": " << it->second << "\n";
+}
+
+std::map<std::string, std::string>::iterator HttpRequest::getHeaderBegin()
+{
+	return (request_headers->getBegin());
+}
+
+std::map<std::string, std::string>::iterator HttpRequest::getHeaderEnd()
+{
+	return (request_headers->getEnd());
+}
+
+void	HttpRequest::setQueryString(std::string queryString)
+{
+	if (request_line == 0)
+		return ;
+	request_line->setQueryString(queryString);
+}
+
+void HttpRequest::setRepository(std::string value)
+{
+	repository += value;
+}
+
+std::string HttpRequest::getRepository(void)
+{
+	return (repository);
 }

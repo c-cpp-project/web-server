@@ -41,18 +41,16 @@ void	ResponseConfig::setHttpStatusCode(void)
 	}
 }
 
-std::string ResponseConfig::getCurrentDate() {
-	// 현재 시각 얻기
-	std::time_t currentTime_t;
+std::string ResponseConfig::getCurrentDate() 
+{
+    std::time_t currentTime_t;
     std::time(&currentTime_t);
 
-    // 시각을 현지 시간대로 변환
     std::tm* localTime = std::localtime(&currentTime_t);
 
-	// 현재 날짜 및 시간 문자열 생성
-	std::ostringstream oss;
-	oss << std::put_time(localTime, "%a, %d %b %Y %H:%M:%S GMT");
-	return oss.str();
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", localTime);
+    return buffer;
 }
 
 void	ResponseConfig::setHttpContentType(void)
@@ -98,7 +96,6 @@ std::string	ResponseConfig::getContentType(std::string filename)
 			break ;
 	}
 	extension = filename.substr(i + 1);
-	std::cout << "extension: " << extension << "\n";
 	for (iter = supportedTypesRepo.begin(); iter != supportedTypesRepo.end(); iter++)
 	{
 		if ((*iter).find(extension) != std::string::npos)
@@ -107,7 +104,6 @@ std::string	ResponseConfig::getContentType(std::string filename)
 			break ;
 		}
 	}
-	std::cout << "ResponseConfig::getContentType: " << contentType << "\n";
 	return (contentType);
 }
 

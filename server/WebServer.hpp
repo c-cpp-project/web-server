@@ -5,13 +5,14 @@
 #include "../Bean/BeanFactory.hpp"
 #include "ServerConfiguration.hpp"
 #include "SocketUtils.hpp"
-#include "mock/Handler.hpp"
+#include "setting/ConfigParser.hpp"
+#include "../controllers/ControllerMapping.hpp"
 
 #define SOCKET_CLOSE 0
 #define SOCKET_OPEN -1
 class WebServer {
  public:
-  static const int LISTENCAPACITY = 1000;
+  static const int LISTENCAPACITY = 150;
   static WebServer& getInstance(
       std::map<int, ServerConfiguration*> serverConfigs);
   void execute();

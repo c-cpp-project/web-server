@@ -7,9 +7,9 @@
 
 class HttpHandler;
 class Bean {
- public:
-  Bean();
-  virtual ~Bean();
-  virtual int runBeanEvent(HttpHandler *httpHandler, Event *event) = 0;
+  public:
+    Bean();
+    virtual ~Bean();
+    virtual int runBeanEvent(HttpHandler *httpHandler, Event *event) = 0;
 };
 #endif

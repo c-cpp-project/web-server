@@ -1,77 +1,56 @@
 #include"Controller.hpp"
 
-void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, const char *cgi_python, std::string filename)
+void			Controller::classifyEvent(HttpRequest &request, HttpResponse &response, const char *cgi_python)
 {
 	int			pid;
-	char		buffer[64 * K];
 	int     	pipefd1[2];
-	int			readfd[2];
-	// int			pipefd2[2];
-	const char	*path[6];
-	std::string uploadPath = request.getPath();
-	std::string	queryString;
+	int			pipefd2[2];
+	char const 	*argv[3];
+	std::string	data;
 
-	path[0] = "/usr/bin/python3";
-	path[1] = cgi_python;
-	// pipe(pipefd2);
-	if (request.getMethod() == "GET" || request.getHeader("CONTENT-TYPE") == "application/x-www-form-urlencoded")
-	{
-		queryString = request.getMethod() == "GET" ? request.getQueryString() : request.getBody();
-
-		path[2] = uploadPath.c_str();
-		path[3] = queryString.c_str();
-		path[4] = filename.c_str();
-		std::cout << "ARGV: [" << path[2] << ", " << path[3] << ", " << path[4] << "]\n";
-	}
-	else if (request.getMethod() == "POST") // post
-	{
-		std::stringstream ss;
-
-		ss << request.getBody().length();
-		path[2] = uploadPath.c_str();
-		path[3] = filename.c_str(); // filename
-		path[4] = ss.str().c_str();
+	request.setHeader("SCRIPT-NAME", std::string(cgi_python));
+	if (request.getMethod() == "POST" && request.getHeader("CONTENT-TYPE") != "application/x-www-form-urlencoded")
 		pipe(pipefd1);
-		std::cout << "ARGV: [" << path[2] << ", " << path[3] << "]\n";
-	}
-	else
-	{
-		path[2] = filename.c_str(); // target
-		std::cout << "ARGV: [" << path[2] << "]\n";
-		path[3] = NULL;
-	}
-	path[5] = NULL;
-	std::cout << request.getMethod() << "[" << filename << " : contentType]\n";
-	
+	pipe(pipefd2);
 	pid = fork();
 	if (pid == 0)
 	{
-		// close(pipefd2[0]); dup2(pipefd2[1], STDOUT_FILENO); // 출력
-		// close(pipefd2[1]);
+		char	 	**envp;
+
+		envp = envpList(request);
+		close(pipefd2[0]); dup2(pipefd2[1], STDOUT_FILENO); // 출력
+		close(pipefd2[1]);
 		if (request.getMethod() == "POST" && request.getHeader("CONTENT-TYPE") != "application/x-www-form-urlencoded")
 		{
 			close(pipefd1[1]); dup2(pipefd1[0], STDIN_FILENO); // 입력
 			close(pipefd1[0]);
 		}
-		execve("/usr/bin/python3", const_cast<char* const*>(path), NULL);
+		if (strcmp(cgi_python, "cgi-bin/cgi_tester") == 0)
+		{
+			argv[0] = cgi_python;
+			argv[1] = NULL;
+		}
+		else
+		{
+			argv[0] = "/usr/bin/python3";
+			argv[1] = cgi_python;
+		}
+		argv[2] = NULL;
+		execve(argv[0], const_cast<char* const*>(argv), envp);
+		freeEnvpList(envp);
 	}
 	else
 	{
-		std::string	fullpath = uploadPath + "/" + filename;
-		int			flag;
-
-		readfd[1] = open(fullpath.c_str(), O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-		close(readfd[1]);
-		readfd[0] = open(fullpath.c_str(), O_RDONLY, S_IRUSR | S_IWUSR);
-		flag = fcntl(readfd[0], F_GETFL);
-		flag = flag | O_NONBLOCK;
-		fcntl(readfd[0], F_SETFL, flag);
-		std::cout << fullpath << ", " << readfd[0] << " = READ POST FILE\n";
 		ChildProcess::insertChildProcess(pid);
 		if (request.getMethod() == "POST" && request.getHeader("CONTENT-TYPE") != "application/x-www-form-urlencoded")
-			writeEventRegister(pipefd1, readfd, response, request.getBody());
+			writeEventRegister(pipefd1, pipefd2, response, request.getBody());
 		else
-			readEventRegsiter(readfd, response, request.getBody().size());
+		{
+			if (request.getQueryString() != "")
+				readEventRegsiter(pipefd2, response, request.getQueryString().length());
+			else
+				readEventRegsiter(pipefd2, response, request.getBody().length());
+		}
 	}
 }
 
@@ -88,18 +67,82 @@ void			Controller::writeEventRegister(int writefd[2], int readfd[2], HttpRespons
 	readEventRegsiter(readfd, response, data.length());
 }
 
-// request
-// response
 void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response, size_t bodySize)
 {
 	Event				*event;
 
 	event = response.getEvent();
-	// close(readfd[1]);
-	// fcntl(readfd[0], F_SETFL, O_NONBLOCK);
-	std::cout << readfd[0] << " = Controller::readEventRegsiter\n";
-	std::cout << bodySize << ": bodySize\n";
-	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(readfd[0], response, bodySize)); // EVFILT_READ, EVFILT_WRITE
+	close(readfd[1]);
+	fcntl(readfd[0], F_SETFL, O_NONBLOCK);
+	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(readfd[0], response, 0)); // EVFILT_READ, EVFILT_WRITE
+}
+
+std::string	Controller::changeToUnderbar(std::string src)
+{
+	for (int i = 0; i < src.length(); i++)
+	{
+		if (src[i] == '-')
+			src[i] = '_';
+	}
+	return (src);
+}
+
+char		**Controller::envpList(HttpRequest &request)
+{
+	std::map<std::string, std::string>::iterator iter;
+	size_t		size = 0;
+	size_t		idx = 0;
+	char	 	**envp;
+
+	for (iter = request.getHeaderBegin(); iter != request.getHeaderEnd(); iter++)
+		size++;
+	size += 9; // METHOD, SERVER_PROTOCOL, PATH_INFO, REQUEST_URI, CONTENT_TYPE, PATH_TRANSLATED; SERVER_PROTOCOL; SERVER_SOFTWARE, GATEWAY_INTERFACE
+	if (request.getQueryString() != "")
+		size++; // Query String
+	envp = new char*[size + 1];
+	envp[idx++] = strdup(("REQUEST_METHOD=" + request.getMethod()).c_str());
+	if (request.getQueryString() != "")
+		envp[idx++] = strdup(("QUERY_STRING=" + request.getQueryString()).c_str());
+	envp[idx++] = strdup(("PATH_INFO=" + request.getRepository()).c_str());
+	envp[idx++] = strdup(("PATH_TRANSLATED=" + request.getPath()).c_str());
+	envp[idx++] = strdup(("REQUEST_URI=" + request.getRepository()).c_str());
+	envp[idx++] = strdup(("CONTENT_TYPE=" + ResponseConfig::getContentType(request.getPath())).c_str());
+	envp[idx++] = strdup(("SERVER_PROTOCOL=" + request.getProtocolString()).c_str());
+	envp[idx++] = strdup(std::string("SERVER_SOFTWARE=NGINX").c_str());
+	envp[idx++] = strdup(std::string("GATEWAY_INTERFACE=CGI/1.1").c_str());
+	for (iter = request.getHeaderBegin(); iter != request.getHeaderEnd(); iter++)
+	{
+		std::string	key;
+		std::string	value;
+		std::string	env;
+
+		key = iter->first;
+		if (iter->first.find("ACCEPT") != std::string::npos || iter->first.find("CONTENT-TYPE") != std::string::npos)
+			continue;
+		if (iter->first.find("SEC-") != std::string::npos)
+			continue;
+		if (iter->first.find("CONTENT-LENGTH") == std::string::npos && iter->first.find("SERVER-PROTOCOL") == std::string::npos \
+		&& iter->first.find("SERVER_PORT") == std::string::npos && iter->first.find("SCRIPT-NAME") == std::string::npos)
+			key = "HTTP_" + changeToUnderbar(key);
+		else
+			key = changeToUnderbar(key);
+		value = changeToUnderbar(iter->second);
+		env = key + "=" + value;
+		envp[idx++] = strdup(env.c_str());
+	}
+	envp[idx] = 0;
+	// for (int i = 0; envp[i] != 0; i++)
+	// {
+	// 	std::cout << envp[i] << "\n";
+	// }
+	return (envp);
+}
+
+void	Controller::freeEnvpList(char *const *envp) {
+    for (size_t i = 0; envp[i] != nullptr; ++i) {
+        free(envp[i]);
+    }
+    delete[] envp;
 }
 
 std::pair<std::string, std::string>	Controller::getFileName(HttpRequest &request)
@@ -132,6 +175,7 @@ std::pair<std::string, std::string>	Controller::getFileName(HttpRequest &request
 			dir = opendir(fullpath.c_str());
 			while ((entry = readdir(dir)) != NULL)
 				count++;
+			closedir(dir);
 			ss << count;
 			filename = ss.str();
 		}
@@ -169,9 +213,10 @@ void    Controller::doGet(HttpRequest &request, HttpResponse &response)
 
 	cgiFile = response.getServerConfiguration()->getGetCgiPath();
 	path = getFileName(request);
-	request.setPath(path.first);
-	filename = path.second;
-	classifyEvent(request, response, cgiFile.c_str(), filename);
+	if (request.getQueryString() == "")
+		request.setQueryString(request.getBody());
+	request.setPath(path.first + "/" + path.second);
+	classifyEvent(request, response, cgiFile.c_str());
 }
 
 // file post
@@ -181,12 +226,10 @@ void	Controller::doPost(HttpRequest &request, HttpResponse &response)
 	std::string 	filename;
 	std::pair<std::string, std::string>	path;
 
-	std::cout << request.getBody().length() << " = Controller::doPost\n";
 	cgiFile = response.getServerConfiguration()->getPostCgiPath();
 	path = getFileName(request);
-	request.setPath(path.first);
-	filename = path.second;
-	classifyEvent(request, response, cgiFile.c_str(), filename);
+	request.setPath(path.first + "/" + path.second);
+	classifyEvent(request, response, cgiFile.c_str());
 }
 
 void	Controller::doDelete(HttpRequest &request, HttpResponse &response)
@@ -196,7 +239,7 @@ void	Controller::doDelete(HttpRequest &request, HttpResponse &response)
 
 	cgiFile = response.getServerConfiguration()->getDeleteCgiPath();
 	target = request.getPath();
-	classifyEvent(request, response, cgiFile.c_str(), target);
+	classifyEvent(request, response, cgiFile.c_str());
 }
 
 Controller::Controller()
@@ -220,11 +263,8 @@ Controller::~Controller()
 
 bool    Controller::isAcceptableMethod(std::string method)
 {
-	std::cout << "this->masking : " << this->masking << ", " << method << "\n";
 	if ((method == "GET")&& (1 & this->masking))
 		return (true);
-	// if ((method == "GET")&& (1 & this->masking))
-	// 	return (true);
 	else if (method == "POST" && (2 & this->masking))
 		return (true);
 	else if (method == "DELETE" && (8 & this->masking))

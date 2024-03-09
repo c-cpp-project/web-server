@@ -15,8 +15,10 @@ def removeFile(path):
     try:
         if os.path.isfile(path):
             os.remove(path)
-        if os.path.isdir(path):
+        elif os.path.isdir(path):
             shutil.rmtree(path)
+        else:
+            return "no"
         return "ok"
     except OSError as e:
         return "no"

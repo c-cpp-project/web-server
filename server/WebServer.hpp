@@ -56,8 +56,8 @@ class WebServer {
                 Event* eventHandler);
 };
 
-std::map<std::pair<std::string, int>, ServerConfiguration*>
-    WebServer::serverConfigs;
+// std::map<std::pair<std::string, int>, ServerConfiguration*>
+//     WebServer::serverConfigs;
 
 struct _linger {
   int l_onoff;

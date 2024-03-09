@@ -16,6 +16,9 @@
 #include "../HttpRequest/HttpRequestHandler.hpp"
 #include "StringUtils.hpp"
 
+std::map<std::pair<std::string, int>, ServerConfiguration*>
+    WebServer::serverConfigs;
+
 WebServer& WebServer::getInstance(
     std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfig,
     int option) {
@@ -27,7 +30,7 @@ WebServer::WebServer(
     std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfigs,
     int option)
     : option(option) {
-  this->serverConfigs = serverConfigs;
+  WebServer::serverConfigs = serverConfigs;
 }
 
 void WebServer::segSignalHandler(int signo) {
@@ -39,14 +42,14 @@ void WebServer::segSignalHandler(int signo) {
 
 void WebServer::init() {
   std::map<std::pair<std::string, int>, ServerConfiguration*>::iterator it =
-      serverConfigs.begin();
+      WebServer::serverConfigs.begin();
   signal(SIGSEGV, WebServer::segSignalHandler);
   int port = 8080;
   if (eventHandler.initKqueue()) {
     std::cout << "kqueue() error" << std::endl;
     exit(1);
   }
-  while (it != serverConfigs.end()) {
+  while (it != WebServer::serverConfigs.end()) {
     ServerConfiguration* serverConfig = it->second;
     int serversSocket = openPort(serverConfig);
     fcntl(serversSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
@@ -244,7 +247,8 @@ int WebServer::acceptClient(int serverSocket) {
     return -1;
   }
   fcntl(clientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-  ServerConfiguration* serverConfig = serverConfigs[serverIdentifier];
+  ServerConfiguration* serverConfig =
+      WebServer::serverConfigs[serverIdentifier];
   addClient(clientSocket, serverConfig, &eventHandler);
   eventHandler.registerEnabledReadEvent(clientSocket, handlerMap[clientSocket]);
   eventHandler.registerDisabledWriteEvent(clientSocket,
@@ -260,7 +264,7 @@ bool WebServer::hasServerFd(struct kevent& currEvent) {
 
 void WebServer::disconnectPort(struct kevent& currEvent) {
   close(currEvent.ident);
-  serverConfigs.erase(serverSocketPortMap[currEvent.ident]);
+  WebServer::serverConfigs.erase(serverSocketPortMap[currEvent.ident]);
 }
 
 bool WebServer::isClient(int clientFd) {

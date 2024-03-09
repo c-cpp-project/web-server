@@ -52,6 +52,11 @@ void WebServer::init() {
   while (it != WebServer::serverConfigs.end()) {
     ServerConfiguration* serverConfig = it->second;
     int serversSocket = openPort(serverConfig);
+    std::cout << serversSocket <<" [SOCKET]\n";
+    // if (serversSocket == -1) {
+    //   it++;
+    //   continue;
+    // }
     fcntl(serversSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
     serverSocketPortMap[serversSocket] = it->first;
     eventHandler.registerServerEvent(serversSocket, serverConfig);
@@ -89,6 +94,10 @@ int WebServer::openPort(ServerConfiguration* serverConfig) {
     SocketUtils::exitWithPerror("[Error] socket() error\n" +
                                 std::string(strerror(errno)));
   setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+  if (ports[port] == 1) {
+    return serverSocket;
+  }
+  ports[port] = 1;
   res = bind(serverSocket, reinterpret_cast<struct sockaddr*>(&socketaddr),
              sizeof(socketaddr));
   if (res == -1) {

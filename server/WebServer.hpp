@@ -23,6 +23,7 @@ class WebServer {
       serverConfigs;
 
  private:
+  int ports[65536];
   int option;
   Event eventHandler;
   std::map<int, std::pair<std::string, int> > serverSocketPortMap;

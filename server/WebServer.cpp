@@ -184,7 +184,7 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
     int ret = BeanFactory::runBeanByName("RECV", handler, &eventHandler);
     std::cout << "[INFO] RET" << ret << std::endl;
     if (ret == 1) {
-      disconnectClient(currEvent.ident);
+      // disconnectClient(currEvent.ident);
     }
   } else {
     std::cout << currEvent.ident << " = READ currEvent.ident\n";
@@ -234,7 +234,7 @@ int WebServer::acceptClient(int serverSocket) {
   std::cout << "acceptClient\n";
   struct _linger linger;
   linger.l_onoff = 1;
-  linger.l_linger = option;
+  linger.l_linger = 3;
   const int clientSocket = accept(serverSocket, NULL, NULL);
   std::pair<std::string, int> serverIdentifier =
       serverSocketPortMap[serverSocket];

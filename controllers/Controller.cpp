@@ -70,11 +70,14 @@ void			Controller::writeEventRegister(int writefd[2], int readfd[2], HttpRespons
 void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response, size_t bodySize)
 {
 	Event				*event;
+	HttpHandler			*httpHandler;
 
 	event = response.getEvent();
 	close(readfd[1]);
 	fcntl(readfd[0], F_SETFL, O_NONBLOCK);
-	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, new HttpHandler(readfd[0], response, 0)); // EVFILT_READ, EVFILT_WRITE
+	httpHandler = new HttpHandler(readfd[0], response, 0);
+	httpHandler->setConnectionClose(response.getHeader("connection") == "close");
+	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, httpHandler); // EVFILT_READ, EVFILT_WRITE
 }
 
 std::string	Controller::changeToUnderbar(std::string src)

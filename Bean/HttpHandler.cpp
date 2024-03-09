@@ -146,3 +146,13 @@ const char  *HttpHandler::getBufferStartIdx(void)
 {
     return (this->data.c_str());
 }
+
+void    HttpHandler::setConnectionClose(bool isClose)
+{
+    close = isClose;
+}
+
+bool    HttpHandler::getConnectionClose(void)
+{
+    return (close);
+}

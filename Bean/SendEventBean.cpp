@@ -39,12 +39,20 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     if (waitSec >= 15)
       waitSec = 15;
     std::cout << "waitSec: " << waitSec << "\n";
-    event->saveEvent(socketfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, recvHandler);
-    event->saveEvent(socketfd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, waitSec, recvHandler);
     event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);  // EVFILT_WRITE 
+    if (httpHandler->getConnectionClose())
+    {
+      std::cout << "CONNECTION CLOSE: " << socketfd << "\n";
+      close(socketfd);
+      return (0);
+    }
+    else
+    {
+      event->saveEvent(socketfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, recvHandler);
+      event->saveEvent(socketfd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, waitSec, recvHandler);
+    }
     delete httpHandler;
     httpHandler = 0;
-    // close(socketfd);
     std::cout << "================== SEND DONE ============================\n";
     return (0);
   }

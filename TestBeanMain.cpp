@@ -17,10 +17,10 @@ int main(int argc, char** argv) {
     std::cout << "[INFO] use default conf file ./config/default.conf"
               << std::endl;
     configFileName = "server/config/default.conf";
-    option = 0;
+    option = 3;
   } else {
     configFileName = argv[1];
-    option = 10;
+    option = 3;
   }
   ConfigParser configParser;
   configParser.parseConfig(configFileName);

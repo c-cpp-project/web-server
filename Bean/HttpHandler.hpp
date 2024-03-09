@@ -18,7 +18,7 @@ private:
 	std::string			data;
 	long long			bodySize;
 	long long			bufferIdx;
-	// Event               event;
+	bool				close;
 	HttpHandler();
 public:
 	HttpHandler(int fd, HttpRequest req, HttpResponse res);
@@ -42,6 +42,8 @@ public:
 	void    		setBufferIdx(long long bufferIdx);
 	long long   	getBufferIdx(void);
 	const char  	*getBufferStartIdx(void);
+	void			setConnectionClose(bool value);
+	bool			getConnectionClose(void);
 };
 // HttpResponse 대입 연산자를 만들어야 한다.
 #endif

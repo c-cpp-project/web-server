@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 // 완전하고 유효한 request 객체 하나를 만들어서 반환
-HttpRequest *HttpRequestFactory::create(int socket_fd, ServerConfiguration *server_config)
+HttpRequest *HttpRequestFactory::create(int socket_fd, ServerConfiguration *&server_config)
 {
 	HttpRequest *request = NULL;
 	try

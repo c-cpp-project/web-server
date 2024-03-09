@@ -11,7 +11,7 @@ class HttpRequestFactory
 		static void SpecialExceptionHandling(const int& e, int socket_fd, HttpRequest*& request);
 
 	public:
-		static HttpRequest *create(int socket_fd, ServerConfiguration *server_config);
+		static HttpRequest *create(int socket_fd, ServerConfiguration *&server_config);
 };
 
 #endif

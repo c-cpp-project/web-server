@@ -13,12 +13,12 @@ class HttpRequestParser
 {
 	private:
 		static void parseRequestLine(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, long& start);
-		static void parseRequestHeaders(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, long& start);
+		static void parseRequestHeaders(HttpRequest *request, ServerConfiguration *&server_config, const std::string& buffer, long& start);
 		static bool isExistBody(HttpRequest *request);
 		static void parseRequestBody(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, long start);
 
 	public:
-		static void parse(HttpRequest*& request, ServerConfiguration *server_config, const std::string& buffer);
+		static void parse(HttpRequest*& request, ServerConfiguration *&server_config, const std::string& buffer);
 		static void parseRequestParams(HttpRequest *request);
 };
 

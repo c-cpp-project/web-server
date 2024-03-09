@@ -1,7 +1,8 @@
 #include "HttpRequestParser.hpp"
 #include "HttpRequestHandler.hpp"
+// #include "WebServer.hpp"
 
-void HttpRequestParser::parse(HttpRequest*& request, ServerConfiguration *server_config, const std::string& buffer)
+void HttpRequestParser::parse(HttpRequest*& request, ServerConfiguration *&server_config, const std::string& buffer)
 {
 	long start = 0;
 	request = new HttpRequest();
@@ -22,9 +23,9 @@ void HttpRequestParser::parseRequestLine(HttpRequest *request, ServerConfigurati
 	size_t end_of_line = buffer.find("\r\n", start);
 	if (end_of_line == std::string::npos) // 요청 라인의 끝을 식별할 수 없는 경우
 	{
-		if (buffer.size() >= server_config->getClientHeaderSize())	// 최대 헤더 크기만큼 충분히 읽었다면
+		if (buffer.size() >= server_config->getClientHeaderSize())	// 제한된 헤더 크기만큼 충분히 읽었다면
 			throw SocketCloseException400();						// -> 너무 긴 요청 라인
-		else														// 최대 헤더 크기만큼 충분히 읽지 못했다면
+		else														// 제한된 요청 라인 길이만큼 충분히 읽지 못했다면
 			throw INCOMPLETE_REQUEST;								// -> 불완전한 요청 라인
 	}
 
@@ -34,7 +35,7 @@ void HttpRequestParser::parseRequestLine(HttpRequest *request, ServerConfigurati
 	start = end_of_line + 2;
 }
 
-void HttpRequestParser::parseRequestHeaders(HttpRequest *request, ServerConfiguration *server_config, const std::string& buffer, long& start)
+void HttpRequestParser::parseRequestHeaders(HttpRequest *request, ServerConfiguration *&server_config, const std::string& buffer, long& start)
 {
 	// 요청 헤더가 들어왔는지 확인하기
 	size_t end_of_headers = buffer.find("\r\n\r\n", start);

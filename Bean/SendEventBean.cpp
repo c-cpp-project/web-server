@@ -32,12 +32,19 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   }
   else if (httpHandler->getBufferIdx() == httpHandler->getDataLength() || ret == 0) {
     std::cout << "SEND FD: " << socketfd << ", RET: " << ret << "\n";
+    int waitSec;
+    
     HttpHandler *recvHandler = new HttpHandler(socketfd, serverConfig);
+    waitSec = httpHandler->getDataLength() / 10000000 + 3; // default 5sec + 100MB 기준 1초
+    if (waitSec >= 15)
+      waitSec = 15;
+    std::cout << "waitSec: " << waitSec << "\n";
     event->saveEvent(socketfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, recvHandler);
-    event->saveEvent(socketfd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, 5, recvHandler);
+    event->saveEvent(socketfd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, waitSec, recvHandler);
     event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);  // EVFILT_WRITE 
     delete httpHandler;
     httpHandler = 0;
+    // close(socketfd);
     std::cout << "================== SEND DONE ============================\n";
     return (0);
   }

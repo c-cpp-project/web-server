@@ -34,8 +34,8 @@ int ReadEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     responseSaveEvent(buffers[readFd], httpHandler, event);
     buffers[readFd] = "";
   }
+  event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DELETE, 0, 0, 0);
   close(readFd);
-  event->saveEvent(httpHandler->getFd(), EVFILT_READ, EV_DISABLE, 0, 0, 0);
   delete httpHandler;
   httpHandler = 0;
   std::cout << "ReadEventBean::runBeanEvent DONE\n";

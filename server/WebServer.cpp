@@ -221,8 +221,7 @@ void WebServer::processWriteEvent(struct kevent& currEvent) {
 }
 
 void WebServer::processTimerEvent(struct kevent& currEvent) {
-  std::cout << "WebServer::processTimerEvent START: " << currEvent.ident
-            << "\n";
+  std::cout << "WebServer::processTimerEvent START: " << currEvent.ident << "\n";
   eventHandler.saveEvent(currEvent.ident, EVFILT_TIMER, EV_DISABLE, 0, 0, 0);
   if (handlerMap.find(currEvent.ident) == handlerMap.end()) return;
   HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
@@ -235,7 +234,7 @@ int WebServer::acceptClient(int serverSocket) {
   std::cout << "acceptClient\n";
   struct _linger linger;
   linger.l_onoff = 1;
-  linger.l_linger = 10;
+  linger.l_linger = 5;
   const int clientSocket = accept(serverSocket, NULL, NULL);
   std::pair<std::string, int> serverIdentifier =
       serverSocketPortMap[serverSocket];

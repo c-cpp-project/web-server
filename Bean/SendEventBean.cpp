@@ -35,11 +35,9 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     int waitSec;
     
     HttpHandler *recvHandler = new HttpHandler(socketfd, serverConfig);
-    // waitSec = httpHandler->getDataLength() / 10000000 + 5; // default 5sec + 100MB 기준 1초
-    waitSec = 15;
     if (waitSec >= 15)
       waitSec = 15;
-    std::cout << "waitSec: " << waitSec << "\n";
+    std::cout << "waitSec: " << waitSec << " Connection Close: " << httpHandler->getConnectionClose() << "\n";
     event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);  // EVFILT_WRITE 
     if (httpHandler->getConnectionClose())
     {

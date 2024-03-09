@@ -71,6 +71,7 @@ void HttpResponse::listDirectory(std::string directory) {
 	std::string body;
 	struct dirent *entry;
 	std::stringstream ss;
+	HttpHandler	*httpHandler;
 
 	dir = opendir(directory.c_str());
 	if (dir == NULL) {
@@ -88,17 +89,25 @@ void HttpResponse::listDirectory(std::string directory) {
 	putHeader("Content-Length", ss.str());
 	sendBody(body, true); 
 	putHeader("Connection", "keep-alive");
-	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), getByteDump(), serverConfig));  // SEND
+	httpHandler = new HttpHandler(getSockfd(), getByteDump(), serverConfig);
+	if (headers.find("connection") != headers.end())
+		httpHandler->setConnectionClose(headers.at("connection") == "close");
+	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0, httpHandler);  // SEND
 }
 
 void HttpResponse::redirect(std::string redirectUri) {
+	HttpHandler	*httpHandler;
 	setStatusCode("302");
 	putHeader("Content-Type", "text/html");
 	putHeader("Location", redirectUri);
 	putHeader("Content-Length", "0");
 	sendBody("", true);
 	putHeader("Connection", "keep-alive");
-	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0, new HttpHandler(getSockfd(), getByteDump(), serverConfig));  // SEND
+
+	httpHandler = new HttpHandler(getSockfd(), getByteDump(), serverConfig);
+	if (headers.find("connection") != headers.end())
+		httpHandler->setConnectionClose(headers.at("connection") == "close");
+	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0, httpHandler);  // SEND
 }
 
 void  HttpResponse::putHeaders(int length, HttpRequest &request)
@@ -126,6 +135,7 @@ void  HttpResponse::forward(HttpRequest &request)  // controller에서 사용한
 	int 		fd;
 	std::string uri;
 	struct stat buf;
+	HttpHandler	*httpHandler;
 
 	uri = request.getPath();
 	if (400 <= std::atoi(getStatusCode().c_str()) && std::atoi(getStatusCode().c_str()) < 600)  // fail.page
@@ -150,11 +160,12 @@ void  HttpResponse::forward(HttpRequest &request)  // controller에서 사용한
 	putHeader("Content-Type", ResponseConfig::getContentType(uri));
 	putHeaders(buf.st_size, request);
 	if ("400" <= getStatusCode() && getStatusCode() < "600")
-		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0,
-										 new HttpHandler(fd, *this, buf.st_size));
+		httpHandler = new HttpHandler(fd, *this, buf.st_size);
 	else
-		event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0,
-										 new HttpHandler(fd, request, *this, buf.st_size));
+		httpHandler = new HttpHandler(fd, request, *this, buf.st_size);
+	if (headers.find("connection") != headers.end())
+		httpHandler->setConnectionClose(headers.at("connection") == "close");
+	event->saveEvent(fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, httpHandler);
 }
 
 void HttpResponse::sendBody(std::string body, bool isStaticFile)  // api 요청에 대한 응답
@@ -241,3 +252,10 @@ ServerConfiguration *HttpResponse::getServerConfiguration(void) {
 }
 
 Event *HttpResponse::getEvent(void) { return (this->event); }
+
+std::string	HttpResponse::getHeader(std::string key)
+{
+	if (headers.find(key) != headers.end())
+		return (headers.at(key));
+	return ("");
+}

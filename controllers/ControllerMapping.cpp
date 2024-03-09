@@ -79,6 +79,7 @@ void ControllerMapping::mapController(
 			if (allowMethod.find("DELETE") != allowMethod.end()) method += 8;
 
 			putController(port, servername, locationUri, new MyController(method, locationUri));
+			std::cout << port << ", " << servername << ", " << locationUri << "\n";
 		}
 	}
 }

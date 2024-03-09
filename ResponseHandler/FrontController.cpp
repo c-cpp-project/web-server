@@ -45,6 +45,8 @@ void    FrontController::run(HttpRequest tmp)
 		controller = ControllerMapping::getController(serverConfig->getPort(), serverConfig->getServerName(), request->at(i).getPath());
 
 		try {
+			if (request->at(i).getHeader("connection") == "close")
+				response->putHeader("connection", request->at(i).getHeader("connection"));
 			controller->service(request->at(i), (*response)); // CGI에서 대한 I/O 작업: READ, WRITE
 		} catch (const char *e) {
 			delete response;

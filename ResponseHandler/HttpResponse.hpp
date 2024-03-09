@@ -69,5 +69,6 @@ public:
 	std::string	readRangeQuery(std::string range, std::string body);
 	ServerConfiguration	*getServerConfiguration(void);
 	Event	*getEvent(void);
+	std::string	getHeader(std::string key);
 };
 #endif

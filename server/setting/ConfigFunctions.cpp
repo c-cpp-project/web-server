@@ -37,8 +37,10 @@ int ConfigParser::checkServerBlock(struct s_info& parse_info,
       return -1;
     locations.clear();
     mapSentence.clear();
-    if (servers.find(server.getListen()) == servers.end()) {
-      servers[server.getListen()] = server;
+    if (servers.find(std::make_pair(server.getServerName(),
+                                    server.getListen())) == servers.end()) {
+      servers[std::make_pair(server.getServerName(), server.getListen())] =
+          server;
       return 0;
     } else
       return -1;

@@ -15,12 +15,14 @@ class ControllerMapping {
   ControllerMapping();
 
  public:
-  ControllerMapping(std::map<int, ServerConfiguration *> serverConfigs);
+  ControllerMapping(std::map<std::pair<std::string, int>, ServerConfiguration *>
+                        serverConfigs);
   ~ControllerMapping();
   static void deleteController();
-  static std::pair<int, std::string> getControllerKey(int port, std::string uri);
+  static std::pair<int, std::string> getControllerKey(int port,
+                                                      std::string uri);
   static void mapController(
-      std::map<int, ServerConfiguration *> &serverConfigs);
+      std::map<std::pair<std::string, int>, ServerConfiguration *> &serverConfigs);
   static void putController(int port, std::string location,
                             Controller *controller);  // config file에서 설정
   static Controller *getController(

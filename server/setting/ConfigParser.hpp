@@ -12,13 +12,13 @@ class Location;
 class Server;
 class ConfigParser {
  public:
-  std::map<int, Server> server;
+  std::map<std::pair<std::string, int>, Server> server;
   void parseConfig(std::string const& configFileName);
   ~ConfigParser();
   ConfigParser();
 
  private:
-  typedef std::map<int, Server> mapPortServer;
+  typedef std::map<std::pair<std::string, int>, Server> mapPortServer;
   typedef std::map<std::string, Location*> mapStrLocation;
   typedef std::vector<std::string> vecStr;
   typedef std::map<std::string, std::string> mapStrStr;

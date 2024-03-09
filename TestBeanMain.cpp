@@ -20,14 +20,17 @@ int main(int argc, char** argv) {
     configFileName = argv[1];
   ConfigParser configParser;
   configParser.parseConfig(configFileName);
-  std::map<int, ServerConfiguration*> serverConfigs;
-  std::map<int, Server>::iterator it = configParser.server.begin();
+  std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfigs;
+  std::map<std::pair<std::string, int>, Server>::iterator it =
+      configParser.server.begin();
   while (it != configParser.server.end()) {
-    int port = it->first;
+    std::string serverName = it->first.first;
+    int port = it->first.second;
     Server& server = it->second;
     ServerConfiguration* serverConfig = new ServerConfiguration(server);
-    serverConfigs.insert(std::pair<int, ServerConfiguration*>(
-        serverConfig->getPort(), serverConfig));
+    serverConfigs.insert(std::make_pair(
+        std::make_pair(server.getServerName(), server.getListen()),
+        serverConfig));
     it++;
   }
   std::cout << "======================================\n";

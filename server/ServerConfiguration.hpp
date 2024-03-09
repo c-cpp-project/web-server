@@ -7,7 +7,7 @@
 class ServerConfiguration {
  private:
   std::set<std::string> defaultAllowedMethods;
-  std::map<int, int> serverSocketPortMap;
+  std::map<int, std::pair<std::string, int> > serverSocketPortMap;
   Server* server;
   const std::string getPathByRootAndValue(std::string root,
                                           std::string value) const;

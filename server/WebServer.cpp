@@ -19,12 +19,13 @@
 int count = 0;
 
 WebServer& WebServer::getInstance(
-    std::map<int, ServerConfiguration*> serverConfig) {
+    std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfig) {
   static WebServer instance(serverConfig);
   return instance;
 }
 
-WebServer::WebServer(std::map<int, ServerConfiguration*> serverConfigs) {
+WebServer::WebServer(
+    std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfigs) {
   this->serverConfigs = serverConfigs;
 }
 
@@ -36,7 +37,8 @@ void WebServer::segSignalHandler(int signo) {
 }
 
 void WebServer::init() {
-  std::map<int, ServerConfiguration*>::iterator it = serverConfigs.begin();
+  std::map<std::pair<std::string, int>, ServerConfiguration*>::iterator it =
+      serverConfigs.begin();
   signal(SIGSEGV, WebServer::segSignalHandler);
   int port = 8080;
   if (eventHandler.initKqueue()) {
@@ -232,14 +234,16 @@ int WebServer::acceptClient(int serverSocket) {
   linger.l_onoff = 1;
   linger.l_linger = 10;
   const int clientSocket = accept(serverSocket, NULL, NULL);
-  const int serverPort = serverSocketPortMap[serverSocket];
+  std::pair<std::string, int> serverIdentifier =
+      serverSocketPortMap[serverSocket];
+  const int serverPort = serverIdentifier.second;
   setsockopt(clientSocket, SOL_SOCKET, SO_LINGER, &linger, sizeof(_linger));
   if (clientSocket == -1) {
     std::cout << "[ERROR] accept() error" << std::endl;
     return -1;
   }
   fcntl(clientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-  ServerConfiguration* serverConfig = serverConfigs[serverPort];
+  ServerConfiguration* serverConfig = serverConfigs[serverIdentifier];
   addClient(clientSocket, serverConfig, &eventHandler);
   eventHandler.registerEnabledReadEvent(clientSocket, handlerMap[clientSocket]);
   eventHandler.registerDisabledWriteEvent(clientSocket,

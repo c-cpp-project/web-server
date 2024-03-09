@@ -71,8 +71,11 @@ void HttpRequestParser::parseRequestHeaders(HttpRequest *request,
 
   if (request->getHeader("Host") == "") throw "400";  // HOST 헤더가 없는 경우
   int port = server_config->getPort();
-  server_config = WebServer::serverConfigs[std::make_pair(
+  ServerConfiguration* temp = WebServer::serverConfigs[std::make_pair(
       request->getHeader("Host"), port)];
+  if (temp != NULL)
+    server_config = temp;
+
 }
 
 bool HttpRequestParser::isExistBody(HttpRequest *request) {

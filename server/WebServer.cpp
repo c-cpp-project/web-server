@@ -166,6 +166,7 @@ void WebServer::processErrorEvent(struct kevent& currEvent) {
     disconnectPort(currEvent);
     std::cout << currEvent.ident << "[INFO] server disconnected" << std::endl;
   } else {
+    std::cout << currEvent << std::endl;
     disconnectClient(currEvent.ident);
     // addCandidatesForDisconnection(currEvent.ident);
     std::cout << currEvent.ident << "[INFO] client disconnected" << std::endl;
@@ -234,7 +235,7 @@ int WebServer::acceptClient(int serverSocket) {
   std::cout << "acceptClient\n";
   struct _linger linger;
   linger.l_onoff = 1;
-  linger.l_linger = 3;
+  linger.l_linger = 10;
   const int clientSocket = accept(serverSocket, NULL, NULL);
   std::pair<std::string, int> serverIdentifier =
       serverSocketPortMap[serverSocket];

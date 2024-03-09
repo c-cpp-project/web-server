@@ -16,17 +16,21 @@
 #include "../HttpRequest/HttpRequestHandler.hpp"
 #include "StringUtils.hpp"
 
-int count = 0;
+std::map<std::pair<std::string, int>, ServerConfiguration*>
+    WebServer::serverConfigs;
 
 WebServer& WebServer::getInstance(
-    std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfig) {
-  static WebServer instance(serverConfig);
+    std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfig,
+    int option) {
+  static WebServer instance(serverConfig, option);
   return instance;
 }
 
 WebServer::WebServer(
-    std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfigs) {
-  this->serverConfigs = serverConfigs;
+    std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfigs,
+    int option)
+    : option(option) {
+  WebServer::serverConfigs = serverConfigs;
 }
 
 void WebServer::segSignalHandler(int signo) {
@@ -38,16 +42,21 @@ void WebServer::segSignalHandler(int signo) {
 
 void WebServer::init() {
   std::map<std::pair<std::string, int>, ServerConfiguration*>::iterator it =
-      serverConfigs.begin();
+      WebServer::serverConfigs.begin();
   signal(SIGSEGV, WebServer::segSignalHandler);
   int port = 8080;
   if (eventHandler.initKqueue()) {
     std::cout << "kqueue() error" << std::endl;
     exit(1);
   }
-  while (it != serverConfigs.end()) {
+  while (it != WebServer::serverConfigs.end()) {
     ServerConfiguration* serverConfig = it->second;
     int serversSocket = openPort(serverConfig);
+    std::cout << serversSocket <<" [SOCKET]\n";
+    // if (serversSocket == -1) {
+    //   it++;
+    //   continue;
+    // }
     fcntl(serversSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
     serverSocketPortMap[serversSocket] = it->first;
     eventHandler.registerServerEvent(serversSocket, serverConfig);
@@ -85,6 +94,10 @@ int WebServer::openPort(ServerConfiguration* serverConfig) {
     SocketUtils::exitWithPerror("[Error] socket() error\n" +
                                 std::string(strerror(errno)));
   setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+  if (ports[port] == 1) {
+    return serverSocket;
+  }
+  ports[port] = 1;
   res = bind(serverSocket, reinterpret_cast<struct sockaddr*>(&socketaddr),
              sizeof(socketaddr));
   if (res == -1) {
@@ -232,7 +245,7 @@ int WebServer::acceptClient(int serverSocket) {
   std::cout << "acceptClient\n";
   struct _linger linger;
   linger.l_onoff = 1;
-  linger.l_linger = 10;
+  linger.l_linger = option;
   const int clientSocket = accept(serverSocket, NULL, NULL);
   std::pair<std::string, int> serverIdentifier =
       serverSocketPortMap[serverSocket];
@@ -243,7 +256,8 @@ int WebServer::acceptClient(int serverSocket) {
     return -1;
   }
   fcntl(clientSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-  ServerConfiguration* serverConfig = serverConfigs[serverIdentifier];
+  ServerConfiguration* serverConfig =
+      WebServer::serverConfigs[serverIdentifier];
   addClient(clientSocket, serverConfig, &eventHandler);
   eventHandler.registerEnabledReadEvent(clientSocket, handlerMap[clientSocket]);
   eventHandler.registerDisabledWriteEvent(clientSocket,
@@ -259,7 +273,7 @@ bool WebServer::hasServerFd(struct kevent& currEvent) {
 
 void WebServer::disconnectPort(struct kevent& currEvent) {
   close(currEvent.ident);
-  serverConfigs.erase(serverSocketPortMap[currEvent.ident]);
+  WebServer::serverConfigs.erase(serverSocketPortMap[currEvent.ident]);
 }
 
 bool WebServer::isClient(int clientFd) {

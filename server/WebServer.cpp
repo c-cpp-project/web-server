@@ -16,16 +16,17 @@
 #include "../HttpRequest/HttpRequestHandler.hpp"
 #include "StringUtils.hpp"
 
-int count = 0;
-
 WebServer& WebServer::getInstance(
-    std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfig) {
-  static WebServer instance(serverConfig);
+    std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfig,
+    int option) {
+  static WebServer instance(serverConfig, option);
   return instance;
 }
 
 WebServer::WebServer(
-    std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfigs) {
+    std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfigs,
+    int option)
+    : option(option) {
   this->serverConfigs = serverConfigs;
 }
 
@@ -232,7 +233,7 @@ int WebServer::acceptClient(int serverSocket) {
   std::cout << "acceptClient\n";
   struct _linger linger;
   linger.l_onoff = 1;
-  linger.l_linger = 10;
+  linger.l_linger = option;
   const int clientSocket = accept(serverSocket, NULL, NULL);
   std::pair<std::string, int> serverIdentifier =
       serverSocketPortMap[serverSocket];

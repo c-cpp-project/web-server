@@ -52,11 +52,7 @@ void WebServer::init() {
   while (it != WebServer::serverConfigs.end()) {
     ServerConfiguration* serverConfig = it->second;
     int serversSocket = openPort(serverConfig);
-    std::cout << serversSocket <<" [SOCKET]\n";
-    // if (serversSocket == -1) {
-    //   it++;
-    //   continue;
-    // }
+    std::cout << serversSocket << " [SOCKET]\n";
     fcntl(serversSocket, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
     serverSocketPortMap[serversSocket] = it->first;
     eventHandler.registerServerEvent(serversSocket, serverConfig);
@@ -184,19 +180,11 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
   } else if (isClient(currEvent.ident)) {
     std::cout << currEvent.ident << " = RECV currEvent.ident\n";
     std::cout << "[RECV] DONE " << (currEvent.flags & EV_EOF) << std::endl;
-    if (currEvent.flags & EV_EOF) {
-      eventHandler.saveEvent(currEvent.ident, EVFILT_READ, EV_DISABLE, 0, 0, 0);
-    } else {
-      HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
-      int ret = BeanFactory::runBeanByName("RECV", handler, &eventHandler);
-      std::cout << "[INFO] RET" << ret << std::endl;
-      if (ret == -1) {
-        // addCandidatesForDisconnection(currEvent.ident);
-        // 소켓을 재사용할지 아니면 끊어내야 할지
-        // 사실 소켓까지 끊을 필요가 있을까?
-        // addCandidatesForDisconnection(currEvent.ident);
-        // 계속 하나의 소켓만 연결됨
-      }
+    HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+    int ret = BeanFactory::runBeanByName("RECV", handler, &eventHandler);
+    std::cout << "[INFO] RET" << ret << std::endl;
+    if (ret == 1) {
+      disconnectClient(currEvent.ident);
     }
   } else {
     std::cout << currEvent.ident << " = READ currEvent.ident\n";
@@ -212,14 +200,15 @@ void WebServer::processWriteEvent(struct kevent& currEvent) {
     if (currEvent.flags & EV_EOF) {
       std::cout << "[CHECK SEND ERROR]" << std::endl;
       // addCandidatesForDisconnection(currEvent.ident);
-      // HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
-      // delete handler;
+      HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+      delete handler;
+      disconnectClient(currEvent.ident);
     }
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
     // ServerConfiguration* serverConfig = handler->getServerConfiguration();
     int ret = BeanFactory::runBeanByName("SEND", handler, &eventHandler);
     if (ret < 0) {
-      addCandidatesForDisconnection(currEvent.ident);
+      disconnectClient(currEvent.ident);
     }
   } else {
     // CGI

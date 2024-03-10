@@ -10,6 +10,7 @@ HttpHandler::HttpHandler(int fd, ServerConfiguration *serverConfig)
     this->data = "";
     this->bodySize = -1;
     this->bufferIdx = 0;
+    this->close = false;
 }
 
 HttpHandler::HttpHandler(int fd, std::string data, ServerConfiguration *serverConfig)
@@ -19,6 +20,7 @@ HttpHandler::HttpHandler(int fd, std::string data, ServerConfiguration *serverCo
     this->serverConfig = serverConfig;
     this->bodySize = -1;
     this->bufferIdx = 0;
+    this->close = false;
 }
 
 HttpHandler::HttpHandler(int fd, HttpResponse res, long long bodySize)
@@ -29,6 +31,7 @@ HttpHandler::HttpHandler(int fd, HttpResponse res, long long bodySize)
     this->data = "";
     this->bodySize = bodySize;
     this->bufferIdx = 0;
+    this->close = false;
 }
 
 HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res)
@@ -40,6 +43,7 @@ HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res)
     this->data = "";
     this->bodySize = -1;
     this->bufferIdx = 0;
+    this->close = false;
 }
 
 HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, long long bodySize)
@@ -51,6 +55,7 @@ HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, long long bo
     this->data = "";
     this->bodySize = bodySize;
     this->bufferIdx = 0;
+    this->close = false;
 }
 
 HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, ServerConfiguration *serverConfig)
@@ -62,6 +67,7 @@ HttpHandler::HttpHandler(int fd, HttpRequest req, HttpResponse res, ServerConfig
     this->data = "";
     this->bodySize = -1;
     this->bufferIdx = 0;
+    this->close = false;
 }
 
 HttpHandler::~HttpHandler()
@@ -89,6 +95,7 @@ HttpHandler&	HttpHandler::operator=(const HttpHandler& ref)
     data = ref.data;
     bodySize = ref.bodySize;
     bufferIdx = ref.bufferIdx;
+    close = ref.close;
     return (*this);
 }
 

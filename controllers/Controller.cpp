@@ -76,7 +76,10 @@ void			Controller::readEventRegsiter(int readfd[2], HttpResponse &response, size
 	close(readfd[1]);
 	fcntl(readfd[0], F_SETFL, O_NONBLOCK);
 	httpHandler = new HttpHandler(readfd[0], response, 0);
-	httpHandler->setConnectionClose(response.getHeader("connection") == "close");
+	if (response.getHeader("connection") == "close")
+		httpHandler->setConnectionClose(true);
+	else
+		httpHandler->setConnectionClose(false);
 	event->saveEvent(readfd[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, httpHandler); // EVFILT_READ, EVFILT_WRITE
 }
 

@@ -16,6 +16,10 @@ void    DefaultController::service(HttpRequest &request, HttpResponse &response)
 	bool				allowedMethod;
 
     allowedMethod = false;
+    if (request.getHeader("connection") == "close")
+		response.putHeader("connection", "close");
+	else
+		response.putHeader("connection", "");
 	if (request.getPath().length() >= extension.length() && \
 	request.getPath().substr(request.getPath().length() - extension.length()) == extension)
 	{

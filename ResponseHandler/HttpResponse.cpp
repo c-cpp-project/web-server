@@ -90,8 +90,10 @@ void HttpResponse::listDirectory(std::string directory) {
 	sendBody(body, true); 
 	putHeader("Connection", "keep-alive");
 	httpHandler = new HttpHandler(getSockfd(), getByteDump(), serverConfig);
-	if (headers.find("connection") != headers.end())
-		httpHandler->setConnectionClose(headers.at("connection") == "close");
+	if (headers.at("connection") == "close")
+		httpHandler->setConnectionClose(true);
+	else
+		httpHandler->setConnectionClose(false);
 	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0, httpHandler);  // SEND
 }
 
@@ -105,8 +107,10 @@ void HttpResponse::redirect(std::string redirectUri) {
 	putHeader("Connection", "keep-alive");
 
 	httpHandler = new HttpHandler(getSockfd(), getByteDump(), serverConfig);
-	if (headers.find("connection") != headers.end())
-		httpHandler->setConnectionClose(headers.at("connection") == "close");
+	if (headers.at("connection") == "close")
+		httpHandler->setConnectionClose(true);
+	else
+		httpHandler->setConnectionClose(false);
 	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0, httpHandler);  // SEND
 }
 

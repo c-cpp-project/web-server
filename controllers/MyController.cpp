@@ -177,6 +177,10 @@ void    MyController::service(HttpRequest &request, HttpResponse &response)
 	ss << serverConfig->getPort();
 	request.setHeader("SERVER_PORT", ss.str());
 	request.setHeader("SERVER_SOFTWARE", serverConfig->getServerName());
+	if (request.getHeader("connection") == "close")
+		response.putHeader("connection", "close");
+	else
+		response.putHeader("connection", "");
 	if ((request.getMethod() == "GET") && request.getQueryString() == "")
 		runService(request, response);
 	else

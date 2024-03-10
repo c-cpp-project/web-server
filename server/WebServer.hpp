@@ -14,7 +14,7 @@
 //     ServerConfiguration::serverConfigs;
 class WebServer {
  public:
-  static const int LISTENCAPACITY = 150;
+  static const int LISTENCAPACITY = 200;
   static WebServer& getInstance(
       std::map<std::pair<std::string, int>, ServerConfiguration*> serverConfigs,
       int option);

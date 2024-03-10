@@ -234,7 +234,7 @@ int WebServer::acceptClient(int serverSocket) {
   std::cout << "acceptClient\n";
   struct _linger linger;
   linger.l_onoff = 1;
-  linger.l_linger = 5;
+  linger.l_linger = 3;
   const int clientSocket = accept(serverSocket, NULL, NULL);
   std::pair<std::string, int> serverIdentifier =
       serverSocketPortMap[serverSocket];

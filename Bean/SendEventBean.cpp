@@ -32,11 +32,8 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   }
   else if (httpHandler->getBufferIdx() == httpHandler->getDataLength() || ret == 0) {
     std::cout << "SEND FD: " << socketfd << ", RET: " << ret << "\n";
-    int waitSec;
+    int waitSec = 3 + httpHandler->getDataLength() / 10000000; // 3sec + 1sec/100MB
     
-    HttpHandler *recvHandler = new HttpHandler(socketfd, serverConfig);
-    if (waitSec >= 15)
-      waitSec = 15;
     std::cout << "waitSec: " << waitSec << " Connection Close: " << httpHandler->getConnectionClose() << "\n";
     event->saveEvent(socketfd, EVFILT_WRITE, EV_DISABLE, 0, 0, 0);  // EVFILT_WRITE 
     if (httpHandler->getConnectionClose())
@@ -46,6 +43,7 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     }
     else
     {
+      HttpHandler *recvHandler = new HttpHandler(socketfd, serverConfig);
       event->saveEvent(socketfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, recvHandler); 
       event->saveEvent(socketfd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, waitSec, recvHandler);
     }

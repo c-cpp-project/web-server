@@ -60,8 +60,6 @@ int HttpRequestHandler::RequestAndResponse(Event *event)
 	}
 	catch (const std::exception &e) // 유효하지 않은 요청 -> 오류 응답 + 소켓 닫기
 	{
-		removeBuffer(socket_fd);
-		removeAndDeleteChunkedRequest(socket_fd);
 		errorHandling(e.what(), server_config, event);
 		std::cout << "socket 닫기: " << e.what() << "\n";
 		delete request;

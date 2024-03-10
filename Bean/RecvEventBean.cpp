@@ -18,12 +18,18 @@ int RecvEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   std::cout << httpHandler->getFd() << ", "
             << httpHandler->getServerConfiguration()
             << " = RecvEventBean::runBeanEvent\n";
-  int ret = 1;
+  int ret = 1; // 버퍼에 읽어온 요청이 불완전할 때 -1, 완전할 때 0, 소켓을 닫아야 할 때 1
   try {
     // return value 받아와야 함
     ret = httpRequestHandler.handle(event);
-  } catch (const std::exception &e) {
-    std::cout << "[ERROR] SOCKET " << e.what() << std::endl;
+  } catch (SocketCloseException400 &e) {
+    HttpRequestHandler::removeAndDeleteChunkedRequest(httpHandler->getFd());
+    HttpRequestHandler::removeBuffer(httpHandler->getFd());
+    ret = 0;
+  } catch (SocketCloseException413 &e) {
+    HttpRequestHandler::removeAndDeleteChunkedRequest(httpHandler->getFd());
+    HttpRequestHandler::removeBuffer(httpHandler->getFd());
+    ret = 0;
   }
   std::cout << "[RET] " << ret << std::endl;
   if (ret >= 0) {

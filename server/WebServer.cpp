@@ -185,7 +185,7 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
     int ret = BeanFactory::runBeanByName("RECV", handler, &eventHandler);
     std::cout << "[INFO] RET" << ret << std::endl;
     if (ret == 1) {
-      // disconnectClient(currEvent.ident);
+      disconnectClient(currEvent.ident);
     }
   } else {
     std::cout << currEvent.ident << " = READ currEvent.ident\n";

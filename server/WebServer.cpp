@@ -129,7 +129,6 @@ void WebServer::handleEvent() {
       processEvent(eventHandler[i]);
     }
     ChildProcess::waitChildProcess();
-    // clearClients();
   }
 }
 
@@ -168,13 +167,11 @@ void WebServer::processErrorEvent(struct kevent& currEvent) {
   } else {
     std::cout << currEvent << std::endl;
     disconnectClient(currEvent.ident);
-    // addCandidatesForDisconnection(currEvent.ident);
     std::cout << currEvent.ident << "[INFO] client disconnected" << std::endl;
   }
 }
 
 void WebServer::processReadEvent(struct kevent& currEvent) {
-  // TODO: 고치기
   std::cout << "processReadEvent currEvent: " << currEvent << std::endl;
   if (hasServerFd(currEvent)) {
     acceptClient(currEvent.ident);
@@ -195,39 +192,34 @@ void WebServer::processReadEvent(struct kevent& currEvent) {
 }
 
 void WebServer::processWriteEvent(struct kevent& currEvent) {
-  // BeanFactory beanFactory;
   std::cout << "processWriteEvent currEvent" << currEvent << std::endl;
   if (isClient(currEvent.ident)) {
     if (currEvent.flags & EV_EOF) {
       std::cout << "[CHECK SEND ERROR]" << std::endl;
-      // addCandidatesForDisconnection(currEvent.ident);
       HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
       delete handler;
       disconnectClient(currEvent.ident);
     }
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
-    // ServerConfiguration* serverConfig = handler->getServerConfiguration();
     int ret = BeanFactory::runBeanByName("SEND", handler, &eventHandler);
     if (ret < 0) {
       disconnectClient(currEvent.ident);
     }
   } else {
-    // CGI
     std::cout << "WRITE currEvent " << currEvent << std::endl;
     HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
-    // ServerConfiguration* serverConfig = handler->getServerConfiguration();
     BeanFactory::runBeanByName("WRITE", handler, &eventHandler);
   }
 }
 
 void WebServer::processTimerEvent(struct kevent& currEvent) {
-  std::cout << "WebServer::processTimerEvent START: " << currEvent.ident << "\n";
+  std::cout << "WebServer::processTimerEvent START: " << currEvent.ident
+            << "\n";
   eventHandler.saveEvent(currEvent.ident, EVFILT_TIMER, EV_DISABLE, 0, 0, 0);
   if (handlerMap.find(currEvent.ident) == handlerMap.end()) return;
   HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
   delete handler;
   disconnectClient(currEvent.ident);
-  // addCandidatesForDisconnection(currEvent.ident);
 }
 
 int WebServer::acceptClient(int serverSocket) {
@@ -282,8 +274,6 @@ void WebServer::clearClients() {
   for (; it != candidatesForDisconnection.end(); it++) {
     std::map<int, HttpHandler*>::iterator handlerIterator =
         handlerMap.find(*it);
-    // handlerIterator->second
-    // TODO: close 로직 세우기 협의 필요
     disconnectClient(*it);
   }
   candidatesForDisconnection.clear();
@@ -295,7 +285,6 @@ void WebServer::addCandidatesForDisconnection(int clientFd) {
 
 int WebServer::addClient(int clientFd, ServerConfiguration* serverConfig,
                          Event* eventHandler) {
-  handlerMap[clientFd] = new HttpHandler(
-      clientFd, serverConfig);  // TODO: 메모리 delete 확인해주기
+  handlerMap[clientFd] = new HttpHandler(clientFd, serverConfig);
   return clientFd;
 };

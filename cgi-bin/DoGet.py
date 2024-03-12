@@ -2,17 +2,19 @@
 
 import cgi, sys, os
 
-# value = 1
-# while True:
-#     if value == 1:
-#         value = 0
-#     else:
-#         value = 1
 from datetime import datetime
 from datetime import timezone, timedelta
 
+# value = 1
+# while True:
+#     if value == 1:
+#         value = 2
+#     elif value == 2:
+#         value = 1
+
+
 # 현재 시간을 가져옵니다.
-current_time = datetime.now(timezone.utc)
+current_time = datetime.now(timezone.ut)
 
 # 날짜 포맷을 지정합니다.
 date_string = current_time.strftime("%a, %d %b %Y %H:%M:%S GMT")

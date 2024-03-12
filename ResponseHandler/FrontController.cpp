@@ -42,6 +42,7 @@ void    FrontController::run(HttpRequest tmp)
 		std::cout << this->socketfd << ": this->socketfd\n";
 		// std::cout <<  "ADDRESS: [" << &serverConfig << ", " << &event << "]\n";
 		response = new HttpResponse(this->socketfd, serverConfig, event);
+		std::cout << "getController [" << serverConfig->getPort() << ", " << serverConfig->getServerName() << ", " << request->at(i).getPath() << "]\n";
 		controller = ControllerMapping::getController(serverConfig->getPort(), serverConfig->getServerName(), request->at(i).getPath());
 
 		try {

@@ -70,12 +70,14 @@ void HttpRequestParser::parseRequestHeaders(HttpRequest *request,
   start += 2;
 
   if (request->getHeader("Host") == "") throw "400";  // HOST 헤더가 없는 경우
+  std::vector<std::string> tockens = RequestUtility::splitString(request->getHeader("Host"), ':');
   int port = server_config->getPort();
+  std::cout << "[LOG11] " << tockens[0] << std::endl;
   ServerConfiguration* temp = WebServer::serverConfigs[std::make_pair(
-      request->getHeader("Host"), port)];
+      tockens[0], port)];
   if (temp != NULL)
     server_config = temp;
-
+  std::cout << "[LOG12] " << server_config->getServerName() << std::endl;
 }
 
 bool HttpRequestParser::isExistBody(HttpRequest *request) {

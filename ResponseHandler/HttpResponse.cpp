@@ -114,6 +114,22 @@ void HttpResponse::redirect(std::string redirectUri) {
 	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0, httpHandler);  // SEND
 }
 
+void HttpResponse::emptyForward(void) {
+	HttpHandler	*httpHandler;
+	setStatusCode("200");
+	putHeader("Content-Type", "text/html");
+	putHeader("Content-Length", "0");
+	sendBody("", true);
+	putHeader("Connection", "keep-alive");
+
+	httpHandler = new HttpHandler(getSockfd(), getByteDump(), serverConfig);
+	if (headers.at("connection") == "close")
+		httpHandler->setConnectionClose(true);
+	else
+		httpHandler->setConnectionClose(false);
+	event->saveEvent(getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0, httpHandler);  // SEND
+}
+
 void  HttpResponse::putHeaders(int length, HttpRequest &request)
 {
 	std::string 			range;
@@ -161,6 +177,11 @@ void  HttpResponse::forward(HttpRequest &request)  // controller에서 사용한
 	}
 	std::cout << fd << ", " << request.getPath() << ": status code = " << getStatusCode() << "\n";
 	stat(uri.c_str(), &buf);
+	if (buf.st_size == 0)
+	{
+		emptyForward();
+		return ;
+	}
 	putHeader("Content-Type", ResponseConfig::getContentType(uri));
 	putHeaders(buf.st_size, request);
 	if ("400" <= getStatusCode() && getStatusCode() < "600")

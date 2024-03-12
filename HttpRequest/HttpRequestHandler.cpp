@@ -65,6 +65,7 @@ int HttpRequestHandler::RequestAndResponse(Event *event)
 	HttpRequest *request = NULL;
 	try
 	{
+		std::cout << "[LOG1]" << server_config->getServerName() << "\n";
 		// Request Part
 		request = HttpRequestFactory::create(socket_fd, server_config);
 		if (request == NULL)
@@ -74,6 +75,7 @@ int HttpRequestHandler::RequestAndResponse(Event *event)
 
 		// Response Part
 		int kqueue_fd = 0;
+		std::cout << "[LOG2]" << server_config->getServerName() << "\n";
 		FrontController front_controller(socket_fd, server_config, event);
 		front_controller.run(*request);
 

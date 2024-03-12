@@ -20,6 +20,7 @@ void ControllerMapping::putController(int port, std::string servername, std::str
 	server.first = port;
 	server.second = servername;
 	controllers.insert(std::make_pair(std::make_pair(server, uri), controller));
+	// std::cout << "PUT CONTROLLER [" << port << ", " << servername << ", " << uri << " = " << controllers.size() << "]\n";
 }
 
 std::pair<std::pair<int, std::string>, std::string> ControllerMapping::getControllerKey(int port, std::string servername, std::string uri) {
@@ -50,8 +51,9 @@ std::pair<std::pair<int, std::string>, std::string> ControllerMapping::getContro
 
 Controller *ControllerMapping::getController(int port, std::string servername, std::string uri) {
 	std::pair<std::pair<int, std::string>, std::string> key;
+	std::cout << port << ", " << servername << ", " << uri << " = getController 1\n";
 	key = getControllerKey(port, servername, uri);
-	std::cout << key.first.first << ", " << key.first.second << ", " << key.second << " = getController\n";
+	std::cout << key.first.first << ", " << key.first.second << ", " << key.second << " = getController 2\n";
 	return (controllers[key]);
 }
 

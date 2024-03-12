@@ -36,8 +36,7 @@ long HttpRequestFactory::parseChunkedRequest(HttpRequest* request, ServerConfigu
 {
 	std::vector<std::string> tockens = RequestUtility::splitString(request->getHeader("Host"), ':');
 	int port = server_config->getPort();
-	ServerConfiguration* temp = WebServer::serverConfigs[std::make_pair(
-		request->getHeader("Host"), server_config->getPort())];
+	ServerConfiguration* temp = WebServer::serverConfigs[std::make_pair(tockens[0], server_config->getPort())];
 	if (temp != NULL)
 		server_config = temp;
 

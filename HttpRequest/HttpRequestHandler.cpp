@@ -5,8 +5,8 @@
 
 #include "../ResponseHandler/FrontController.hpp"
 
-std::map<int, std::string> HttpRequestHandler::buffers;  // 요청을 읽어오는 소켓, 버퍼
-std::map<int, HttpRequest *> HttpRequestHandler::chunkeds;  // chunked 수신 중인 소켓, request 객체
+std::map<int, std::string> HttpRequestHandler::buffers; // 요청을 읽어오는 소켓, 버퍼
+std::map<int, HttpRequest *> HttpRequestHandler::chunkeds; // chunked 수신 중인 소켓, request 객체
 
 #include <unistd.h>
 
@@ -42,7 +42,6 @@ int HttpRequestHandler::handle(Event *event)
 	}
 	catch (const SocketCloseException500 &e)
 	{
-		errorHandling(e.what(), server_config, event);
 		return (CLOSE_SOCKET);
 	}
 	catch (const SocketCloseException400 &e)

@@ -26,9 +26,7 @@ void HttpRequestParser::parseRequestLine(HttpRequest *request,
   size_t end_of_line = buffer.find("\r\n", start);
   if (end_of_line == std::string::npos)  // 요청 라인의 끝을 식별할 수 없는 경우
   {
-    if (buffer.size() >=
-        server_config
-            ->getClientHeaderSize())  // 제한된 헤더 크기만큼 충분히 읽었다면
+    if (buffer.size() >= server_config->getClientHeaderSize())  // 제한된 헤더 크기만큼 충분히 읽었다면
       throw SocketCloseException400();  // -> 너무 긴 요청 라인
     else  // 제한된 요청 라인 길이만큼 충분히 읽지 못했다면
       throw INCOMPLETE_REQUEST;  // -> 불완전한 요청 라인
@@ -72,12 +70,9 @@ void HttpRequestParser::parseRequestHeaders(HttpRequest *request,
   if (request->getHeader("Host") == "") throw "400";  // HOST 헤더가 없는 경우
   std::vector<std::string> tockens = RequestUtility::splitString(request->getHeader("Host"), ':');
   int port = server_config->getPort();
-  std::cout << "[LOG11] " << tockens[0] << std::endl;
-  ServerConfiguration* temp = WebServer::serverConfigs[std::make_pair(
-      tockens[0], port)];
+  ServerConfiguration* temp = WebServer::serverConfigs[std::make_pair(tockens[0], port)];
   if (temp != NULL)
     server_config = temp;
-  std::cout << "[LOG12] " << server_config->getServerName() << std::endl;
 }
 
 bool HttpRequestParser::isExistBody(HttpRequest *request) {

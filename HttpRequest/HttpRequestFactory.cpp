@@ -34,10 +34,12 @@ HttpRequest *HttpRequestFactory::create(int socket_fd, ServerConfiguration *&ser
 
 long HttpRequestFactory::parseChunkedRequest(HttpRequest* request, ServerConfiguration *&server_config, const std::string& buffer)
 {
+	std::vector<std::string> tockens = RequestUtility::splitString(request->getHeader("Host"), ':');
+	int port = server_config->getPort();
 	ServerConfiguration* temp = WebServer::serverConfigs[std::make_pair(
-      request->getHeader("Host"), server_config->getPort())];
-  	if (temp != NULL)
-    	server_config = temp;
+		request->getHeader("Host"), server_config->getPort())];
+	if (temp != NULL)
+		server_config = temp;
 
 	long client_body_size = server_config->getClientBodySize(request->getPath());
 

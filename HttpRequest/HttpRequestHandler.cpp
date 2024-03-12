@@ -13,23 +13,49 @@ std::map<int, HttpRequest *> HttpRequestHandler::chunkeds;  // chunked 수신 �
 #define NO_CHUNKED_REQUEST 1
 #define IN_PROGRESS_CHUNKED_REQUEST 2
 
+#define CLOSE_SOCKET 1
+
 HttpRequestHandler::HttpRequestHandler(int _socket_fd, ServerConfiguration *_server_config)
 	: socket_fd(_socket_fd), server_config(_server_config) {}
 
 int HttpRequestHandler::handle(Event *event)
 {
-	readRequest(); // 소켓으로부터 요청 읽어오기
-	while (true)
+	try
 	{
-		if (RequestAndResponse(event) == FAILURE) // 불완전한 요청인 경우
-			return (FAILURE);
-		if (buffers.at(socket_fd) == "" || buffers.find(socket_fd) == buffers.end()) // 버퍼의 요청을 모두 처리한 경우
+		readRequest(); // 소켓으로부터 요청 읽어오기
+		while (true)
 		{
-			// 버퍼는 다 처리했지만, chunked 요청 중인 경우 -> 요청을 더 받기
-			if (chunkeds.find(socket_fd) != chunkeds.end())
+			if (RequestAndResponse(event) == FAILURE) // 불완전한 요청인 경우
 				return (FAILURE);
-			break;
+			if (buffers.at(socket_fd) == "" || buffers.find(socket_fd) == buffers.end()) // 버퍼의 요청을 모두 처리한 경우
+			{
+				// 버퍼는 다 처리했지만, chunked 요청 중인 경우 -> 요청을 더 받기
+				if (chunkeds.find(socket_fd) != chunkeds.end())
+					return (FAILURE);
+				break;
+			}
 		}
+	}
+	catch (const ClientSocketCloseException &e)
+	{
+		return (CLOSE_SOCKET);
+	}
+	catch (const SocketCloseException500 &e)
+	{
+		errorHandling(e.what(), server_config, event);
+		return (CLOSE_SOCKET);
+	}
+	catch (const SocketCloseException400 &e)
+	{
+		errorHandling(e.what(), server_config, event);
+		removeAndDeleteChunkedRequest(socket_fd);
+		removeBuffer(socket_fd);
+	}
+	catch (const SocketCloseException413 &e)
+	{
+		errorHandling(e.what(), server_config, event);
+		removeAndDeleteChunkedRequest(socket_fd);
+		removeBuffer(socket_fd);
 	}
 	return (SUCCESS);
 }
@@ -60,8 +86,6 @@ int HttpRequestHandler::RequestAndResponse(Event *event)
 	}
 	catch (const std::exception &e) // 유효하지 않은 요청 -> 오류 응답 + 소켓 닫기
 	{
-		errorHandling(e.what(), server_config, event);
-		std::cout << "socket 닫기: " << e.what() << "\n";
 		delete request;
 		throw;
 	}

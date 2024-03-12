@@ -6,7 +6,7 @@
 class HttpRequestFactory
 {
 	private:
-		static long parseChunkedRequest(HttpRequest* request, ServerConfiguration *server_config, const std::string& buffer);
+		static long parseChunkedRequest(HttpRequest* request, ServerConfiguration *&server_config, const std::string& buffer);
 		static void removeRequestInBuffer(int socket_fd, HttpRequest* request);
 		static void SpecialExceptionHandling(const int& e, int socket_fd, HttpRequest*& request);
 

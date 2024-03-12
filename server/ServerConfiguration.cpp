@@ -7,7 +7,6 @@ ServerConfiguration::ServerConfiguration() : server(NULL) {}
 ServerConfiguration::ServerConfiguration(Server& server) : server(&server) {}
 
 int ServerConfiguration::getPort() const {
-  std::cout << server->getListen() << std::endl;
   return server->getListen();
 }
 
@@ -185,7 +184,6 @@ const std::string ServerConfiguration::findUriPattern(std::string uri) const {
       }
     }
   }
-  std::cout << matchesPattern << std::endl;
   if (matchesPattern) {
     std::string partial = uri.substr(slashIdx);
     partial.erase(partial.size() - 1);

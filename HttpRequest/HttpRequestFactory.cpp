@@ -2,6 +2,7 @@
 #include "HttpRequestHandler.hpp"
 #include <string>
 #include <unistd.h>
+#include "../server/WebServer.hpp"
 
 // 완전하고 유효한 request 객체 하나를 만들어서 반환
 HttpRequest *HttpRequestFactory::create(int socket_fd, ServerConfiguration *&server_config)
@@ -31,8 +32,13 @@ HttpRequest *HttpRequestFactory::create(int socket_fd, ServerConfiguration *&ser
 	return (request); // NULL인 경우, 버퍼에 파싱하기에 충분한 데이터가 없음을 뜻함
 }
 
-long HttpRequestFactory::parseChunkedRequest(HttpRequest* request, ServerConfiguration *server_config, const std::string& buffer)
+long HttpRequestFactory::parseChunkedRequest(HttpRequest* request, ServerConfiguration *&server_config, const std::string& buffer)
 {
+	ServerConfiguration* temp = WebServer::serverConfigs[std::make_pair(
+      request->getHeader("Host"), server_config->getPort())];
+  	if (temp != NULL)
+    	server_config = temp;
+
 	long client_body_size = server_config->getClientBodySize(request->getPath());
 
 	// 청크 크기가 들어왔는지 확인하기

@@ -49,6 +49,7 @@ public:
 	void	HttpResponseBody(std::string body);
 	// std::string	readFile(int fd);
 
+	void 	emptyForward(void);
 	void	listDirectory(std::string directory);
 	void	redirect(std::string redirectUri);
 	void    forward(HttpRequest &Httprequest);

@@ -30,6 +30,8 @@ int RecvEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     HttpRequestHandler::removeAndDeleteChunkedRequest(httpHandler->getFd());
     HttpRequestHandler::removeBuffer(httpHandler->getFd());
     ret = 0;
+  } catch (std::exception &e) {
+    ret = 1;
   }
   std::cout << "[RET] " << ret << std::endl;
   if (ret >= 0) {

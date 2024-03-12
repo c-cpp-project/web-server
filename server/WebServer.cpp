@@ -16,6 +16,7 @@
 #include "../HttpRequest/HttpRequestHandler.hpp"
 #include "StringUtils.hpp"
 
+std::map<int, HttpHandler*> WebServer::handlerMap;
 std::map<std::pair<std::string, int>, ServerConfiguration*>
     WebServer::serverConfigs;
 
@@ -225,6 +226,7 @@ void WebServer::processTimerEvent(struct kevent& currEvent) {
   eventHandler.saveEvent(currEvent.ident, EVFILT_TIMER, EV_DISABLE, 0, 0, 0);
   if (handlerMap.find(currEvent.ident) == handlerMap.end()) return;
   HttpHandler* handler = reinterpret_cast<HttpHandler*>(currEvent.udata);
+  std::cout << "handler: " << handler << '\n';
   delete handler;
   disconnectClient(currEvent.ident);
   // addCandidatesForDisconnection(currEvent.ident);
@@ -253,6 +255,8 @@ int WebServer::acceptClient(int serverSocket) {
                                           handlerMap[clientSocket]);
   eventHandler.saveEvent(clientSocket, EVFILT_TIMER, EV_ADD | EV_ENABLE,
                          NOTE_SECONDS, 150, handlerMap[clientSocket]);
+    // eventHandler.saveEvent(clientSocket, EVFILT_TIMER, EV_ADD | EV_ENABLE,
+    //                      NOTE_SECONDS, 300, handlerMap[clientSocket]);
   return clientSocket;
 }
 
@@ -299,3 +303,13 @@ int WebServer::addClient(int clientFd, ServerConfiguration* serverConfig,
       clientFd, serverConfig);  // TODO: 메모리 delete 확인해주기
   return clientFd;
 };
+
+HttpHandler    *WebServer::getHandlerMap(int socketfd)
+{
+  return (handlerMap[socketfd]);
+}
+
+void            WebServer::setHandlerMap(int socketfd, HttpHandler *value)
+{
+  handlerMap[socketfd] = value;
+}

@@ -27,6 +27,15 @@ HttpRequest *HttpRequestFactory::create(int socket_fd, ServerConfiguration *&ser
 	{
 		removeRequestInBuffer(socket_fd, request);
 		delete request;
+		request = NULL;
+		throw;
+	}
+	catch (const std::exception &e) // 유효하지 않은 요청 -> 오류 응답 + 소켓 닫기
+	{
+		if(HttpRequestHandler::getChunkedRequest(socket_fd) == NULL) {
+			delete request;
+			request = NULL;
+		}
 		throw;
 	}
 	return (request); // NULL인 경우, 버퍼에 파싱하기에 충분한 데이터가 없음을 뜻함
@@ -57,9 +66,9 @@ long HttpRequestFactory::parseChunkedRequest(HttpRequest* request, ServerConfigu
 	long chunk_size = RequestUtility::hexToDecimal(buffer.substr(0, end_of_chunk_size));
 	if (chunk_size == FAILURE)
 		throw SocketCloseException400(); // 청크 크기를 식별할 수 없는 경우
+
 	if (chunk_size > client_body_size)
 		throw SocketCloseException413(); // 제한된 바디 크기를 초과하는 청크 크기
-
 	// 청크 데이터가 들어왔는지 확인하기
 	if (buffer.size() < end_of_chunk_size + chunk_size + 4)
 		throw INCOMPLETE_REQUEST; // 버퍼에 청크 크기 만큼의 청크 데이터가 없는 경우
@@ -85,8 +94,11 @@ void HttpRequestFactory::SpecialExceptionHandling(const int& e, int socket_fd, H
 	switch(e)
 	{
 	case INCOMPLETE_REQUEST: // 불완전한 요청
+		std::cout << "INCOMPLETE_REQUEST, request: " << request << '\n';
 		if (!HttpRequestHandler::getChunkedRequest(socket_fd))
+		{
 			delete request; // chunk 요청의 경우 request 객체를 삭제하지 않기
+		}
 		request = NULL;
 		break;
 	case START_CHUNKED_REQUEST: // 청크 전송 시작 요청

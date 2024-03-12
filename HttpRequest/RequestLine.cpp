@@ -1,11 +1,12 @@
 #include "RequestLine.hpp"
 #include <cctype>
+#include "SocketCloseException.hpp"
 
 RequestLine::RequestLine(const std::string& input)
 {
 	std::vector<std::string> tockens = RequestUtility::splitString(input, ' ');
 	if (tockens.size() != 3)
-		throw "400"; // "[메서드] [경로] [프로토콜]" 형식이 아닌 경우
+		throw SocketCloseException400(); // "[메서드] [경로] [프로토콜]" 형식이 아닌 경우
 
 	parseMethod(tockens[0]); // 메서드 파싱
 	parseURI(tockens[1]); // 경로 파싱
@@ -24,7 +25,7 @@ void RequestLine::parseMethod(std::string method_string)
 {
 	for(size_t i = 0; i < method_string.size(); i++) {
 		if (!std::isupper(method_string[i]))
-			throw "400"; // 메서드에 영어 대문자 이외의 문자가 포함된 경우
+			throw SocketCloseException400(); // 메서드에 영어 대문자 이외의 문자가 포함된 경우
 	}
 	method = method_string;
 }
@@ -33,9 +34,9 @@ void RequestLine::parseURI(std::string uri_string)
 {
 	std::vector<std::string> tockens = RequestUtility::splitString(uri_string, '?');
 	if (tockens.size() < 1 || 2 < tockens.size())
-		throw "400";
+		throw SocketCloseException400();
 	if (tockens[0][0] != '/')
-		throw "400"; // 슬래시(/)로 시작하지 않는 경로
+		throw SocketCloseException400(); // 슬래시(/)로 시작하지 않는 경로
 
 	// ?를 기준으로 앞은 path, 뒤는 query_string으로 저장
 	path = tockens[0];
@@ -46,7 +47,7 @@ void RequestLine::parseURI(std::string uri_string)
 void RequestLine::parseProtocol(std::string protocol_string)
 {
 	if (protocol_string != "HTTP/1.1")
-		throw "400";
+		throw SocketCloseException400();
 	this->protocol_string = protocol_string;
 }
 

@@ -12,12 +12,30 @@ class SocketCloseException400 : public std::exception
 		}
 };
 
+class SocketCloseException411 : public std::exception
+{
+	public:
+		const char *what() const throw()
+		{
+			return "411";
+		}
+};
+
 class SocketCloseException413 : public std::exception
 {
 	public:
 		const char *what() const throw()
 		{
 			return "413";
+		}
+};
+
+class SocketCloseException431 : public std::exception
+{
+	public:
+		const char *what() const throw()
+		{
+			return "431";
 		}
 };
 

@@ -21,14 +21,15 @@ class WebServer {
   void execute();
   static std::map<std::pair<std::string, int>, ServerConfiguration*>
       serverConfigs;
+  static HttpHandler    *getHandlerMap(int socketfd);
+  static void            setHandlerMap(int socketfd, HttpHandler *value);
 
  private:
   int ports[65536];
   int option;
   Event eventHandler;
   std::map<int, std::pair<std::string, int> > serverSocketPortMap;
-  std::map<int, HttpHandler*>
-      handlerMap;  // TODO: 요청 관련해서 이벤트, fd 관리 일괄적으로
+  static std::map<int, HttpHandler*> handlerMap;  // TODO: 요청 관련해서 이벤트, fd 관리 일괄적으로
   std::set<int> candidatesForDisconnection;
   WebServer(const WebServer&);
   WebServer(

@@ -65,7 +65,8 @@ void ReadEventBean::responseSaveEvent(std::string body,
       body, (request.getQueryString() == "" && request.getMethod() == "GET" ||
              ("400" <= response.getStatusCode() &&
               response.getStatusCode() <= "500")));
+  HttpHandler *handler = new HttpHandler(response.getSockfd(), response.getByteDump(), serverConfig);
+  std::cout << "ReadEventBean::responseSaveEvent, handler: " << handler << '\n';
   event->saveEvent(response.getSockfd(), EVFILT_WRITE, EV_ENABLE, 0, 0,
-                   new HttpHandler(response.getSockfd(), response.getByteDump(),
-                                   serverConfig));  // EVFILT_READ, EVFILT_WRITE
+                   handler);  // EVFILT_READ, EVFILT_WRITE
 }

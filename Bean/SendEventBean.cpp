@@ -1,5 +1,6 @@
 #include "SendEventBean.hpp"
-
+#include "../HttpRequest/HttpRequestHandler.hpp"
+#include"../server/WebServer.hpp"
 #include <sys/socket.h>
 
 SendEventBean::SendEventBean() {}
@@ -43,9 +44,20 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
     }
     else
     {
-      HttpHandler *recvHandler = new HttpHandler(socketfd, serverConfig);
-      event->saveEvent(socketfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, recvHandler); 
-      event->saveEvent(socketfd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, waitSec, recvHandler);
+      // if (HttpRequestHandler::getBuffer(socketfd) == "")
+      HttpHandler *recvHandler;
+      if(HttpRequestHandler::getReadFinish(socketfd))
+      {
+        recvHandler = new HttpHandler(socketfd, serverConfig);
+        WebServer::setHandlerMap(socketfd, recvHandler);
+        std::cout << "SendEventBean::runBeanEvent, handler: " << recvHandler << '\n';
+        event->saveEvent(socketfd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, recvHandler);
+        event->saveEvent(socketfd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, waitSec, recvHandler);
+      }
+      else {
+        recvHandler = WebServer::getHandlerMap(socketfd);
+        event->saveEvent(socketfd, EVFILT_TIMER, EV_ADD | EV_ENABLE, NOTE_SECONDS, waitSec, recvHandler);
+      }
     }
     delete httpHandler;
     httpHandler = 0;
@@ -54,3 +66,7 @@ int SendEventBean::runBeanEvent(HttpHandler *httpHandler, Event *event) {
   }
   return (ret);
 }
+
+// accept 150: tcp 연결 -> socket data: 150sec == 300sec
+// tcp -> 1st message: 150sec -> 2nd message 13sec
+// tcp -> 1st message: 150sec -> 2nd message .. -> 3rd 13 ->  150sec -> close == 300sec

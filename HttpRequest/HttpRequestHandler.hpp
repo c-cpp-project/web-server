@@ -13,7 +13,7 @@ class HttpRequestHandler {
   static std::map<int, std::string> buffers;  // 요청을 읽어오는 소켓, 버퍼
   static std::map<int, HttpRequest *>
       chunkeds;  // chunked 수신 중인 소켓, request 객체
-
+  static std::map<int, bool>  read_flags;
   void readRequest();
 
  public:
@@ -32,6 +32,8 @@ class HttpRequestHandler {
   static const std::string &getBuffer(int socket_fd);
   static void addChunkedRequest(int socket_fd, HttpRequest *request);
   static void removePartOfBuffer(int socket_fd, int start, int count);
+  static bool getReadFinish(int socket_fd);
+  static void setReadFlag(int socket_fd, bool flag);
 };
 
 #endif

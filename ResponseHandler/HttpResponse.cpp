@@ -164,6 +164,7 @@ void  HttpResponse::forward(HttpRequest &request)  // controller에서 사용한
 		if (uri == "") 
 			uri = "static/html/welcome.html";
 	}
+	std::cout << "uri: " << uri << '\n';
 	fd = open(uri.c_str(), O_RDONLY);
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 	if (fd < 0)

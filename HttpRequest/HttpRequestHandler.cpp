@@ -5,8 +5,9 @@
 
 #include "../ResponseHandler/FrontController.hpp"
 
-std::map<int, std::string> HttpRequestHandler::buffers; // 요청을 읽어오는 소켓, 버퍼
-std::map<int, HttpRequest *> HttpRequestHandler::chunkeds; // chunked 수신 중인 소켓, request 객체
+std::map<int, std::string> 		HttpRequestHandler::buffers; // 요청을 읽어오는 소켓, 버퍼
+std::map<int, HttpRequest *>	HttpRequestHandler::chunkeds; // chunked 수신 중인 소켓, request 객체
+std::map<int, bool>				HttpRequestHandler::read_flags;
 
 #include <unistd.h>
 
@@ -25,15 +26,16 @@ int HttpRequestHandler::handle(Event *event)
 		readRequest(); // 소켓으로부터 요청 읽어오기
 		while (true)
 		{
+			// std::cout << "buffer: [" << buffers[socket_fd] << "]\n";
 			if (RequestAndResponse(event) == FAILURE) // 불완전한 요청인 경우
 				return (FAILURE);
-			if (buffers.at(socket_fd) == "" || buffers.find(socket_fd) == buffers.end()) // 버퍼의 요청을 모두 처리한 경우
+			if (buffers.find(socket_fd) == buffers.end() || buffers.at(socket_fd) == "") // 버퍼의 요청을 모두 처리한 경우
 			{
 				// 버퍼는 다 처리했지만, chunked 요청 중인 경우 -> 요청을 더 받기
 				if (chunkeds.find(socket_fd) != chunkeds.end())
 					return (FAILURE);
 				break;
-			}
+			} 
 		}
 	}
 	catch (const ClientSocketCloseException &e)
@@ -44,13 +46,7 @@ int HttpRequestHandler::handle(Event *event)
 	{
 		return (CLOSE_SOCKET);
 	}
-	catch (const SocketCloseException400 &e)
-	{
-		errorHandling(e.what(), server_config, event);
-		removeAndDeleteChunkedRequest(socket_fd);
-		removeBuffer(socket_fd);
-	}
-	catch (const SocketCloseException413 &e)
+	catch (std::exception &e)
 	{
 		errorHandling(e.what(), server_config, event);
 		removeAndDeleteChunkedRequest(socket_fd);
@@ -82,11 +78,7 @@ int HttpRequestHandler::RequestAndResponse(Event *event)
 	{
 		errorHandling(e, server_config, event);
 		delete request;
-	}
-	catch (const std::exception &e) // 유효하지 않은 요청 -> 오류 응답 + 소켓 닫기
-	{
-		delete request;
-		throw;
+		request = NULL;
 	}
 	return (SUCCESS);
 }
@@ -108,6 +100,7 @@ void HttpRequestHandler::readRequest()
 	// read_size 만큼 temp_buffer에 읽어오기
 	char *temp_buffer = new char[read_size];
 	long read_byte = recv(socket_fd, temp_buffer, read_size, 0);
+	std::cout << "[" << read_byte << "] readRequest() = recv\n";
 	if (read_byte == -1) { // recv 시스템 콜 오류
 		delete[] temp_buffer;
 		throw SocketCloseException500();
@@ -166,6 +159,7 @@ void HttpRequestHandler::removeAndDeleteChunkedRequest(int socket_fd)
 {
 	HttpRequest *request = removeChunkedRequest(socket_fd);
 	delete request;
+	request = NULL;
 }
 
 HttpRequest *HttpRequestHandler::getChunkedRequest(int socket_fd)
@@ -190,4 +184,14 @@ void HttpRequestHandler::addChunkedRequest(int socket_fd, HttpRequest *request)
 void HttpRequestHandler::removePartOfBuffer(int socket_fd, int start, int count)
 {
 	buffers[socket_fd].erase(start, count);
+}
+
+bool	HttpRequestHandler::getReadFinish(int socket_fd)
+{
+	return (read_flags[socket_fd]);
+}
+
+void	HttpRequestHandler::setReadFlag(int socket_fd, bool flag)
+{
+	read_flags[socket_fd] = flag;
 }

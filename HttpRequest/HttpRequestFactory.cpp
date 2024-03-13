@@ -57,7 +57,7 @@ long HttpRequestFactory::parseChunkedRequest(HttpRequest* request, ServerConfigu
 	if (end_of_chunk_size == std::string::npos)
 	{
 		if (buffer.size() >= body_size_length + 2)	// "client body size\r\n" 까지 충분히 읽었다면
-			throw SocketCloseException413();		// -> 너무 긴 청크 크기
+			throw EscapeHandleException413();		// -> 너무 긴 청크 크기
 		else										// "client body size\r\n" 까지 충분히 읽지 못했다면
 			throw INCOMPLETE_REQUEST;				// -> 불완전한 청크 크기
 	}
@@ -65,15 +65,14 @@ long HttpRequestFactory::parseChunkedRequest(HttpRequest* request, ServerConfigu
 	// 청크 크기 파싱하기
 	long chunk_size = RequestUtility::hexToDecimal(buffer.substr(0, end_of_chunk_size));
 	if (chunk_size == FAILURE)
-		throw SocketCloseException400(); // 청크 크기를 식별할 수 없는 경우
-
+		throw EscapeHandleException400(); // 청크 크기를 식별할 수 없는 경우
 	if (chunk_size > client_body_size)
-		throw SocketCloseException413(); // 제한된 바디 크기를 초과하는 청크 크기
+		throw EscapeHandleException413(); // 제한된 바디 크기를 초과하는 청크 크기
 	// 청크 데이터가 들어왔는지 확인하기
 	if (buffer.size() < end_of_chunk_size + chunk_size + 4)
 		throw INCOMPLETE_REQUEST; // 버퍼에 청크 크기 만큼의 청크 데이터가 없는 경우
 	if (buffer.substr(end_of_chunk_size + 2 + chunk_size, 2) != "\r\n")
-		throw SocketCloseException400(); // 청크 데이터 직후 CRLF가 없는 경우
+		throw EscapeHandleException400(); // 청크 데이터 직후 CRLF가 없는 경우
 
 	if (chunk_size == 0) // 마지막 청크 요청인 경우
 		throw LAST_CHUNKED_REQUEST;
@@ -81,7 +80,7 @@ long HttpRequestFactory::parseChunkedRequest(HttpRequest* request, ServerConfigu
 	// 총 청크 데이터 크기 검사하기 & 청크 데이터를 요청 본문에 추가하기
 	long content_length = RequestUtility::strToPositiveLong(request->getHeader("Content-Length")) + chunk_size;
 	if (content_length > client_body_size)
-		throw SocketCloseException413(); // 제한된 바디 크기를 초과하는 청크 데이터
+		throw EscapeHandleException413(); // 제한된 바디 크기를 초과하는 청크 데이터
 	request->setHeader("Content-Length", RequestUtility::positiveLongToStr(content_length));
 	std::string chunk_data = buffer.substr(end_of_chunk_size + 2, chunk_size);
 	request->addRequestBody(chunk_data);
@@ -94,11 +93,8 @@ void HttpRequestFactory::SpecialExceptionHandling(const int& e, int socket_fd, H
 	switch(e)
 	{
 	case INCOMPLETE_REQUEST: // 불완전한 요청
-		std::cout << "INCOMPLETE_REQUEST, request: " << request << '\n';
 		if (!HttpRequestHandler::getChunkedRequest(socket_fd))
-		{
 			delete request; // chunk 요청의 경우 request 객체를 삭제하지 않기
-		}
 		request = NULL;
 		break;
 	case START_CHUNKED_REQUEST: // 청크 전송 시작 요청

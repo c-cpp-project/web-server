@@ -2,7 +2,7 @@
 # define HTTP_REQUEST_PARSER_HPP
 
 # include "HttpRequest.hpp"
-# include "SocketCloseException.hpp"
+# include "RequestException.hpp"
 #include "../server/ServerConfiguration.hpp"
 
 # define INCOMPLETE_REQUEST 1 // 요청을 더 읽어오자

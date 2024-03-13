@@ -10,8 +10,7 @@
 
 #define SOCKET_CLOSE 0
 #define SOCKET_OPEN -1
-// std::map<std::pair<std::string, int>, ServerConfiguration*>
-//     ServerConfiguration::serverConfigs;
+
 class WebServer {
  public:
   static const int LISTENCAPACITY = 200;
@@ -57,9 +56,6 @@ class WebServer {
   int addClient(int clientFd, ServerConfiguration* serverConfig,
                 Event* eventHandler);
 };
-
-// std::map<std::pair<std::string, int>, ServerConfiguration*>
-//     WebServer::serverConfigs;
 
 struct _linger {
   int l_onoff;

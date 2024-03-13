@@ -293,12 +293,12 @@ int WebServer::addClient(int clientFd, ServerConfiguration* serverConfig,
   return clientFd;
 };
 
-HttpHandler    *WebServer::getHandlerMap(int socketfd)
+HttpHandler *WebServer::getHandlerMap(int socketfd)
 {
   return (handlerMap[socketfd]);
 }
 
-void            WebServer::setHandlerMap(int socketfd, HttpHandler *value)
+void WebServer::setHandlerMap(int socketfd, HttpHandler *value)
 {
   handlerMap[socketfd] = value;
 }

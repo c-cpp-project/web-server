@@ -1,20 +1,16 @@
-#include "HttpRequestHandler.hpp"
-
 #include <fcntl.h>
 #include <sys/socket.h>
-
+#include <unistd.h>
+#include "HttpRequestHandler.hpp"
 #include "../ResponseHandler/FrontController.hpp"
+
+#define NO_CHUNKED_REQUEST 1
+#define IN_PROGRESS_CHUNKED_REQUEST 2
+#define CLOSE_SOCKET 1
 
 std::map<int, std::string> 		HttpRequestHandler::buffers; // 요청을 읽어오는 소켓, 버퍼
 std::map<int, HttpRequest *>	HttpRequestHandler::chunkeds; // chunked 수신 중인 소켓, request 객체
 std::map<int, bool>				HttpRequestHandler::read_flags;
-
-#include <unistd.h>
-
-#define NO_CHUNKED_REQUEST 1
-#define IN_PROGRESS_CHUNKED_REQUEST 2
-
-#define CLOSE_SOCKET 1
 
 HttpRequestHandler::HttpRequestHandler(int _socket_fd, ServerConfiguration *_server_config)
 	: socket_fd(_socket_fd), server_config(_server_config) {}
@@ -26,10 +22,10 @@ int HttpRequestHandler::handle(Event *event)
 		readRequest(); // 소켓으로부터 요청 읽어오기
 		while (true)
 		{
-			// std::cout << "buffer: [" << buffers[socket_fd] << "]\n";
 			if (RequestAndResponse(event) == FAILURE) // 불완전한 요청인 경우
 				return (FAILURE);
-			if (buffers.find(socket_fd) == buffers.end() || buffers.at(socket_fd) == "") // 버퍼의 요청을 모두 처리한 경우
+			if (buffers.find(socket_fd) == buffers.end() || 
+				buffers.at(socket_fd) == "") // 버퍼의 요청을 모두 처리한 경우
 			{
 				// 버퍼는 다 처리했지만, chunked 요청 중인 경우 -> 요청을 더 받기
 				if (chunkeds.find(socket_fd) != chunkeds.end())
@@ -38,7 +34,7 @@ int HttpRequestHandler::handle(Event *event)
 			} 
 		}
 	}
-	catch (const ClientSocketCloseException &e)
+	catch (const ClientCloseSocketException &e)
 	{
 		return (CLOSE_SOCKET);
 	}
@@ -61,13 +57,18 @@ int HttpRequestHandler::RequestAndResponse(Event *event)
 	try
 	{
 		// Request Part
+		// std::cout << "Request part\n";
 		request = HttpRequestFactory::create(socket_fd, server_config);
 		if (request == NULL)
 			return (FAILURE);  // 버퍼에 완전한 요청이 없음
 		if (ChunkedRequestHandling(request) == IN_PROGRESS_CHUNKED_REQUEST)
+		{
+			// std::cout << "여기로 와야 하는데!\n";
 			return (SUCCESS); // chunk 요청 중인 경우 -> 아직 response 하지 않음
+		}
 
 		// Response Part
+		// std::cout << "Response part\n";
 		int kqueue_fd = 0;
 		FrontController front_controller(socket_fd, server_config, event);
 		front_controller.run(*request);
@@ -100,13 +101,12 @@ void HttpRequestHandler::readRequest()
 	// read_size 만큼 temp_buffer에 읽어오기
 	char *temp_buffer = new char[read_size];
 	long read_byte = recv(socket_fd, temp_buffer, read_size, 0);
-	std::cout << "[" << read_byte << "] readRequest() = recv\n";
 	if (read_byte == -1) { // recv 시스템 콜 오류
 		delete[] temp_buffer;
 		throw SocketCloseException500();
 	} else if (read_byte == 0) { // 클라이언트 연결 끊김
 		delete[] temp_buffer;
-		throw ClientSocketCloseException();
+		throw ClientCloseSocketException();
 	}
 
 	// 읽어온 내용 버퍼에 추가하기

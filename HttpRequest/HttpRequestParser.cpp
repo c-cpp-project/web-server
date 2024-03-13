@@ -1,16 +1,12 @@
 #include "HttpRequestParser.hpp"
-
 #include "../server/WebServer.hpp"
-#include "HttpRequestHandler.hpp"
 
 void HttpRequestParser::parse(HttpRequest *&request,
 							ServerConfiguration *&server_config,
 							const std::string &buffer)
 {
 	long start = 0;
-	// std::cout << "buffer: " << buffer << '\n';
 	request = new HttpRequest();
-	std::cout << "request " << request << "\n";
 	parseRequestLine(request, server_config, buffer, start);
 	parseRequestHeaders(request, server_config, buffer, start);
 	if (isExistBody(request))
@@ -27,20 +23,14 @@ void HttpRequestParser::parseRequestLine(HttpRequest *request,
 	while (buffer.substr(start, 2) == "\r\n")
 		start += 2;
 
-	std::cout << "parseRequestLine1\n";
-
 	// 요청 라인이 들어왔는지 확인하기
 	size_t end_of_line = buffer.find("\r\n", start);
 	if (end_of_line == std::string::npos)  // 요청 라인의 끝을 식별할 수 없는 경우
 	{
-		std::cout << "parseRequestLine2\n";
-		if (buffer.size() >= server_config->getClientHeaderSize())  // 제한된 헤더 크기만큼 충분히 읽었다면
-			throw SocketCloseException431();  // -> 너무 긴 요청 라인
-		else  // 제한된 요청 라인 길이만큼 충분히 읽지 못했다면
-		{
-			std::cout << "parseRequestLine3\n";
-			throw INCOMPLETE_REQUEST;  // -> 불완전한 요청 라인
-		}
+		if (buffer.size() >= server_config->getClientHeaderSize())	// 제한된 헤더 크기만큼 충분히 읽었다면
+			throw EscapeHandleException431();						// -> 너무 긴 요청 라인
+		else														// 제한된 요청 라인 길이만큼 충분히 읽지 못했다면
+			throw INCOMPLETE_REQUEST;								// -> 불완전한 요청 라인
 	}
 
 	// 요청 라인 파싱하기
@@ -59,7 +49,7 @@ void HttpRequestParser::parseRequestHeaders(HttpRequest *request,
 	if (end_of_headers == std::string::npos)  // 요청 헤더의 끝을 식별할 수 없는 경우
 	{
 		if (buffer.size() >= server_config->getClientHeaderSize())	// 최대 헤더 크기만큼 충분히 읽었다면
-			throw SocketCloseException431(); 						// -> 너무 긴 헤더
+			throw EscapeHandleException431(); 						// -> 너무 긴 헤더
 		else														// 최대 헤더 크기만큼 충분히 읽지 못했다면
 			throw INCOMPLETE_REQUEST;								// 불완전한 요청 라인
 	}
@@ -73,13 +63,13 @@ void HttpRequestParser::parseRequestHeaders(HttpRequest *request,
 			break; // 헤더 부분이 끝난 경우 while문 탈출
 		std::string line = buffer.substr(start, nl_pos - start);
 		if (request->addHeader(line) == FAILURE) // 한 줄을 파싱하여 헤더에 추가
-			throw "400";
+			throw EscapeHandleException400();
 		start = nl_pos + 2;
 	}
 	start += 2;
 
 	if (request->getHeader("Host") == "")
-		throw "400";  // HOST 헤더가 없는 경우
+		throw EscapeHandleException400();
 	std::vector<std::string> tockens = RequestUtility::splitString(request->getHeader("Host"), ':');
 	int port = server_config->getPort();
 	ServerConfiguration* temp = WebServer::serverConfigs[std::make_pair(tockens[0], port)];
@@ -94,14 +84,13 @@ bool HttpRequestParser::isExistBody(HttpRequest *request)
 		return (false);
 
 	// chunked 헤더를 포함하는 POST 요청 -> chunked 수신을 시작하는 요청
-	if (request->getHeader("Transfer-Encoding") == "chunked")
-	{
+	if (request->getHeader("Transfer-Encoding") == "chunked") {
 		request->setHeader("Content-Length", "0");
 		throw START_CHUNKED_REQUEST;
 	}
 
 	if (request->getHeader("Content-Length") == "")
-		throw SocketCloseException411(); // Transfer-Encoding, Content-Length 둘 다 없는 경우 -> 411 응답
+		throw EscapeHandleException411(); // Transfer-Encoding, Content-Length 둘 다 없는 경우 -> 411 응답
 
 	return (true);
 }
@@ -114,13 +103,12 @@ void HttpRequestParser::parseRequestBody(HttpRequest *request,
 	// content_length 구하기
 	long content_length = RequestUtility::strToPositiveLong(request->getHeader("Content-Length"));
 	if (content_length == FAILURE)
-		throw SocketCloseException400();
+		throw EscapeHandleException400();
 	if (content_length > server_config->getClientBodySize(request->getPath()))
-		throw SocketCloseException413(); // content_length가 제한된 본문 크기를 초과하는 경우
+		throw EscapeHandleException413(); // content_length가 제한된 본문 크기를 초과하는 경우
 	if (buffer.size() < start + content_length)
 		throw INCOMPLETE_REQUEST;  // 버퍼에 content_length 만큼 충분히 없는 경우
-	// 본문 설정하기
-	request->setRequestBody(buffer.substr(start, content_length));
+	request->setRequestBody(buffer.substr(start, content_length)); // 본문 설정하기
 }
 
 void HttpRequestParser::parseRequestParams(HttpRequest *request)

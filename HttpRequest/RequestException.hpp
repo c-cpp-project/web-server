@@ -3,7 +3,7 @@
 
 # include <exception>
 
-class SocketCloseException400 : public std::exception
+class EscapeHandleException400 : public std::exception
 {
 	public:
 		const char *what() const throw()
@@ -12,7 +12,7 @@ class SocketCloseException400 : public std::exception
 		}
 };
 
-class SocketCloseException411 : public std::exception
+class EscapeHandleException411 : public std::exception
 {
 	public:
 		const char *what() const throw()
@@ -21,7 +21,7 @@ class SocketCloseException411 : public std::exception
 		}
 };
 
-class SocketCloseException413 : public std::exception
+class EscapeHandleException413 : public std::exception
 {
 	public:
 		const char *what() const throw()
@@ -30,7 +30,7 @@ class SocketCloseException413 : public std::exception
 		}
 };
 
-class SocketCloseException431 : public std::exception
+class EscapeHandleException431 : public std::exception
 {
 	public:
 		const char *what() const throw()
@@ -48,7 +48,7 @@ class SocketCloseException500 : public std::exception
 		}
 };
 
-class ClientSocketCloseException : public std::exception
+class ClientCloseSocketException : public std::exception
 {
 	public:
 		const char *what() const throw()
